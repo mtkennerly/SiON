@@ -4,12 +4,19 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sound.synthesizers {
-    import flash.media.Sound;
-    
-    /** Interface class for all flash Sound operating synthesizers */
-    public class IFlashSoundOperator extends BasicSynth
+package org.si.sound.synthesizers;
+
+
+import openfl.media.Sound;
+
+/** Interface class for all flash Sound operating synthesizers */
+class IFlashSoundOperator extends BasicSynth
+{
+
+    public function new()
     {
+        super();
     }
 }
+
 

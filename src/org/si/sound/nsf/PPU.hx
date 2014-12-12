@@ -5,8 +5,14 @@
 //--------------------------------------------------------------------------------
 
 
-package org.si.sound.nsf {
-    public class PPU { function PPU() { } }
+package org.si.sound.nsf;
+
+
+class PPU
+{public function new()
+    {
+    }
 }
+
 
 

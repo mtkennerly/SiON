@@ -25,15 +25,15 @@ package org.si.sound.nsf {
         static public const IRQ_DPCM:int     = 0x08;
         static public const IRQ_MAPPER:int   = 0x10;
         static public const IRQ_MAPPER2:int  = 0x20;
-        static public const IRQ_TRIGGER:int  = 0x40; // one shot(‹ŒIRQ())
-        static public const IRQ_TRIGGER2:int = 0x80; // one shot(‹ŒIRQ_NotPending())
+        static public const IRQ_TRIGGER:int  = 0x40; // one shot(ï¿½ï¿½IRQ())
+        static public const IRQ_TRIGGER2:int = 0x80; // one shot(ï¿½ï¿½IRQ_NotPending())
         
         // address
         static public const $NMI:int = 0xfffa;
         static public const $RES:int = 0xfffc;
         static public const $IRQ:int = 0xfffe;
 
-        // valiables
+        // variables
         public var A:int, X:int, Y:int, PC:int, SP:int, P:int;
         public var interruptFlag:int, enableClockedProcess:Boolean;
         public var wait:int, totalCycle:int;
@@ -129,7 +129,7 @@ package org.si.sound.nsf {
         
         // operations
         //--------------------------------------------------------------------------------
-        // -------- temporary valiables
+        // -------- temporary variables
         private var _ea:int, _et:int, _execCycle:int, _zp:Vector.<uint>; // zero page memory area
         // -------- address
         private function get $IM() : int { return PC++; }

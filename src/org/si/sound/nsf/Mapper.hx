@@ -5,30 +5,56 @@
 //--------------------------------------------------------------------------------
 
 
-package org.si.sound.nsf {
-    public class Mapper {
-        public var bank3WRAM:int = 0;
-        function Mapper() { }
-        public function write(addr:int, data:int) : void { }
-        public function readLow(addr:int) : int {
-            var a:int=(addr&8191)+(bank3WRAM<<13), i:int=a>>2, s:int=(a&3)<<3;
-            return (MMU.$.WRAM[i]>>s)&0xff;
-        }
-        public function writeLow(addr:int, data:int) : void {
-            var a:int=(addr&8191)+(bank3WRAM<<13), i:int=a>>2, s:int=(a&3)<<3;
-            MMU.$.WRAM[i] = (MMU.$.WRAM[i]&~(255<<s)) | (data<<s);
-        }
-    	public function ExCmdRead(cmd:int) : int { return 0x00; }
-    	public function ExCmdWrite(cmd:int, data:int) : void {}
-        public function ExRead(addr:int) : int { return 0; }
-        public function ExWrite(addr:int, data:int) : void { }
-        public function sync(cycles:int) : void { }
-        public function HSync(scanline:int) : void { }
-        public function VSync() : void { }
-        public function PPU_Latch(addr:int) : void { }
-        public function PPU_ChrLatch(addr:int) : void { }
-        public function PPU_ExtLatchX(x:int) : void { }
-        public function PPU_ExtLatch(addr:int) : * { return {"chr_l":0, "chr_h":0, "attr":0}; }
+package org.si.sound.nsf;
+
+
+class Mapper
+{
+    public var bank3WRAM : Int = 0;
+    public function new()
+    {
+    }
+    public function write(addr : Int, data : Int) : Void{
+    }
+    public function readLow(addr : Int) : Int{
+        var a : Int = (addr & 8191) + (bank3WRAM << 13);
+        var i : Int = a >> 2;
+        var s : Int = (a & 3) << 3;
+        return (MMU.__DOLLAR__.WRAM[i] >> s) & 0xff;
+    }
+    public function writeLow(addr : Int, data : Int) : Void{
+        var a : Int = (addr & 8191) + (bank3WRAM << 13);
+        var i : Int = a >> 2;
+        var s : Int = (a & 3) << 3;
+        MMU.__DOLLAR__.WRAM[i] = (MMU.__DOLLAR__.WRAM[i] & ~(255 << s)) | (data << s);
+    }
+    public function ExCmdRead(cmd : Int) : Int{return 0x00;
+    }
+    public function ExCmdWrite(cmd : Int, data : Int) : Void{
+    }
+    public function ExRead(addr : Int) : Int{return 0;
+    }
+    public function ExWrite(addr : Int, data : Int) : Void{
+    }
+    public function sync(cycles : Int) : Void{
+    }
+    public function HSync(scanline : Int) : Void{
+    }
+    public function VSync() : Void{
+    }
+    public function PPU_Latch(addr : Int) : Void{
+    }
+    public function PPU_ChrLatch(addr : Int) : Void{
+    }
+    public function PPU_ExtLatchX(x : Int) : Void{
+    }
+    public function PPU_ExtLatch(addr : Int) : Dynamic{return {
+            chr_l : 0,
+            chr_h : 0,
+            attr : 0,
+
+        };
     }
 }
+
 

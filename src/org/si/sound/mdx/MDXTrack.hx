@@ -5,179 +5,179 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sound.mdx {
-    import flash.utils.ByteArray;
-    
-    
-    /** Track of MDX data */
-    public class MDXTrack
-    {
+package org.si.sound.mdx;
+
+
+import openfl.utils.ByteArray;
+
+
+/** Track of MDX data */
+class MDXTrack
+{
+    public var hasNoData(get, never) : Bool;
+
     // variables
     //--------------------------------------------------------------------------------
-        /** sequence */
-        public var sequence:Vector.<MDXEvent> = new Vector.<MDXEvent>();
-        /** Return pointer of segno */
-        public var segnoPointer:MDXEvent;
-        /** timer B value to set */
-        public var timerB:int;
-
-        /** owner MDXData */
-        public var owner:MDXData;
-        /** channel number */
-        public var channelNumber:int;
-        
-        
-        
+    /** sequence */
+    public var sequence : Array<MDXEvent> = new Array<MDXEvent>();
+    /** Return pointer of segno */
+    public var segnoPointer : MDXEvent;
+    /** timer B value to set */
+    public var timerB : Int;
+    
+    /** owner MDXData */
+    public var owner : MDXData;
+    /** channel number */
+    public var channelNumber : Int;
+    
+    
+    
     // properties
     //--------------------------------------------------------------------------------
-        /** has no data. */
-        public function get hasNoData() : Boolean {
-            return (sequence.length <= 1);
+    /** has no data. */
+    private function get_hasNoData() : Bool{
+        return (sequence.length <= 1);
+    }
+    
+    /** to string. */
+    public function toString() : String
+    {
+        var text : String = "";
+        var i : Int;
+        var imax : Int = sequence.length;
+        for (imax){text += sequence[i] + "\n";
         }
-        
-        /** to string. */
-        public function toString():String
-        {
-            var text:String = "", i:int, imax:int = sequence.length;
-            for (i=0; i<imax; i++) text += sequence[i] +"\n";
-            return text;
-        }
-        
-        
-        
-        
+        return text;
+    }
+    
+    
+    
+    
     // constructor
     //--------------------------------------------------------------------------------
-        function MDXTrack(owner:MDXData, channelNumber:int)
-        {
-            this.owner = owner;
-            this.channelNumber = channelNumber;
-            sequence = new Vector.<MDXEvent>();
-            segnoPointer = null;
-        }
-        
-        
-        
-        
+    public function new(owner : MDXData, channelNumber : Int)
+    {
+        this.owner = owner;
+        this.channelNumber = channelNumber;
+        sequence = new Array<MDXEvent>();
+        segnoPointer = null;
+    }
+    
+    
+    
+    
     // operations
     //--------------------------------------------------------------------------------
-        /** Clear. */
-        public function clear() : MDXTrack
-        {
-            sequence.length = 0;
-            segnoPointer = null;
-            timerB = -1;
-            return this;
-        }
+    /** Clear. */
+    public function clear() : MDXTrack
+    {
+        sequence.length = 0;
+        segnoPointer = null;
+        timerB = -1;
+        return this;
+    }
+    
+    
+    /** Load track from byteArray. */
+    public function loadBytes(bytes : ByteArray) : MDXTrack
+    {
+        clear();
         
+        var clock : Int;
+        var code : Int;
+        var v : Int;
+        var pos : Int;
+        var mem : Array<Dynamic> = [];
+        var exitLoop : Bool = false;
         
-        /** Load track from byteArray. */
-        public function loadBytes(bytes:ByteArray) : MDXTrack
-        {
-            clear();
-            
-            var clock:int, code:int, v:int, pos:int, mem:Array=[], exitLoop:Boolean = false;
-            
-            while (!exitLoop && bytes.bytesAvailable>0) {
-                pos = bytes.position;
-                code = bytes.readUnsignedByte();
-                if (code<0x80) { // rest
-                    newEvent(MDXEvent.REST, 0, 0, code+1);
-                    clock += code+1;
-                } else
-                if (code<0xe0) { // note
-                    v = bytes.readUnsignedByte() + 1;
-                    newEvent(MDXEvent.NOTE, code - 0x80, 0, v);
-                    clock += v;
-                } else {
-                    switch(code) {
-                    //----- 2 operands
-                    case MDXEvent.REGISTER:
-                    case MDXEvent.FADEOUT:
+        while (!exitLoop && bytes.bytesAvailable > 0){
+            pos = bytes.position;
+            code = bytes.readUnsignedByte();
+            if (code < 0x80) {  // rest  
+                newEvent(MDXEvent.REST, 0, 0, code + 1);
+                clock += code + 1;
+            }
+            else 
+            if (code < 0xe0) {  // note  
+                v = bytes.readUnsignedByte() + 1;
+                newEvent(MDXEvent.NOTE, code - 0x80, 0, v);
+                clock += v;
+            }
+            else {
+                switch (code)
+                {
+                    case MDXEvent.REGISTER, MDXEvent.FADEOUT:
                         newEvent(code, bytes.readUnsignedByte(), bytes.readUnsignedByte());
-                        break;
-                    //----- 1 operand
-                    case MDXEvent.VOICE:
-                    case MDXEvent.PAN:
-                    case MDXEvent.VOLUME:
-                    case MDXEvent.GATE:
-                    case MDXEvent.KEY_ON_DELAY:
-                    case MDXEvent.FREQUENCY:
-                    case MDXEvent.LFO_DELAY:
-                    case MDXEvent.SYNC_SEND:
+                    case MDXEvent.VOICE, MDXEvent.PAN, MDXEvent.VOLUME, MDXEvent.GATE, MDXEvent.KEY_ON_DELAY, MDXEvent.FREQUENCY, MDXEvent.LFO_DELAY, MDXEvent.SYNC_SEND:
                         newEvent(code, bytes.readUnsignedByte());
-                        break;
-                    //----- no operands
-                    case MDXEvent.VOLUME_DEC:
-                    case MDXEvent.VOLUME_INC:
-                    case MDXEvent.SLUR:
-                    case MDXEvent.SET_PCM8:
-                    case MDXEvent.SYNC_WAIT:
+                    case MDXEvent.VOLUME_DEC, MDXEvent.VOLUME_INC, MDXEvent.SLUR, MDXEvent.SET_PCM8, MDXEvent.SYNC_WAIT:
                         newEvent(code);
-                        break;
-                    //----- 1 WORD
-                    case MDXEvent.DETUNE:
-                    case MDXEvent.PORTAMENT:
-                        newEvent(code, bytes.readShort()); //...short?
-                        break;
                     //----- REPEAT
-                    case MDXEvent.REPEAT_BEGIN:
+                    case MDXEvent.DETUNE, MDXEvent.PORTAMENT, MDXEvent.REPEAT_BEGIN:
+
+                        switch (code)
+                        {case MDXEvent.PORTAMENT:
+                                newEvent(code, bytes.readShort());  //...short?  
+                                break;
+                        }
                         newEvent(code, bytes.readUnsignedByte(), bytes.readUnsignedByte());
-                        break;
-                    case MDXEvent.REPEAT_END:
-                        newEvent(code, pos+bytes.readShort());  // position of REPEAT_BEGIN
-                        break;
-                    case MDXEvent.REPEAT_BREAK:
-                        newEvent(code, pos+bytes.readShort()+2); // position of REPEAT_END
-                        break;
                     //----- others
-                    case MDXEvent.TIMERB:
+                    case MDXEvent.REPEAT_END, MDXEvent.REPEAT_BREAK, MDXEvent.TIMERB:
+
+                        switch (code)
+                        {case MDXEvent.REPEAT_END:
+                                newEvent(code, pos + bytes.readShort());  // position of REPEAT_BEGIN  
+                                break;
+                        }
+
+                        switch (code)
+                        {case MDXEvent.REPEAT_BREAK:
+                                newEvent(code, pos + bytes.readShort() + 2);  // position of REPEAT_END  
+                                break;
+                        }
                         v = bytes.readUnsignedByte();
-                        if (clock == 0) timerB = v;
+                        if (clock == 0)                             timerB = v;
                         newEvent(code, v);
-                        break;
-                    case MDXEvent.PITCH_LFO:
-                    case MDXEvent.VOLUME_LFO:
+                    case MDXEvent.PITCH_LFO, MDXEvent.VOLUME_LFO:
                         v = bytes.readUnsignedByte();
-                        if (v == 0x80 || v == 0x81) newEvent(code, v);
-                        else newEvent(code, v | (bytes.readUnsignedShort()<<8), bytes.readShort());
-                        break;
+                        if (v == 0x80 || v == 0x81)                             newEvent(code, v)
+                        else newEvent(code, v | (bytes.readUnsignedShort() << 8), bytes.readShort());
                     case MDXEvent.OPM_LFO:
                         v = bytes.readUnsignedByte();
-                        if (v == 0x80 || v == 0x81) newEvent(code, v<<16);
+                        if (v == 0x80 || v == 0x81)                             newEvent(code, v << 16)
                         else {
-                            v = (v<<16) | (bytes.readUnsignedByte()<<8) | bytes.readUnsignedByte();
+                            v = (v << 16) | (bytes.readUnsignedByte() << 8) | bytes.readUnsignedByte();
                             newEvent(code, v, bytes.readShort());
                         }
-                        break;
-                    case MDXEvent.DATA_END: // ...?
+                    case MDXEvent.DATA_END:  // ...?  
                         v = bytes.readShort();
                         newEvent(code, v);
-                        if (v>0 && pos-v+3>=0) segnoPointer = mem[pos-v+3];
-                        else if (v<0 && pos+v+3>=0) segnoPointer = mem[pos+v+3];
+                        if (v > 0 && pos - v + 3 >= 0)                             segnoPointer = mem[pos - v + 3]
+                        else if (v < 0 && pos + v + 3 >= 0)                             segnoPointer = mem[pos + v + 3];
                         exitLoop = true;
-                        break;
                     default:
                         newEvent(MDXEvent.DATA_END);
                         exitLoop = true;
                         break;
-                    }
                 }
             }
-            
-            
-            function newEvent(type:int, data:int=0, data2:int=0, deltaClock:int=0) : MDXEvent {
-                var inst:MDXEvent = new MDXEvent(type, data, data2, deltaClock);
-                sequence.push(inst);
-                mem[pos] = inst;
-                return inst;
-            }
-
-//trace("------------------- ch", channelNumber, "-------------------");
-//trace(String(this));
-            return this;
         }
+        
+        
+        function newEvent(type : Int, data : Int = 0, data2 : Int = 0, deltaClock : Int = 0) : MDXEvent{
+            var inst : MDXEvent = new MDXEvent(type, data, data2, deltaClock);
+            sequence.push(inst);
+            mem[pos] = inst;
+            return inst;
+        }  //trace(String(this));    //trace("------------------- ch", channelNumber, "-------------------");  ;
+        
+        
+        
+        
+        
+        return this;
     }
 }
+
 
 

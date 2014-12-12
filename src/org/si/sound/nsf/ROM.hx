@@ -5,8 +5,14 @@
 //--------------------------------------------------------------------------------
 
 
-package org.si.sound.nsf {
-    public class ROM { function ROM() { } }
+package org.si.sound.nsf;
+
+
+class ROM
+{public function new()
+    {
+    }
 }
+
 
 

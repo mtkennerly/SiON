@@ -4,18 +4,21 @@
 //  Distributed under BSD-style license (see org.si.license.txt).
 //----------------------------------------------------------------------------------------------------
 
-package org.si.sion.sequencer.simulator {
-    import org.si.sion.module.SiOPMTable;
-    
-    
-    /** Simulator of ramp waveform single operator sound generator */
-    public class SiMMLSimulatorRamp extends SiMMLSimulatorBase
+package org.si.sion.sequencer.simulator;
+
+import org.si.sion.sequencer.simulator.SiMMLSimulatorVoiceSet;
+
+import org.si.sion.module.SiOPMTable;
+
+
+/** Simulator of ramp waveform single operator sound generator */
+class SiMMLSimulatorRamp extends SiMMLSimulatorBase
+{
+    public function new()
     {
-        function SiMMLSimulatorRamp()
-        {
-            super(MT_RAMP, 1);
-            this._defaultVoiceSet = new SiMMLSimulatorVoiceSet(128, SiOPMTable.PG_RAMP);
-        }
+        super(SiMMLSimulatorBase.MT_RAMP, 1);
+        this._defaultVoiceSet = new SiMMLSimulatorVoiceSet(128, SiOPMTable.PG_RAMP);
     }
 }
+
 

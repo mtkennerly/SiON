@@ -23,7 +23,7 @@ package org.si.utils {
     /** Fast Fourier Transform module */
     public class FFT_original
     {
-    // valiables
+    // variables
     //------------------------------------------------------------
         private var _length:int = 0;
         private var _waveTable:Vector.<Number> = new Vector.<Number>();
@@ -61,7 +61,8 @@ package org.si.utils {
         }
         
         
-        /** Real Discrete Fourier Tranform
+
+        /** Real Discrete Fourier Tranform
          *  @param isgn 1 for FFT, -1 for IFFT.
          *  @param src data to transform. The length must be same as you passed to constructor.
          */

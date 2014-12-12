@@ -5,87 +5,99 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sound.events {
-    import flash.events.*;
-    import flash.media.Sound;
-    import org.si.sion.*;
-    import org.si.sion.effector.*;
-    import org.si.sion.module.SiOPMStream;
-    import org.si.sound.namespaces._sound_object_internal;
-    
-    
-    /** FlashSoundPlayerEvent is dispatched by FlashSoundPlayer. @see org.si.sound.FlashSoundPlayer */
-    public class FlashSoundPlayerEvent extends Event
-    {
+package org.si.sound.events;
+
+import org.si.sound.events.Event;
+import org.si.sound.events.Sound;
+
+import openfl.events.*;
+import openfl.media.Sound;
+import org.si.sion.*;
+import org.si.sion.effector.*;
+import org.si.sion.module.SiOPMStream;
+import org.si.sound.namespaces.SoundObjectInternal;
+
+
+/** FlashSoundPlayerEvent is dispatched by FlashSoundPlayer. @see org.si.sound.FlashSoundPlayer */
+class FlashSoundPlayerEvent extends Event
+{
+    public var sound(get, never) : Sound;
+    public var keyRangeFrom(get, never) : Int;
+    public var keyRangeTo(get, never) : Int;
+
     // namespace
     //----------------------------------------
-        use namespace _sound_object_internal;
-        
-        
-        
-        
+    
+    
+    
+    
+    
     // constants
     //----------------------------------------
-        /** Complete all loading sounds */
-        public static const COMPLETE:String = 'fspComplete';
-        
-        
-        
-        
+    /** Complete all loading sounds */
+    public static inline var COMPLETE : String = "fspComplete";
+    
+    
+    
+    
     // properties
     //----------------------------------------
-        /** Target sound */
-        public function get sound() : Sound { return _sound; }
-        /** keyRangeFrom */
-        public function get keyRangeFrom() : int { return _keyRangeFrom; }
-        /** keyRangeTo */
-        public function get keyRangeTo() : int { return _keyRangeTo; }
-        
-        
-        /**@private*/ _sound_object_internal var _sound:Sound;
-        /**@private*/ _sound_object_internal var _onComplete:Function;
-        /**@private*/ _sound_object_internal var _onError:Function;
-        /**@private*/ _sound_object_internal var _keyRangeFrom:int;
-        /**@private*/ _sound_object_internal var _keyRangeTo:int;
-        /**@private*/ _sound_object_internal var _startPoint:int;
-        /**@private*/ _sound_object_internal var _endPoint:int;
-        /**@private*/ _sound_object_internal var _loopPoint:int;
-        
-        
-        
-        
+    /** Target sound */
+    private function get_sound() : Sound{return _sound;
+    }
+    /** keyRangeFrom */
+    private function get_keyRangeFrom() : Int{return _keyRangeFrom;
+    }
+    /** keyRangeTo */
+    private function get_keyRangeTo() : Int{return _keyRangeTo;
+    }
+    
+    
+    /**@private*/private var _sound : Sound;
+    /**@private*/private var _onComplete : Function;
+    /**@private*/private var _onError : Function;
+    /**@private*/private var _keyRangeFrom : Int;
+    /**@private*/private var _keyRangeTo : Int;
+    /**@private*/private var _startPoint : Int;
+    /**@private*/private var _endPoint : Int;
+    /**@private*/private var _loopPoint : Int;
+    
+    
+    
+    
     // functions
     //----------------------------------------
-        /** @private */
-        function FlashSoundPlayerEvent(sound:Sound, onComplete:Function, onError:Function, keyRangeFrom:int, keyRangeTo:int, startPoint:int, endPoint:int, loopPoint:int) {
-            super(COMPLETE, false, false);
-            this._sound = sound;
-            this._onComplete = onComplete;
-            this._onError = onError;
-            this._keyRangeFrom = keyRangeFrom;
-            this._keyRangeTo = keyRangeTo;
-            this._startPoint = startPoint;
-            this._endPoint = endPoint;
-            this._loopPoint = loopPoint;
-            _sound.addEventListener(Event.COMPLETE, _handleComplete);
-            _sound.addEventListener(IOErrorEvent.IO_ERROR, _handleError);
-        }
-        
-        
-        private function _handleComplete(e:Event) : void {
-            _sound.removeEventListener(Event.COMPLETE, _handleComplete);
-            _sound.removeEventListener(IOErrorEvent.IO_ERROR, _handleError);
-            _onComplete(this);
-        }
-        
-        
-        private function _handleError(e:Event) : void {
-            _sound.removeEventListener(Event.COMPLETE, _handleComplete);
-            _sound.removeEventListener(IOErrorEvent.IO_ERROR, _handleError);
-            _onError(this);
-        }
+    /** @private */
+    public function new(sound : Sound, onComplete : Function, onError : Function, keyRangeFrom : Int, keyRangeTo : Int, startPoint : Int, endPoint : Int, loopPoint : Int)
+    {
+        super(COMPLETE, false, false);
+        this._sound = sound;
+        this._onComplete = onComplete;
+        this._onError = onError;
+        this._keyRangeFrom = keyRangeFrom;
+        this._keyRangeTo = keyRangeTo;
+        this._startPoint = startPoint;
+        this._endPoint = endPoint;
+        this._loopPoint = loopPoint;
+        _sound.addEventListener(Event.COMPLETE, _handleComplete);
+        _sound.addEventListener(IOErrorEvent.IO_ERROR, _handleError);
+    }
+    
+    
+    private function _handleComplete(e : Event) : Void{
+        _sound.removeEventListener(Event.COMPLETE, _handleComplete);
+        _sound.removeEventListener(IOErrorEvent.IO_ERROR, _handleError);
+        _onComplete(this);
+    }
+    
+    
+    private function _handleError(e : Event) : Void{
+        _sound.removeEventListener(Event.COMPLETE, _handleComplete);
+        _sound.removeEventListener(IOErrorEvent.IO_ERROR, _handleError);
+        _onError(this);
     }
 }
+
 
 
 

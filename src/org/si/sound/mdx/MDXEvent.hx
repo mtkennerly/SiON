@@ -5,103 +5,106 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sound.mdx {
-    import flash.utils.ByteArray;
-    
-    
-    /** MDX event */
-    public class MDXEvent
-    {
+package org.si.sound.mdx;
+
+
+import openfl.utils.ByteArray;
+
+
+/** MDX event */
+class MDXEvent
+{
     // constant
     //--------------------------------------------------------------------------------
-        static public const REST:int = 0x00;
-        static public const NOTE:int = 0x80;
-        static public const TIMERB:int = 0xff;
-        static public const REGISTER:int = 0xfe;
-        static public const VOICE:int = 0xfd;
-        static public const PAN:int = 0xfc;
-        static public const VOLUME:int = 0xfb;
-        static public const VOLUME_DEC:int = 0xfa;
-        static public const VOLUME_INC:int = 0xf9;
-        static public const GATE:int = 0xf8;
-        static public const SLUR:int = 0xf7;
-        static public const REPEAT_BEGIN:int = 0xf6;
-        static public const REPEAT_END:int = 0xf5;
-        static public const REPEAT_BREAK:int = 0xf4;
-        static public const DETUNE:int = 0xf3;
-        static public const PORTAMENT:int = 0xf2;
-        static public const DATA_END:int = 0xf1;
-        static public const KEY_ON_DELAY:int = 0xf0;
-        static public const SYNC_SEND:int = 0xef;
-        static public const SYNC_WAIT:int = 0xee;
-        static public const FREQUENCY:int = 0xed;
-        static public const PITCH_LFO:int = 0xec;
-        static public const VOLUME_LFO:int = 0xeb;
-        static public const OPM_LFO:int = 0xea;
-        static public const LFO_DELAY:int = 0xe9;
-        static public const SET_PCM8:int = 0xe8;
-        static public const FADEOUT:int = 0xe7;
-        
-        
-        static private var _noteText:Vector.<String> = Vector.<String>(["c ","c+","d ","d+","e ","f ","f+","g ","g+","a ","a+","b "]);
-        
-        
-        
-        
+    public static inline var REST : Int = 0x00;
+    public static inline var NOTE : Int = 0x80;
+    public static inline var TIMERB : Int = 0xff;
+    public static inline var REGISTER : Int = 0xfe;
+    public static inline var VOICE : Int = 0xfd;
+    public static inline var PAN : Int = 0xfc;
+    public static inline var VOLUME : Int = 0xfb;
+    public static inline var VOLUME_DEC : Int = 0xfa;
+    public static inline var VOLUME_INC : Int = 0xf9;
+    public static inline var GATE : Int = 0xf8;
+    public static inline var SLUR : Int = 0xf7;
+    public static inline var REPEAT_BEGIN : Int = 0xf6;
+    public static inline var REPEAT_END : Int = 0xf5;
+    public static inline var REPEAT_BREAK : Int = 0xf4;
+    public static inline var DETUNE : Int = 0xf3;
+    public static inline var PORTAMENT : Int = 0xf2;
+    public static inline var DATA_END : Int = 0xf1;
+    public static inline var KEY_ON_DELAY : Int = 0xf0;
+    public static inline var SYNC_SEND : Int = 0xef;
+    public static inline var SYNC_WAIT : Int = 0xee;
+    public static inline var FREQUENCY : Int = 0xed;
+    public static inline var PITCH_LFO : Int = 0xec;
+    public static inline var VOLUME_LFO : Int = 0xeb;
+    public static inline var OPM_LFO : Int = 0xea;
+    public static inline var LFO_DELAY : Int = 0xe9;
+    public static inline var SET_PCM8 : Int = 0xe8;
+    public static inline var FADEOUT : Int = 0xe7;
+    
+    
+    private static var _noteText : Array<String> = ["c ", "c+", "d ", "d+", "e ", "f ", "f+", "g ", "g+", "a ", "a+", "b "];
+    
+    
+    
+    
     // variables
     //--------------------------------------------------------------------------------
-        public var type:int = 0;
-        public var data:int = 0;
-        public var data2:int = 0;
-        public var deltaClock:uint = 0;
-        
-        
-        
-        
+    public var type : Int = 0;
+    public var data : Int = 0;
+    public var data2 : Int = 0;
+    public var deltaClock : Int = 0;
+    
+    
+    
+    
     // properties
     //--------------------------------------------------------------------------------
-        /** toString */
-        public function toString() : String
+    /** toString */
+    public function toString() : String
+    {
+        var i : Int;
+        switch (type)
         {
-            var i:int;
-            switch (type) {
-            case REST: return "r ;"+String(deltaClock);
-            case NOTE: 
-                i = (data+15)%12;
-                return "o"+String(((data+15)/12)>>0)+_noteText[i]+";"+String(deltaClock);
-            case GATE:   return "q"+String(data);
-            case DETUNE: return "k"+String(data>>8);
-            case REPEAT_BEGIN: return "["+String(data);
-            case REPEAT_BREAK: return "|";
-            case REPEAT_END: return "]";
-            case PORTAMENT: return "po";
-            case SLUR: return "&";
-            case VOICE: return "@"+String(data);
-            case PAN: return "p"+String(data);
-            case VOLUME: return (data<16) ? "v"+String(data) : "@v"+String(data&127);
-            case LFO_DELAY:  return "LFO_delay"+String(data);
-            case PITCH_LFO:  return "LFO"+(data&255).toString(16)+" mp"+(data>>8)+","+(data2);
-            case VOLUME_LFO: return "LFO"+(data&255).toString(16)+" ma"+(data>>8)+","+(data2);
-            case FREQUENCY:  return "FREQ"+String(data);
-            case TIMERB:     return "TIMER_B "+String(data);
-            case SET_PCM8:   return "PCM8";
-            default:   return "#"+ type.toString(16) + "; " + String(data);
-            }
-            return "";
+            case REST:return "r ;" + Std.string(deltaClock);
+            case NOTE:
+                i = (data + 15) % 12;
+                return "o" + Std.string(((data + 15) / 12) >> 0) + _noteText[i] + ";" + Std.string(deltaClock);
+            case GATE:return "q" + Std.string(data);
+            case DETUNE:return "k" + Std.string(data >> 8);
+            case REPEAT_BEGIN:return "[" + Std.string(data);
+            case REPEAT_BREAK:return "|";
+            case REPEAT_END:return "]";
+            case PORTAMENT:return "po";
+            case SLUR:return "&";
+            case VOICE:return "@" + Std.string(data);
+            case PAN:return "p" + Std.string(data);
+            case VOLUME:return ((data < 16)) ? "v" + Std.string(data) : "@v" + Std.string(data & 127);
+            case LFO_DELAY:return "LFO_delay" + Std.string(data);
+            case PITCH_LFO:return "LFO" + Std.string((data & 255)) + " mp" + (data >> 8) + "," + (data2);
+            case VOLUME_LFO:return "LFO" + Std.string((data & 255)) + " ma" + (data >> 8) + "," + (data2);
+            case FREQUENCY:return "FREQ" + Std.string(data);
+            case TIMERB:return "TIMER_B " + Std.string(data);
+            case SET_PCM8:return "PCM8";
+            default:return "#" + Std.string(type) + "; " + Std.string(data);
         }
-        
-        
-        
-        
+        return "";
+    }
+    
+    
+    
+    
     // constructor
     //--------------------------------------------------------------------------------
-        function MDXEvent(type:int, data:int, data2:int, deltaClock:int) 
-        {
-            this.type = type;
-            this.data = data;
-            this.data2 = data2;
-            this.deltaClock = deltaClock;
-        }
+    public function new(type : Int, data : Int, data2 : Int, deltaClock : Int)
+    {
+        this.type = type;
+        this.data = data;
+        this.data2 = data2;
+        this.deltaClock = deltaClock;
     }
 }
+
 

@@ -22,7 +22,7 @@ package org.si.sound.patterns {
         /** constructor */
         function BassSequencerPresetPattern()
         {
-            _categoly("bass");
+            _category("bass");
             _pattern("bass1", "A^--A^--A^--A^--");
             _pattern("bass2", "A^--A^--A^--A^AA");
             _pattern("bass3", "A^A^--A^--A^--A^");
@@ -68,18 +68,18 @@ package org.si.sound.patterns {
         });
         private function _pattern(key:String, pml:String) : void {
             var pattern:Array = _pp.parse(pml);
-            _categolyList.push(pattern);
+            _categoryList.push(pattern);
             this[key] = pattern;
         }
         
         
         // register categoly
-        private var _categolyList:Array;
-        private function _categoly(key:String) : void {
-            _categolyList = [];
-            _categolyList["name"] = key;
-            categolies.push(_categolyList);
-            this[key] = _categolyList;
+        private var _categoryList:Array;
+        private function _category(key:String) : void {
+            _categoryList = [];
+            _categoryList["name"] = key;
+            categolies.push(_categoryList);
+            this[key] = _categoryList;
         }
     }
 }

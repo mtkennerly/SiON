@@ -4,87 +4,93 @@
 //  Distributed under BSD-style license (see org.si.license.txt).
 //----------------------------------------------------------------------------------------------------
 
-package org.si.sion.effector {
-    /** Piezoelectric speaker simulator. */
-    public class SiEffectSpeakerSimulator extends SiEffectBase
-    {
+package org.si.sion.effector;
+
+
+/** Piezoelectric speaker simulator. */
+class SiEffectSpeakerSimulator extends SiEffectBase
+{
     // variables
     //------------------------------------------------------------
-        private var _springCoef:Number = 0.96;
-        private var _diaphragmPosL:Number, _diaphragmPosR:Number;
-        private var _prevL:Number, _prevR:Number;
-        
-        
-        
-        
+    private var _springCoef : Float = 0.96;
+    private var _diaphragmPosL : Float;private var _diaphragmPosR : Float;
+    private var _prevL : Float;private var _prevR : Float;
+    
+    
+    
+    
     // constructor
     //------------------------------------------------------------
-        /** Constructor. 
-         *  @param hardness hardness of diaphragm (0-1). 0 sets no effect. 1 sets hardest.
-         */
-        function SiEffectSpeakerSimulator(hardness:Number=0.2) 
-        {
-            setParameters(hardness);
-        }
-        
-                
-        /** set parameter
-         *  @param hardness hardness of diaphragm (0-1). 0 sets no effect. 1 sets hardest.
-         */
-        public function setParameters(hardness:Number=0.2) : void 
-        {
-            _springCoef = 1 - hardness * hardness;
-            if (_springCoef < 0.1) _springCoef = 0.1;
-        }
-
-        
-        
-        
+    /** Constructor. 
+     *  @param hardness hardness of diaphragm (0-1). 0 sets no effect. 1 sets hardest.
+     */
+    public function new(hardness : Float = 0.2)
+    {
+        super();
+        setParameters(hardness);
+    }
+    
+    
+    /** set parameter
+     *  @param hardness hardness of diaphragm (0-1). 0 sets no effect. 1 sets hardest.
+     */
+    public function setParameters(hardness : Float = 0.2) : Void
+    {
+        _springCoef = 1 - hardness * hardness;
+        if (_springCoef < 0.1)             _springCoef = 0.1;
+    }
+    
+    
+    
+    
     // callback functions
     //------------------------------------------------------------
-        /** @private */
-        override public function initialize() : void
-        {
-            setParameters();
+    /** @private */
+    override public function initialize() : Void
+    {
+        setParameters();
+    }
+    
+    
+    /** @private */
+    override public function mmlCallback(args : Array<Float>) : Void
+    {
+        setParameters(((!Math.isNaN(args[0]))) ? args[0] * 0.01 : 0.2);
+    }
+    
+    
+    /** @private */
+    override public function prepareProcess() : Int
+    {
+        _prevL = _prevR = _diaphragmPosL = _diaphragmPosR = 0;
+        return 2;
+    }
+    
+    
+    /** @private */
+    override public function process(channels : Int, buffer : Array<Float>, startIndex : Int, length : Int) : Int
+    {
+        startIndex <<= 1;
+        length <<= 1;
+        var i : Int;
+        var d : Float;
+        var imax : Int = startIndex + length;
+        i = startIndex;
+        while (i < imax){
+            d = buffer[i] - _prevL;
+            _diaphragmPosL *= _springCoef;
+            _diaphragmPosL += d;
+            _prevL = buffer[i];
+            buffer[i] = _diaphragmPosL;i++;
+            
+            d = buffer[i] - _prevR;
+            _diaphragmPosR *= _springCoef;
+            _diaphragmPosR += d;
+            _prevR = buffer[i];
+            buffer[i] = _diaphragmPosR;i++;
         }
-        
-        
-        /** @private */
-        override public function mmlCallback(args:Vector.<Number>) : void
-        {
-            setParameters((!isNaN(args[0])) ? args[0]*0.01 : 0.2);
-        }
-        
-        
-        /** @private */
-        override public function prepareProcess() : int
-        {
-            _prevL = _prevR = _diaphragmPosL = _diaphragmPosR = 0;
-            return 2;
-        }
-        
-        
-        /** @private */
-        override public function process(channels:int, buffer:Vector.<Number>, startIndex:int, length:int) : int
-        {
-            startIndex <<= 1;
-            length <<= 1;
-            var i:int, d:Number, imax:int=startIndex+length;
-            for (i=startIndex; i<imax;) {
-                d = buffer[i] - _prevL;
-                _diaphragmPosL *= _springCoef;
-                _diaphragmPosL += d;
-                _prevL = buffer[i];
-                buffer[i] = _diaphragmPosL; i++;
-                
-                d = buffer[i] - _prevR;
-                _diaphragmPosR *= _springCoef;
-                _diaphragmPosR += d;
-                _prevR = buffer[i];
-                buffer[i] = _diaphragmPosR; i++;
-            }
-            return channels;
-        }
+        return channels;
     }
 }
+
 

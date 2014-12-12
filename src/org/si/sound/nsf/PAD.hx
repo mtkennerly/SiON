@@ -5,8 +5,14 @@
 //--------------------------------------------------------------------------------
 
 
-package org.si.sound.nsf {
-    public class PAD { function PAD() { } }
+package org.si.sound.nsf;
+
+
+class PAD
+{public function new()
+    {
+    }
 }
+
 
 

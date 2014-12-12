@@ -4,94 +4,102 @@
 //  Distributed under BSD-style license (see org.si.license.txt).
 //----------------------------------------------------------------------------------------------------
 
-package org.si.sion.effector {
-    /** Stereo wave shaper. */
-    public class SiEffectWaveShaper extends SiEffectBase
-    {
+package org.si.sion.effector;
+
+
+/** Stereo wave shaper. */
+class SiEffectWaveShaper extends SiEffectBase
+{
     // variables
     //------------------------------------------------------------
-        private var _coefficient:int;
-        private var _outputLevel:Number;
-        
-        
-        
-        
+    private var _coefficient : Int;
+    private var _outputLevel : Float;
+    
+    
+    
+    
     // constructor
     //------------------------------------------------------------
-        /** constructor
-         *  @param distortion distortion(0-1).
-         *  @param outputLevel output level(0-1).
-         */
-        function SiEffectWaveShaper(distortion:Number=0.5, outputLevel:Number=1.0) 
-        {
-            setParameters(distortion, outputLevel);
-        }        
-        
-        
-        
-        
+    /** constructor
+     *  @param distortion distortion(0-1).
+     *  @param outputLevel output level(0-1).
+     */
+    public function new(distortion : Float = 0.5, outputLevel : Float = 1.0)
+    {
+        super();
+        setParameters(distortion, outputLevel);
+    }
+    
+    
+    
+    
     // operations
     //------------------------------------------------------------
-        /** set parameters
-         *  @param distortion distortion(0-1).
-         *  @param outputLevel output level(0-1).
-         */
-        public function setParameters(distortion:Number=0.5, outputLevel:Number=1.0) : void
-        {
-            if (distortion >= 1) distortion = 0.9999847412109375; //65535/65536
-            _coefficient = 2*distortion/(1-distortion);
-            _outputLevel = outputLevel;
-        }
-        
-        
-        
-        
+    /** set parameters
+     *  @param distortion distortion(0-1).
+     *  @param outputLevel output level(0-1).
+     */
+    public function setParameters(distortion : Float = 0.5, outputLevel : Float = 1.0) : Void
+    {
+        if (distortion >= 1) distortion = 0.9999847412109375;  //65535/65536
+        _coefficient = Math.floor(2 * distortion / (1 - distortion));
+        _outputLevel = outputLevel;
+    }
+    
+    
+    
+    
     // overrided funcitons
     //------------------------------------------------------------
-        /** @private */
-        override public function initialize() : void
-        {
-            setParameters();
-        }
-        
-
-        /** @private */
-        override public function mmlCallback(args:Vector.<Number>) : void
-        {
-            setParameters((!isNaN(args[0])) ? args[0]*0.01 : 0.5,
-                          (!isNaN(args[1])) ? args[1]*0.01 : 1.0);
-        }
-        
-        
-        /** @private */
-        override public function prepareProcess() : int
-        {
-            return 2;
-        }
-        
-        
-        
-        /** @private */
-        override public function process(channels:int, buffer:Vector.<Number>, startIndex:int, length:int) : int
-        {
-            startIndex <<= 1;
-            length <<= 1;
-            var i:int, n:Number, c1:Number=(1 + _coefficient)*_outputLevel, imax:int=startIndex+length;
-            if (channels == 2) {
-                for (i=startIndex; i<imax; i++) {
-                    n = buffer[i];
-                    buffer[i] = c1 * n / (1 + _coefficient * ((n<0) ? -n : n));
-                }
-            } else {
-                for (i=startIndex; i<imax;) {
-                    n = buffer[i];
-                    n = c1 * n / (1 + _coefficient * ((n<0) ? -n : n));
-                    buffer[i] = n; i++;
-                    buffer[i] = n; i++;
-                }
+    /** @private */
+    override public function initialize() : Void
+    {
+        setParameters();
+    }
+    
+    
+    /** @private */
+    override public function mmlCallback(args : Array<Float>) : Void
+    {
+        setParameters(((!Math.isNaN(args[0]))) ? args[0] * 0.01 : 0.5,
+                ((!Math.isNaN(args[1]))) ? args[1] * 0.01 : 1.0);
+    }
+    
+    
+    /** @private */
+    override public function prepareProcess() : Int
+    {
+        return 2;
+    }
+    
+    
+    
+    /** @private */
+    override public function process(channels : Int, buffer : Array<Float>, startIndex : Int, length : Int) : Int
+    {
+        startIndex <<= 1;
+        length <<= 1;
+        var i : Int;
+        var n : Float;
+        var c1 : Float = (1 + _coefficient) * _outputLevel;
+        var imax : Int = startIndex + length;
+        if (channels == 2) {
+            for (i in 0...imax){
+                n = buffer[i];
+                buffer[i] = c1 * n / (1 + _coefficient * (((n < 0)) ? -n : n));
             }
-            return channels;
         }
+        else {
+            i = startIndex;
+            while (i < imax){
+                n = buffer[i];
+                n = c1 * n / (1 + _coefficient * (((n < 0)) ? -n : n));
+                buffer[i] = n;i++;
+                buffer[i] = n;i++;
+            }
+        }
+        return channels;
     }
 }
+
 

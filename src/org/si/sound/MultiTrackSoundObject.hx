@@ -5,186 +5,252 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sound {
-    import org.si.sion.*;
-    import org.si.sion.sequencer.SiMMLTrack;
-    import org.si.sound.namespaces._sound_object_internal;
-    import org.si.sound.synthesizers.*;
-    
-    
-    /** The MultiTrackSoundObject class is the base class for all objects that can control plural tracks. 
-     */
-    public class MultiTrackSoundObject extends SoundObject
-    {
+package org.si.sound;
+
+import org.si.sound.SoundObject;
+import org.si.sound.VoiceReference;
+
+import org.si.sion.*;
+import org.si.sion.sequencer.SiMMLTrack;
+import org.si.sound.namespaces.SoundObjectInternal;
+import org.si.sound.synthesizers.*;
+
+
+/** The MultiTrackSoundObject class is the base class for all objects that can control plural tracks. 
+ */
+class MultiTrackSoundObject extends SoundObject
+{
+    public var trackCount(get, never) : Int;
+
     // namespace
     //----------------------------------------
-        use namespace _sound_object_internal;
-        
-        
-        
-        
-    // valiables
+    
+    
+    
+    
+    
+    // variables
     //----------------------------------------
-        /** @private [protected] mask for tracks operation. */
-        protected var _trackOperationMask:uint;
-        
-        
-        
-        
+    /** @private [protected] mask for tracks operation. */
+    private var _trackOperationMask : Int;
+    
+    
+    
+    
     // properties
     //----------------------------------------
-        /** Returns the number of tracks. */
-        public function get trackCount() : int { return (_tracks) ? _tracks.length : 0; }
-        
-        
-        
-        
+    /** Returns the number of tracks. */
+    private function get_trackCount() : Int{return ((_tracks)) ? _tracks.length : 0;
+    }
+    
+    
+    
+    
     // properties
     //----------------------------------------
-        /** @private */
-        override public function get isPlaying() : Boolean { return (_tracks != null); }
-        
-        
-        /** @private */
-        override public function set coarseTune(n:int) : void {
-            super.coarseTune = n;
-            if (_tracks) {
-                var i:int, f:uint, imax:int = _tracks.length;
-                for (i=0, f=_trackOperationMask; i<imax; i++, f>>=1) {
-                    if ((f&1)==0) _tracks[i].noteShift = _noteShift;
-                }
+    /** @private */
+    override private function get_isPlaying() : Bool{return (_tracks != null);
+    }
+    
+    
+    /** @private */
+    override private function set_coarseTune(n : Int) : Int{
+        super.coarseTune = n;
+        if (_tracks) {
+            var i : Int;
+            var f : Int;
+            var imax : Int = _tracks.length;
+            i = 0;
+f = _trackOperationMask;
+            while (i < imax){
+                if ((f & 1) == 0)                     _tracks[i].noteShift = _noteShift;
+                i++;
+                f >>= 1;
             }
         }
-        
-        /** @private */
-        override public function set fineTune(p:Number) : void {
-            super.fineTune = p;
-            if (_tracks) {
-                var i:int, f:uint, imax:int = _tracks.length, ps:int = _pitchShift*64;
-                for (i=0, f=_trackOperationMask; i<imax; i++, f>>=1) {
-                    if ((f&1)==0) _tracks[i].pitchShift = ps;
-                }
+        return n;
+    }
+    
+    /** @private */
+    override private function set_fineTune(p : Float) : Float{
+        super.fineTune = p;
+        if (_tracks) {
+            var i : Int;
+            var f : Int;
+            var imax : Int = _tracks.length;
+            var ps : Int = _pitchShift * 64;
+            i = 0;
+f = _trackOperationMask;
+            while (i < imax){
+                if ((f & 1) == 0)                     _tracks[i].pitchShift = ps;
+                i++;
+                f >>= 1;
             }
         }
-        
-        /** @private */
-        override public function set gateTime(g:Number) : void {
-            super.gateTime = g;
-            if (_tracks) {
-                var i:int, f:uint, imax:int = _tracks.length;
-                for (i=0, f=_trackOperationMask; i<imax; i++, f>>=1) {
-                    if ((f&1)==0) _tracks[i].quantRatio = _gateTime;
-                }
+        return p;
+    }
+    
+    /** @private */
+    override private function set_gateTime(g : Float) : Float{
+        super.gateTime = g;
+        if (_tracks) {
+            var i : Int;
+            var f : Int;
+            var imax : Int = _tracks.length;
+            i = 0;
+f = _trackOperationMask;
+            while (i < imax){
+                if ((f & 1) == 0)                     _tracks[i].quantRatio = _gateTime;
+                i++;
+                f >>= 1;
             }
         }
-        
-        /** @private */
-        override public function set eventMask(m:int) : void {
-            super.eventMask = m;
-            if (_tracks) {
-                var i:int, f:uint, imax:int = _tracks.length;
-                for (i=0, f=_trackOperationMask; i<imax; i++, f>>=1) {
-                    if ((f&1)==0) _tracks[i].eventMask = _eventMask;
-                }
+        return g;
+    }
+    
+    /** @private */
+    override private function set_eventMask(m : Int) : Int{
+        super.eventMask = m;
+        if (_tracks) {
+            var i : Int;
+            var f : Int;
+            var imax : Int = _tracks.length;
+            i = 0;
+f = _trackOperationMask;
+            while (i < imax){
+                if ((f & 1) == 0)                     _tracks[i].eventMask = _eventMask;
+                i++;
+                f >>= 1;
             }
         }
-        
-        /** @private */
-        override public function set mute(m:Boolean) : void { 
-            super.mute = m;
-            if (_tracks) {
-                var i:int, f:uint, imax:int = _tracks.length;
-                for (i=0, f=_trackOperationMask; i<imax; i++, f>>=1) {
-                    if ((f&1)==0) _tracks[i].channel.mute = _mute;
-                }
+        return m;
+    }
+    
+    /** @private */
+    override private function set_mute(m : Bool) : Bool{
+        super.mute = m;
+        if (_tracks) {
+            var i : Int;
+            var f : Int;
+            var imax : Int = _tracks.length;
+            i = 0;
+f = _trackOperationMask;
+            while (i < imax){
+                if ((f & 1) == 0)                     _tracks[i].channel.mute = _mute;
+                i++;
+                f >>= 1;
             }
         }
-        
-        /** @private */
-        override public function set pan(p:Number) : void {
-            super.pan = p;
-            if (_tracks) {
-                var i:int, f:uint, imax:int = _tracks.length;
-                for (i=0, f=_trackOperationMask; i<imax; i++, f>>=1) {
-                    if ((f&1)==0) _tracks[i].channel.pan = _pan*64;
-                }
+        return m;
+    }
+    
+    /** @private */
+    override private function set_pan(p : Float) : Float{
+        super.pan = p;
+        if (_tracks) {
+            var i : Int;
+            var f : Int;
+            var imax : Int = _tracks.length;
+            i = 0;
+f = _trackOperationMask;
+            while (i < imax){
+                if ((f & 1) == 0)                     _tracks[i].channel.pan = _pan * 64;
+                i++;
+                f >>= 1;
             }
         }
-        
-        
-        /** @private */
-        override public function set pitchBend(p:Number) : void {
-            super.pitchBend = p;
-            if (_tracks) {
-                var i:int, f:uint, pb:int = p*64, imax:int = _tracks.length;
-                for (i=0, f=_trackOperationMask; i<imax; i++, f>>=1) {
-                    if ((f&1)==0) _tracks[i].pitchBend = pb;
-                }
+        return p;
+    }
+    
+    
+    /** @private */
+    override private function set_pitchBend(p : Float) : Float{
+        super.pitchBend = p;
+        if (_tracks) {
+            var i : Int;
+            var f : Int;
+            var pb : Int = p * 64;
+            var imax : Int = _tracks.length;
+            i = 0;
+f = _trackOperationMask;
+            while (i < imax){
+                if ((f & 1) == 0)                     _tracks[i].pitchBend = pb;
+                i++;
+                f >>= 1;
             }
         }
-        
-        
-        
-        
+        return p;
+    }
+    
+    
+    
+    
     // constructor
     //----------------------------------------
-        /** @private [protected] constructor */
-        function MultiTrackSoundObject(name:String = null, synth:VoiceReference = null) {
-            super(name, synth);
-            _tracks = null;
-            _trackOperationMask = 0;
-        }
-        
-        
-        
-        
+    /** @private [protected] constructor */
+    public function new(name : String = null, synth : VoiceReference = null)
+    {
+        super(name, synth);
+        _tracks = null;
+        _trackOperationMask = 0;
+    }
+    
+    
+    
+    
     // operations
     //----------------------------------------
-        /** @private [protected] Reset */
-        override public function reset() : void 
-        {
-            super.reset();
-            _trackOperationMask = 0;
-        }
-        
-        
-        /** you cannot call play() in MultiTrackSoundObject. */
-        override public function play() : void { 
-            _errorNotAvailable("play()");
-        }
-        
-        
-        /** you cannot call stop() in MultiTrackSoundObject. */
-        override public function stop() : void {
-            _errorNotAvailable("stop()");
-        }
-        
-        
-        /** @private [protected] Stop all sound belonging to this sound object. */
-        protected function _stopAllTracks() : void {
-            if (_tracks) {
-                for each (var t:SiMMLTrack in _tracks) {
-                    _synthesizer._unregisterTracks(t);
-                    t.setDisposable();
-                }
-                _tracks = null;
+    /** @private [protected] Reset */
+    override public function reset() : Void
+    {
+        super.reset();
+        _trackOperationMask = 0;
+    }
+    
+    
+    /** you cannot call play() in MultiTrackSoundObject. */
+    override public function play() : Void{
+        _errorNotAvailable("play()");
+    }
+    
+    
+    /** you cannot call stop() in MultiTrackSoundObject. */
+    override public function stop() : Void{
+        _errorNotAvailable("stop()");
+    }
+    
+    
+    /** @private [protected] Stop all sound belonging to this sound object. */
+    private function _stopAllTracks() : Void{
+        if (_tracks) {
+            for (t/* AS3HX WARNING could not determine type for var: t exp: EIdent(_tracks) type: null */ in _tracks){
+                _synthesizer._unregisterTracks(t);
+                t.setDisposable();
             }
-            _stopEffect();
+            _tracks = null;
         }
-        
-        
-        /** @private [protected] update stream send level */
-        override protected function _updateStreamSend(streamNum:int, level:Number) : void {
-            if (_tracks) {
-                if (_effectChain) _effectChain.setStreamSend(streamNum, level);
-                else {
-                    var i:int, f:uint, imax:int = _tracks.length;
-                    for (i=0, f=_trackOperationMask; i<imax; i++, f>>=1) {
-                        if ((f&1)==0) _tracks[i].channel.setStreamSend(streamNum, level);
-                    }
+        _stopEffect();
+    }
+    
+    
+    /** @private [protected] update stream send level */
+    override private function _updateStreamSend(streamNum : Int, level : Float) : Void{
+        if (_tracks) {
+            if (_effectChain)                 _effectChain.setStreamSend(streamNum, level)
+            else {
+                var i : Int;
+                var f : Int;
+                var imax : Int = _tracks.length;
+                i = 0;
+f = _trackOperationMask;
+                while (i < imax){
+                    if ((f & 1) == 0)                         _tracks[i].channel.setStreamSend(streamNum, level);
+                    i++;
+                    f >>= 1;
                 }
             }
         }
     }
 }
+
 

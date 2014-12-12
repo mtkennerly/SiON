@@ -5,101 +5,107 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sound.nsf {
-    import flash.utils.ByteArray;
-    
-    
-    /** NSF data class */
-    public class NSFData
-    {
+package org.si.sound.nsf;
+
+
+import openfl.utils.ByteArray;
+
+
+/** NSF data class */
+class NSFData
+{
     // variables
     //--------------------------------------------------------------------------------
-        public var version:int;
-        public var songCount:int;
-        public var startSongID:int;
-        public var loadAddress:int;
-        public var initAddress:int;
-        public var playAddress:int;
-        public var title:String;
-        public var artist:String;
-        public var copyright:String;
-        public var speedNRSC:int;
-        public var speedPAL:int;
-        public var NTSC_PALbits:int;
-        public var bankSwitch:Vector.<int> = new Vector.<int>(8);
-        public var extraChipFlag:int;
-        public var reserved:uint;
-        
-        
-        
-        
+    public var version : Int;
+    public var songCount : Int;
+    public var startSongID : Int;
+    public var loadAddress : Int;
+    public var initAddress : Int;
+    public var playAddress : Int;
+    public var title : String;
+    public var artist : String;
+    public var copyright : String;
+    public var speedNRSC : Int;
+    public var speedPAL : Int;
+    public var NTSC_PALbits : Int;
+    public var bankSwitch : Array<Int> = new Array<Int>();
+    public var extraChipFlag : Int;
+    public var reserved : Int;
+    
+    
+    
+    
     // properties
     //--------------------------------------------------------------------------------
-        /** Is avaiblable ? */
-        public function isAvailable() : Boolean { return false; }
-        
-        
-        /** to string. */
-        public function toString():String
-        {
-            var text:String = "";
-            return text;
-        }
-        
-        
-        
-        
+    /** Is avaiblable ? */
+    public function isAvailable() : Bool{return false;
+    }
+    
+    
+    /** to string. */
+    public function toString() : String
+    {
+        var text : String = "";
+        return text;
+    }
+    
+    
+    
+    
     // constructor
     //--------------------------------------------------------------------------------
-        function NSFData() {
-        }
+    public function new()
+    {
         
-        
-        
-        
-        
+    }
+    
+    
+    
+    
+    
     // operations
     //--------------------------------------------------------------------------------
-        /** Clear. */
-        public function clear() : NSFData
-        {
-            
-            return this;
+    /** Clear. */
+    public function clear() : NSFData
+    {
+        
+        return this;
+    }
+    
+    
+    /** Load NSF data from byteArray. */
+    public function loadBytes(bytes : ByteArray) : NSFData
+    {
+        bytes.position = 0;
+        clear();
+        
+        if (bytes.readMultiByte(4, "us-ascii") != "NESM")             return this;
+        bytes.position = 5;
+        version = bytes.readUnsignedByte();
+        songCount = bytes.readUnsignedByte();
+        startSongID = bytes.readUnsignedByte();
+        loadAddress = bytes.readUnsignedShort();
+        initAddress = bytes.readUnsignedShort();
+        playAddress = bytes.readUnsignedShort();
+        
+        title = bytes.readMultiByte(32, "us-ascii");  //shift_jis  
+        artist = bytes.readMultiByte(32, "us-ascii");  //shift_jis  
+        copyright = bytes.readMultiByte(32, "us-ascii");  //shift_jis  
+        
+        speedNRSC = bytes.readUnsignedShort();
+        for (i in 0...8){bankSwitch[i] = bytes.readUnsignedByte();
         }
+        speedPAL = bytes.readUnsignedShort();
+        NTSC_PALbits = bytes.readUnsignedByte();
+        extraChipFlag = bytes.readUnsignedByte();
+        reserved = bytes.readUnsignedInt();
+        bytes.position = 128;
         
         
-        /** Load NSF data from byteArray. */
-        public function loadBytes(bytes:ByteArray) : NSFData
-        {
-            bytes.position = 0;
-            clear();
-            
-            if (bytes.readMultiByte(4, "us-ascii") != "NESM") return this;
-            bytes.position = 5;
-            version = bytes.readUnsignedByte();
-            songCount = bytes.readUnsignedByte();
-            startSongID = bytes.readUnsignedByte();
-            loadAddress = bytes.readUnsignedShort();
-            initAddress = bytes.readUnsignedShort();
-            playAddress = bytes.readUnsignedShort();
-            
-            title     = bytes.readMultiByte(32, "us-ascii"); //shift_jis
-            artist    = bytes.readMultiByte(32, "us-ascii"); //shift_jis
-            copyright = bytes.readMultiByte(32, "us-ascii"); //shift_jis
-            
-            speedNRSC = bytes.readUnsignedShort();
-            for (var i:int=0; i<8; i++) bankSwitch[i] = bytes.readUnsignedByte();
-            speedPAL = bytes.readUnsignedShort();
-            NTSC_PALbits = bytes.readUnsignedByte();
-            extraChipFlag = bytes.readUnsignedByte();
-            reserved = bytes.readUnsignedInt();
-            bytes.position = 128;
-            
-            
-            
-            return this;
-        }
+        
+        return this;
     }
 }
+
 
 

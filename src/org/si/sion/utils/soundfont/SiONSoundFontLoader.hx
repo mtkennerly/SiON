@@ -4,311 +4,346 @@
 //  Distributed under BSD-style license (see org.si.license.txt).
 //----------------------------------------------------------------------------------------------------
 
-package org.si.sion.utils.soundfont {
-    import flash.events.*;
-    import flash.net.*;
-    import flash.media.Sound;
-    import flash.display.Loader;
-    import flash.system.LoaderContext;
-    import flash.utils.ByteArray;
-    import org.si.sion.*;
-    import org.si.sion.utils.*;
-    import org.si.sion.module.*;
-    import org.si.sion.sequencer.*;
-    import org.si.utils.ByteArrayExt;
-    
-    /** Sound font loader. */
-    public class SiONSoundFontLoader extends EventDispatcher
-    {
+package org.si.sion.utils.soundfont;
+
+import openfl.errors.Error;
+import openfl.events.*;
+import openfl.net.*;
+import openfl.media.Sound;
+import openfl.display.Loader;
+import openfl.system.LoaderContext;
+import openfl.utils.ByteArray;
+import org.si.sion.*;
+import org.si.sion.utils.*;
+import org.si.sion.module.*;
+import org.si.sion.sequencer.*;
+import org.si.utils.ByteArrayExt;
+
+/** Sound font loader. */
+class SiONSoundFontLoader extends EventDispatcher
+{
+    public var bytesLoaded(get, never) : Float;
+    public var bytesTotal(get, never) : Float;
+
     // variables
     //--------------------------------------------------
-        /** SiONSoundFont instance. this instance is available after finish loading. */
-        public var soundFont:SiONSoundFont;
-        
-        // loaders
-        private var _binloader:URLLoader;
-        private var _swfloader:Loader;
-        
-        
-        
-        
+    /** SiONSoundFont instance. this instance is available after finish loading. */
+    public var soundFont : SiONSoundFont;
+    
+    // loaders
+    private var _binloader : URLLoader;
+    private var _swfloader : Loader;
+    
+    
+    
+    
     // properties
     //--------------------------------------------------
-        /** loaded size. */
-        public function get bytesLoaded() : Number 
-        {
-            return (_swfloader) ? _swfloader.contentLoaderInfo.bytesLoaded : (_binloader) ? _binloader.bytesLoaded : 0;
-        }
-        
-        
-        /** total size. */
-        public function get bytesTotal() : Number 
-        {
-            return (_swfloader) ? _swfloader.contentLoaderInfo.bytesTotal : (_binloader) ? _binloader.bytesTotal : 0;
-        }
-        
-        
-        
-        
+    /** loaded size. */
+    private function get_bytesLoaded() : Float
+    {
+        return ((_swfloader != null)) ? _swfloader.contentLoaderInfo.bytesLoaded : ((_binloader != null)) ? _binloader.bytesLoaded : 0;
+    }
+    
+    
+    /** total size. */
+    private function get_bytesTotal() : Float
+    {
+        return ((_swfloader != null)) ? _swfloader.contentLoaderInfo.bytesTotal : ((_binloader != null)) ? _binloader.bytesTotal : 0;
+    }
+    
+    
+    
+    
     // constructor
     //--------------------------------------------------
-        /** constructor */
-        public function SiONSoundFontLoader()
-        {
-            soundFont = null;
-            _binloader = null;
-            _swfloader = null;
-        }
-        
-        
-        
-        
+    /** constructor */
+    public function new()
+    {
+        super();
+        soundFont = null;
+        _binloader = null;
+        _swfloader = null;
+    }
+    
+    
+    
+    
     // operations
     //--------------------------------------------------
-        /** load sound font from url
-         *  @param url requesting url
-         *  @param loadAsBinary load soundfont swf as binary and convert to swf.
-         *  @param checkPolicyFile check policy file. this argument is ignored when loadAsBinary is true.
-         */
-        public function load(url:URLRequest, loadAsBinary:Boolean=true, checkPolicyFile:Boolean=false) : void
-        {
-            if (loadAsBinary) {
-                _addAllListeners(_binloader = new URLLoader());
-                _binloader.dataFormat = URLLoaderDataFormat.BINARY;
-                _binloader.load(url);
-            } else {
-                _swfloader = new Loader();
-                _addAllListeners(_swfloader.contentLoaderInfo);
-                _swfloader.load(url, new LoaderContext(checkPolicyFile));
-            }
+    /** load sound font from url
+     *  @param url requesting url
+     *  @param loadAsBinary load soundfont swf as binary and convert to swf.
+     *  @param checkPolicyFile check policy file. this argument is ignored when loadAsBinary is true.
+     */
+    public function load(url : URLRequest, loadAsBinary : Bool = true, checkPolicyFile : Bool = false) : Void
+    {
+        if (loadAsBinary) {
+            _addAllListeners(_binloader = new URLLoader());
+            _binloader.dataFormat = URLLoaderDataFormat.BINARY;
+            _binloader.load(url);
         }
-        
-        
-        /** load sound font from binary 
-         *  @param bytes ByteArray to load from.
-         */
-        public function loadBytes(bytes:ByteArray) : void {
-            _binloader = null;
-            var signature:uint = bytes.readUnsignedInt();
-            if (signature == 0x0b535743) { // swf
-                _swfloader = new Loader();
-                _addAllListeners(_swfloader.contentLoaderInfo);
-                _swfloader.loadBytes(bytes);
-            } else if (signature == 0x04034b50) { // zip
-                _analyzeZip(bytes);
-            }
+        else {
+            _swfloader = new Loader();
+            _addAllListeners(_swfloader.contentLoaderInfo);
+            _swfloader.load(url, new LoaderContext(checkPolicyFile));
         }
-        
-        
-        
-        
+    }
+    
+    
+    /** load sound font from binary 
+     *  @param bytes ByteArray to load from.
+     */
+    public function loadBytes(bytes : ByteArray) : Void{
+        _binloader = null;
+        var signature : Int = bytes.readUnsignedInt();
+        if (signature == 0x0b535743) {  // swf  
+            _swfloader = new Loader();
+            _addAllListeners(_swfloader.contentLoaderInfo);
+            _swfloader.loadBytes(bytes);
+        }
+        else if (signature == 0x04034b50) {  // zip  
+            _analyzeZip(bytes);
+        }
+    }
+    
+    
+    
+    
     // event handling
     //--------------------------------------------------
-        private function _addAllListeners(dispatcher:EventDispatcher) : void 
-        {
-            dispatcher.addEventListener(Event.COMPLETE, _onComplete);
-            dispatcher.addEventListener(ProgressEvent.PROGRESS, _onProgress);
-            dispatcher.addEventListener(IOErrorEvent.IO_ERROR, _onError);
-            dispatcher.addEventListener(SecurityErrorEvent.SECURITY_ERROR, _onError);
+    private function _addAllListeners(dispatcher : EventDispatcher) : Void
+    {
+        dispatcher.addEventListener(Event.COMPLETE, _onComplete);
+        dispatcher.addEventListener(ProgressEvent.PROGRESS, _onProgress);
+        dispatcher.addEventListener(IOErrorEvent.IO_ERROR, _onError);
+        dispatcher.addEventListener(SecurityErrorEvent.SECURITY_ERROR, _onError);
+    }
+    
+    
+    private function _removeAllListeners() : Void
+    {
+        var dispatcher : EventDispatcher = _binloader;
+        if (dispatcher == null) dispatcher = _swfloader.contentLoaderInfo;
+        dispatcher.removeEventListener(Event.COMPLETE, _onComplete);
+        dispatcher.removeEventListener(ProgressEvent.PROGRESS, _onProgress);
+        dispatcher.removeEventListener(IOErrorEvent.IO_ERROR, _onError);
+        dispatcher.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _onError);
+    }
+    
+    
+    private function _onComplete(e : Event) : Void
+    {
+        _removeAllListeners();
+        if (_binloader != null)             loadBytes(_binloader.data)
+        else {
+            _analyze();
+            dispatchEvent(e.clone());
         }
-        
-        
-        private function _removeAllListeners() : void 
-        {
-            var dispatcher:EventDispatcher = _binloader || _swfloader.contentLoaderInfo;
-            dispatcher.removeEventListener(Event.COMPLETE, _onComplete);
-            dispatcher.removeEventListener(ProgressEvent.PROGRESS, _onProgress);
-            dispatcher.removeEventListener(IOErrorEvent.IO_ERROR, _onError);
-            dispatcher.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _onError);
-        }
-        
-        
-        private function _onComplete(e:Event) : void
-        {
-            _removeAllListeners();
-            if (_binloader) loadBytes(_binloader.data);
-            else {
-                _analyze();
-                dispatchEvent(e.clone());
-            }
-        }
-        
-        
-        private function _onProgress(e:Event) : void { dispatchEvent(e.clone()); }
-        private function _onError(e:ErrorEvent) : void { _removeAllListeners(); dispatchEvent(e.clone()); }
-        
-        
-        
-        
+    }
+    
+    
+    private function _onProgress(e : Event) : Void{dispatchEvent(e.clone());
+    }
+    private function _onError(e : ErrorEvent) : Void{_removeAllListeners();dispatchEvent(e.clone());
+    }
+    
+    
+    
+    
     // internal functions
     //--------------------------------------------------
-        private function _analyze() : void
+    private function _analyze() : Void
+    {
+        var container : SiONSoundFontContainer = try cast(_swfloader.content, SiONSoundFontContainer) catch(e:Dynamic) null;
+        if (container == null) _onError(new IOErrorEvent(IOErrorEvent.IO_ERROR, false, false, "The sound font file is not valid."));  // create new sound font instance
+
+        soundFont = new SiONSoundFont(container.sounds);
+        
+        // parse mml
+        var _sw0_ = (container.version);        
+
+        switch (_sw0_)
         {
-            var container:SiONSoundFontContainer = _swfloader.content as SiONSoundFontContainer;
-            if (!container) _onError(new IOErrorEvent(IOErrorEvent.IO_ERROR, false, false, "The sound font file is not valid."));
-            
-            // create new sound font instance
-            soundFont = new SiONSoundFont(container.sounds);
-            
-            // parse mml
-            switch (container.version) {
             case "1":
                 _compileSystemCommand(Translator.extractSystemCommand(container.mml));
-                break;
+        }
+    }
+    
+    
+    private function _analyzeZip(bytes : ByteArray) : Void
+    {
+        var fileList : Array<ByteArrayExt> = new ByteArrayExt(bytes).expandZipFile();
+        var i : Int;
+        var imax : Int = fileList.length;
+        var mml : String = null;
+        var snd : Sound;
+        var file : ByteArrayExt;
+        for (i in 0...imax) {
+            file = fileList[i];
+            if (new EReg('\\.mp3$', "").match(file.name)) {
+                snd = new Sound();
+                snd.loadCompressedDataFromByteArray(file, file.length);
+            }
+            else if (new EReg('\\.mml$', "").match(file.name)) {
+                mml = file.readUTF();
             }
         }
-        
-        
-        private function _analyzeZip(bytes:ByteArray) : void
-        {
-            var fileList:Vector.<ByteArrayExt> = new ByteArrayExt(bytes).expandZipFile();
-            var i:int, imax:int = fileList.length, sounds:* = {}, mml:String, snd:Sound, file:ByteArrayExt;
-            for (i=0; i<imax; i++) {
-                file = fileList[i];
-                if (/\.mp3$/.test(file.name)) {
-                    sounds[file.name] = snd = new Sound();
-                    snd.loadCompressedDataFromByteArray(file, file.length);
-                } else if (/\.mml$/.test(file.name)) {
-                    mml = file.readUTF();
-                }
-            }
-            _compileSystemCommand(Translator.extractSystemCommand(mml));
-        }
-        
-        
-        // compile sound font from system commands
-        private function _compileSystemCommand(systemCommands:Array) : void
-        {
-            var i:int, imax:int = systemCommands.length, cmd:*, num:int, dat:String, pfx:String, bank:int, 
-                env:SiMMLEnvelopTable, voice:SiONVoice, samplerTable:SiOPMWaveSamplerTable, pcmTable:SiOPMWavePCMTable;
-            
-            for (i=0; i<imax; i++) {
-                cmd = systemCommands[i];
-                num = cmd.number;
-                dat = cmd.content;
-                pfx = cmd.postfix;
-                
-                switch (cmd.command) {
-                // tone settings
-                case '#@':    { __parseToneParam(Translator.parseParam);    break; }
-                case '#OPM@': { __parseToneParam(Translator.parseOPMParam); break; }
-                case '#OPN@': { __parseToneParam(Translator.parseOPNParam); break; }
-                case '#OPL@': { __parseToneParam(Translator.parseOPLParam); break; }
-                case '#OPX@': { __parseToneParam(Translator.parseOPXParam); break; }
-                case '#MA@':  { __parseToneParam(Translator.parseMA3Param); break; }
-                case '#AL@':  { __parseToneParam(Translator.parseALParam);  break; }
-                    
-                // parser settings
-                case '#FPS':   { soundFont.defaultFPS = (num>0) ? num : ((dat == "") ? 60 : int(dat)); break; }
-                case '#VMODE': { _parseVCommansSubMML(dat); break; }
+        _compileSystemCommand(Translator.extractSystemCommand(mml));
+    }
+    
+    
+    // compile sound font from system commands
+    private function _compileSystemCommand(systemCommands : Array<Dynamic>) : Void
+    {
+        var i : Int;
+        var imax : Int = systemCommands.length;
+        var cmd : Dynamic;
+        var num : Int = 0;
+        var dat : String = null;
+        var pfx : String = null;
+        var bank : Int;
+        var env : SiMMLEnvelopTable;
+        var voice : SiONVoice;
+        var samplerTable : SiOPMWaveSamplerTable;
+        var pcmTable : SiOPMWavePCMTable;
 
+        function __parseToneParam(func : SiOPMChannelParam->String->Void) : Void {
+            voice = new SiONVoice();
+            func(voice.channelParam, dat);
+            if (pfx.length > 0) Translator.parseVoiceSetting(voice, pfx);
+            soundFont.fmVoices[num] = voice;
+        };
+
+        for (i in 0...imax){
+            cmd = systemCommands[i];
+            num = cmd.number;
+            dat = cmd.content;
+            pfx = cmd.postfix;
+            
+            var _sw1_ = (cmd.command);            
+
+            switch (_sw1_)
+            {
+                // tone settings
+                case "#@":{__parseToneParam(Translator.parseParam);
+                }
+                case "#OPM@":{__parseToneParam(Translator.parseOPMParam);
+                }
+                case "#OPN@":{__parseToneParam(Translator.parseOPNParam);
+                }
+                case "#OPL@":{__parseToneParam(Translator.parseOPLParam);
+                }
+                case "#OPX@":{__parseToneParam(Translator.parseOPXParam);
+                }
+                case "#MA@":{__parseToneParam(Translator.parseMA3Param);
+                }
+                case "#AL@":{__parseToneParam(Translator.parseALParam);
+                }
+                
+                // parser settings
+                case "#FPS":{
+                    soundFont.defaultFPS = ((num > 0)) ? num : ((dat == "") ? 60 : Std.parseInt(dat));
+                }
+                case "#VMODE":{_parseVCommansSubMML(dat);
+                }
+                
                 // tables
-                case '#TABLE': {
-                    if (num < 0 || num > 254) throw _errorParameterNotValid("#TABLE", String(num));
+                case "#TABLE":{
+                    if (num < 0 || num > 254) throw _errorParameterNotValid("#TABLE", Std.string(num));
                     env = new SiMMLEnvelopTable().parseMML(dat, pfx);
-                    if (!env.head) throw _errorParameterNotValid("#TABLE", dat);
+                    if (env.head.i == 0) throw _errorParameterNotValid("#TABLE", dat);
                     soundFont.envelopes[num] = env;
-                    break;
                 }
-                case '#WAV': {
-                    if (num < 0 || num > 255) throw _errorParameterNotValid("#WAV", String(num));
+                case "#WAV":{
+                    if (num < 0 || num > 255) throw _errorParameterNotValid("#WAV", Std.string(num));
                     soundFont.waveTables[num] = _newWaveTable(Translator.parseWAV(dat, pfx));
-                    break;
                 }
-                case '#WAVB': {
-                    if (num < 0 || num > 255) throw _errorParameterNotValid("#WAVB", String(num));
-                    soundFont.waveTables[num] = _newWaveTable(Translator.parseWAVB((dat=="") ? pfx : dat));
-                    break;
+                case "#WAVB":{
+                    if (num < 0 || num > 255) throw _errorParameterNotValid("#WAVB", Std.string(num));
+                    soundFont.waveTables[num] = _newWaveTable(Translator.parseWAVB(((dat == "")) ? pfx : dat));
                 }
-        
+                
                 // pcm voice
-                case '#SAMPLER': {
-                    if (num < 0 || num > 255) throw _errorParameterNotValid("#SAMPLER", String(num));
-                    bank = (num>>SiOPMTable.NOTE_BITS) & (SiOPMTable.SAMPLER_TABLE_MAX-1);
-                    num &= (SiOPMTable.NOTE_TABLE_SIZE-1);
-                    if (!soundFont.samplerTables[bank]) soundFont.samplerTables[bank] = new SiOPMWaveSamplerTable();
+                case "#SAMPLER":{
+                    if (num < 0 || num > 255) throw _errorParameterNotValid("#SAMPLER", Std.string(num));
+                    bank = (num >> SiOPMTable.NOTE_BITS) & (SiOPMTable.SAMPLER_TABLE_MAX - 1);
+                    num &= (SiOPMTable.NOTE_TABLE_SIZE - 1);
+                    if (soundFont.samplerTables[bank] == null) soundFont.samplerTables[bank] = new SiOPMWaveSamplerTable();
                     samplerTable = soundFont.samplerTables[bank];
-                    if (!Translator.parseSamplerWave(samplerTable, num, dat, soundFont.sounds)) _errorParameterNotValid("#SAMPLER", String(num));
-                    break;
+                    if (!Translator.parseSamplerWave(samplerTable, num, dat, soundFont.sounds))                         _errorParameterNotValid("#SAMPLER", Std.string(num));
                 }
-                case '#PCMWAVE': {
-                    if (num < 0 || num > 255) throw _errorParameterNotValid("#PCMWAVE", String(num));
-                    if (!soundFont.pcmVoices[num]) soundFont.pcmVoices[num] = new SiONVoice();
+                case "#PCMWAVE":{
+                    if (num < 0 || num > 255) throw _errorParameterNotValid("#PCMWAVE", Std.string(num));
+                    if (soundFont.pcmVoices[num] == null) soundFont.pcmVoices[num] = new SiONVoice();
                     voice = soundFont.pcmVoices[num];
-                    if (!(voice.waveData is SiOPMWavePCMTable)) voice.waveData = new SiOPMWavePCMTable();
-                    pcmTable = voice.waveData as SiOPMWavePCMTable;
-                    if (!Translator.parsePCMWave(pcmTable, dat, soundFont.sounds)) _errorParameterNotValid("#PCMWAVE", String(num));
-                    break;
+                    if (!(Std.is(voice.waveData, SiOPMWavePCMTable))) voice.waveData = new SiOPMWavePCMTable();
+                    pcmTable = try cast(voice.waveData, SiOPMWavePCMTable) catch(e:Dynamic) null;
+                    if (!Translator.parsePCMWave(pcmTable, dat, soundFont.sounds)) _errorParameterNotValid("#PCMWAVE", Std.string(num));
                 }
-                case '#PCMVOICE': {
-                    if (num < 0 || num > 255) throw _errorParameterNotValid("#PCMVOICE", String(num));
-                    if (!soundFont.pcmVoices[num]) soundFont.pcmVoices[num] = new SiONVoice();
+                case "#PCMVOICE":{
+                    if (num < 0 || num > 255) throw _errorParameterNotValid("#PCMVOICE", Std.string(num));
+                    if (soundFont.pcmVoices[num] == null) soundFont.pcmVoices[num] = new SiONVoice();
                     voice = soundFont.pcmVoices[num];
-                    if (!Translator.parsePCMVoice(voice, dat, pfx, soundFont.envelopes)) _errorParameterNotValid("#PCMVOICE", String(num));
-                    break;
+                    if (!Translator.parsePCMVoice(voice, dat, pfx, soundFont.envelopes)) _errorParameterNotValid("#PCMVOICE", Std.string(num));
                 }
                 default:
                     break;
-                }
-            }
-            
-            
-            function __parseToneParam(func:Function) : void {
-                voice = new SiONVoice();
-                func(voice.channelParam, dat);
-                if (pfx.length > 0) Translator.parseVoiceSetting(voice, pfx);
-                soundFont.fmVoices[num] = voice;
             }
         }
-        
-        
-        // Parse inside of #VMODE{...}
-        private function _parseVCommansSubMML(dat:String) : void
-        {
-            var tcmdrex:RegExp = /(n88|mdx|psg|mck|tss|%[xv])(\d*)(\s*,?\s*(\d?))/g;
-            var res:*, num:Number, i:int;
-            while (res = tcmdrex.exec(dat)) {
-                switch(String(res[1])) {
+    }
+    
+    
+    // Parse inside of #VMODE{...}
+    private function _parseVCommansSubMML(dat : String) : Void
+    {
+        var tcmdrex : EReg = new EReg('(n88|mdx|psg|mck|tss|%[xv])(\\d*)(\\s*,?\\s*(\\d?))', "g");
+        var res : Dynamic;
+        var num : Float;
+        var i : Int;
+        while (tcmdrex.match(dat)) {
+            switch (Std.string(tcmdrex.matched(1))) {
                 case "%v":
-                    i = int(res[2]);
-                    soundFont.defaultVelocityMode = (i>=0 && i<SiOPMTable.VM_MAX) ? i : 0;
-                    i = (res[4] != "") ? int(res[4]) : 4;
-                    soundFont.defaultVCommandShift = (i>=0 && i<8) ? i : 0;
-                    break;
+                    i = Std.parseInt(tcmdrex.matched(2));
+                    soundFont.defaultVelocityMode = ((i >= 0 && i < SiOPMTable.VM_MAX)) ? i : 0;
+                    i = ((tcmdrex.matched(4) != "")) ? Std.parseInt(tcmdrex.matched(4)) : 4;
+                    soundFont.defaultVCommandShift = ((i >= 0 && i < 8)) ? i : 0;
                 case "%x":
-                    i = int(res[2]);
-                    soundFont.defaultExpressionMode = (i>=0 && i<SiOPMTable.VM_MAX) ? i : 0;
-                    break;
-                case "n88": case "mdx":
+                    i = Std.parseInt(tcmdrex.matched(2));
+                    soundFont.defaultExpressionMode = ((i >= 0 && i < SiOPMTable.VM_MAX)) ? i : 0;case "n88", "mdx":
                     soundFont.defaultVelocityMode = SiOPMTable.VM_DR32DB;
                     soundFont.defaultExpressionMode = SiOPMTable.VM_DR48DB;
-                    break;
                 case "psg":
                     soundFont.defaultVelocityMode = SiOPMTable.VM_DR48DB;
                     soundFont.defaultExpressionMode = SiOPMTable.VM_DR48DB;
-                    break;
-                default: // mck/tss
+                default:  // mck/tss  
                     soundFont.defaultVelocityMode = SiOPMTable.VM_LINEAR;
                     soundFont.defaultExpressionMode = SiOPMTable.VM_LINEAR;
                     break;
-                }
             }
-        }
-        
-        
-        // Set wave table data refered by %4
-        private function _newWaveTable(data:Vector.<Number>) : SiOPMWaveTable
-        {
-            var i:int, imax:int=data.length, table:Vector.<int> = new Vector.<int>(imax);
-            for (i=0; i<imax; i++) table[i] = SiOPMTable.calcLogTableIndex(data[i]);
-            return SiOPMWaveTable.alloc(table);
-        }
-        
-        
-        private function _errorParameterNotValid(cmd:String, param:String) : Error
-        {
-            return new Error("SiMMLSequencer error : Parameter not valid. '" + param + "' in " + cmd);
+            
+            dat=tcmdrex.matchedRight();
         }
     }
+    
+    
+    // Set wave table data refered by %4
+    private function _newWaveTable(data : Array<Float>) : SiOPMWaveTable
+    {
+        var i : Int;
+        var imax : Int = data.length;
+        var table : Array<Int> = new Array<Int>();
+        for (i in 0...imax) {
+            table[i] = SiOPMTable.calcLogTableIndex(data[i]);
+        }
+        return SiOPMWaveTable.alloc(table);
+    }
+    
+    
+    private function _errorParameterNotValid(cmd : String, param : String) : Error
+    {
+        return new Error("SiMMLSequencer error : Parameter not valid. '" + param + "' in " + cmd);
+    }
 }
+
 

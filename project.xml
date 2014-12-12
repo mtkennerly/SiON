@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	
+	<meta title="SiON" package="com.sample.project" version="1.0.0" company="Company Name" />
+	<app main="Main" path="Export" file="SiON" />
+
+	<source path="src" />
+
+	<haxelib name="lime" />
+	<haxelib name="openfl" />
+
+	<assets path="Assets" rename="assets" exclude="lime.svg" />
+	<icon path="Assets/lime.svg" />
+	
+</project>

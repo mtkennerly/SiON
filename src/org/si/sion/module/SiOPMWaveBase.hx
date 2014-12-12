@@ -4,64 +4,72 @@
 //  Distributed under BSD-style license (see org.si.license.txt).
 //----------------------------------------------------------------------------------------------------
 
-package org.si.sion.module {
-    import flash.media.Sound;
-    import flash.events.*;
+package org.si.sion.module;
+
+import openfl.media.Sound;
+import openfl.events.*;
+
+/** basic class for SiOPM wave data */
+class SiOPMWaveBase
+{
+    private var _isSoundLoading(get, never) : Bool;
+
+    /** module type */
+    public var moduleType : Int;
+    // loading target
+    private var _loadingTarget : Sound;
     
-    /** basic class for SiOPM wave data */
-    public class SiOPMWaveBase {
-        /** module type */
-        public var moduleType:int;
-        // loading target
-        private var _loadingTarget:Sound;
-        
-        
-        /** constructor */
-        function SiOPMWaveBase(moduleType:int)
-        {
-            this.moduleType = moduleType;
+    
+    /** constructor */
+    public function new(moduleType : Int)
+    {
+        this.moduleType = moduleType;
+    }
+    
+    
+    /** @private listen sound loading events */
+    private function _listenSoundLoadingEvents(sound : Sound) : Void
+    {
+        if (sound.bytesTotal == 0 || sound.bytesTotal > sound.bytesLoaded) {
+            _loadingTarget = sound;
+            sound.addEventListener(Event.COMPLETE, _cmp);
+            sound.addEventListener(IOErrorEvent.IO_ERROR, _err);
+            sound.addEventListener(SecurityErrorEvent.SECURITY_ERROR, _err);
         }
-        
-        
-        /** @private listen sound loading events */
-        protected function _listenSoundLoadingEvents(sound:Sound) : void 
-        {
-            if (sound.bytesTotal == 0 || sound.bytesTotal > sound.bytesLoaded) {
-                _loadingTarget = sound;
-                sound.addEventListener(Event.COMPLETE, _cmp);
-                sound.addEventListener(IOErrorEvent.IO_ERROR, _err);
-                sound.addEventListener(SecurityErrorEvent.SECURITY_ERROR, _err);
-            } else {
-                _onSoundLoadingComplete(sound);
-            }
-        }
-        
-        
-        /** @private */
-        protected function get _isSoundLoading() : Boolean { return (_loadingTarget != null); }
-        
-        
-        /** @private complete event handler */
-        protected function _onSoundLoadingComplete(sound:Sound) : void
-        {
-        }
-        
-        
-        // event handlers
-        private function _cmp(e:Event) : void {
-            _onSoundLoadingComplete(_loadingTarget);
-            _removeAllListeners();
-        }
-        private function _err(e:Event) : void {
-            _removeAllListeners();
-        }
-        private function _removeAllListeners() : void 
-        {
-            _loadingTarget.removeEventListener(Event.COMPLETE, _cmp);
-            _loadingTarget.removeEventListener(IOErrorEvent.IO_ERROR, _err);
-            _loadingTarget.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _err);
-            _loadingTarget = null;
+        else {
+            _onSoundLoadingComplete(sound);
         }
     }
+    
+    
+    /** @private */
+    private function get__isSoundLoading() : Bool{
+        return (_loadingTarget != null);
+    }
+    
+    
+    /** @private complete event handler */
+    private function _onSoundLoadingComplete(sound : Sound) : Void
+    {
+        
+    }
+    
+    
+    // event handlers
+    private function _cmp(e : Event) : Void{
+        _onSoundLoadingComplete(_loadingTarget);
+        _removeAllListeners();
+    }
+    private function _err(e : Event) : Void{
+        _removeAllListeners();
+    }
+    private function _removeAllListeners() : Void
+    {
+        _loadingTarget.removeEventListener(Event.COMPLETE, _cmp);
+        _loadingTarget.removeEventListener(IOErrorEvent.IO_ERROR, _err);
+        _loadingTarget.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _err);
+        _loadingTarget = null;
+    }
 }
+
 

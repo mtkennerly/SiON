@@ -4,75 +4,84 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sound.synthesizers {
-    import org.si.sion.*;
-    import org.si.sion.sequencer.SiMMLTrack;
-    import org.si.sound.SoundObject;
-   
-    
-    /** Voice reference, basic class of all synthesizers. */
-    public class VoiceReference
-    {
+package org.si.sound.synthesizers;
+
+
+import org.si.sion.*;
+import org.si.sion.sequencer.SiMMLTrack;
+import org.si.sound.SoundObject;
+
+
+/** Voice reference, basic class of all synthesizers. */
+class VoiceReference
+{
+    public var voice(get, set) : SiONVoice;
+
     // namespace
     //----------------------------------------
-        use namespace _synthesizer_internal;
-        
-        
-        
-        
-    // valiables
+    
+    
+    
+    
+    
+    // variables
     //----------------------------------------
-        /** @private [synthesizer internal] Instance of voice setting */
-        _synthesizer_internal var _voice:SiONVoice = null;
-        
-        /** @private [synthesizer internal] require voice update number */
-        _synthesizer_internal var _voiceUpdateNumber:uint;
-        
-        
-        
-        
+    /** @private [synthesizer internal] Instance of voice setting */
+    private var _voice : SiONVoice = null;
+    
+    /** @private [synthesizer internal] require voice update number */
+    private var _voiceUpdateNumber : Int;
+    
+    
+    
+    
     // properties
     //----------------------------------------
-        /** voice setting */
-        public function get voice() : SiONVoice { return _voice; }
-        public function set voice(v:SiONVoice) : void {
-            if (_voice !== v) _voiceUpdateNumber++;
-            _voice = v;
-        }
-            
-        
-        
-        
+    /** voice setting */
+    private function get_voice() : SiONVoice{return _voice;
+    }
+    private function set_voice(v : SiONVoice) : SiONVoice{
+        if (_voice != v)             _voiceUpdateNumber++;
+        _voice = v;
+        return v;
+    }
+    
+    
+    
+    
     // constructor
     //----------------------------------------
-        /** constructor */
-        function VoiceReference()
-        {
-            _voiceUpdateNumber = 0;
-        }
-        
-        
-        
-        
+    /** constructor */
+    public function new()
+    {
+        _voiceUpdateNumber = 0;
+    }
+    
+    
+    
+    
     // operation
     //----------------------------------------
-        /** @private [synthesizer internal] register single track */
-        public function _registerTrack(track:SiMMLTrack) : void
-        {
-        }
+    /** @private [synthesizer internal] register single track */
+    public function _registerTrack(track : SiMMLTrack) : Void
+    {
         
+    }
+    
+    
+    /** @private [synthesizer internal] register prural tracks */
+    public function _registerTracks(tracks : Array<SiMMLTrack>) : Void
+    {
         
-        /** @private [synthesizer internal] register prural tracks */
-        public function _registerTracks(tracks:Vector.<SiMMLTrack>) : void
-        {
-        }
+    }
+    
+    
+    /** @private [synthesizer internal] unregister tracks */
+    public function _unregisterTracks(firstTrack : SiMMLTrack, count : Int = 1) : Void
+    {
         
-        
-        /** @private [synthesizer internal] unregister tracks */
-        public function _unregisterTracks(firstTrack:SiMMLTrack, count:int=1) : void
-        {
-        }
     }
 }
+
 
 

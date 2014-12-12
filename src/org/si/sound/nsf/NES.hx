@@ -5,16 +5,28 @@
 //--------------------------------------------------------------------------------
 
 
-package org.si.sound.nsf {
-    public class NES {
-        static public var cpu:CPU = new CPU();
-        static public var apu:APU = new APU();
-        static public var ppu:PPU = new PPU();
-        static public var pad:PAD = new PAD();
-        static public var rom:ROM;
-        static public var map:Mapper;
-        static public var cfg:NESconfig;
+package org.si.sound.nsf;
+
+import org.si.sound.nsf.CPU;
+import org.si.sound.nsf.NESconfig;
+import org.si.sound.nsf.PAD;
+import org.si.sound.nsf.PPU;
+import org.si.sound.nsf.ROM;
+
+class NES
+{
+    public static var cpu : CPU = new CPU();
+    public static var apu : APU = new APU();
+    public static var ppu : PPU = new PPU();
+    public static var pad : PAD = new PAD();
+    public static var rom : ROM;
+    public static var map : Mapper;
+    public static var cfg : NESconfig;
+
+    public function new()
+    {
     }
 }
+
 
 

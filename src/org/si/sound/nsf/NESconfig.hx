@@ -1,32 +1,24 @@
-//----------------------------------------------------------------------------------------------------
-// NES configuration
-//  Copyright (c) 2009 keim All rights reserved.
-//  Distributed under BSD-style license (see org.si.license.txt).
-//--------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------  // NES configuration  
+//  Copyright (c) 2009 keim All rights reserved.  //  Distributed under BSD-style license (see org.si.license.txt).    //--------------------------------------------------------------------------------  
+package org.si.sound.nsf;
 
-
-package org.si.sound.nsf {
-    public class NESconfig {
-        static public var NTSC:NESconfig = new NESconfig(1789772.5,   262, 1364, 1024, 340, 4, 29830, 60);
-        static public var PAL :NESconfig = new NESconfig(1662607.125, 312, 1278,  960, 318, 2, 33252, 50);
-        
-        public var cpuClock:Number, frameRate:int, framePeriod:Number, totalScanlines:int;
-        public var scanlineCycles:int, hDrawCycles:int, hBlankCycles:int, scanlineEndCycles:int;
-        public var frameCycles:int, frameIrqCycles:int;
-        
-        function NESconfig(cl:Number, sl:int, slc:int, hdc:int, hbc:int, sec:int, fic:int, fr:int) {
-            cpuClock = cl;
-            totalScanlines = sl;
-            scanlineCycles = slc;
-            hDrawCycles = hdc;
-            hBlankCycles = hbc;
-            scanlineEndCycles = sec;
-            frameCycles = sl * slc;
-            frameIrqCycles = fic;
-            frameRate = fr;
-            framePeriod = 1000/fr;
-        }
+class NESconfig
+{
+    public static var NTSC : NESconfig = new NESconfig(1789772.5, 262, 1364, 1024, 340, 4, 29830, 60);
+    public static var PAL : NESconfig = new NESconfig(1662607.125, 312, 1278, 960, 318, 2, 33252, 50);
+    
+    public var cpuClock : Float;public var frameRate : Int;public var framePeriod : Float;public var totalScanlines : Int;public var scanlineCycles : Int;public var hDrawCycles : Int;public var hBlankCycles : Int;public var scanlineEndCycles : Int;public var frameCycles : Int;public var frameIrqCycles : Int;public function new(cl : Float, sl : Int, slc : Int, hdc : Int, hbc : Int, sec : Int, fic : Int, fr : Int)
+    {
+        cpuClock = cl;
+        totalScanlines = sl;
+        scanlineCycles = slc;
+        hDrawCycles = hdc;
+        hBlankCycles = hbc;
+        scanlineEndCycles = sec;
+        frameCycles = sl * slc;
+        frameIrqCycles = fic;
+        frameRate = fr;
+        framePeriod = 1000 / fr;
     }
-}
-
+}
 

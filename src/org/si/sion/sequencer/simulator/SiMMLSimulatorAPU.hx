@@ -5,51 +5,57 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sion.sequencer.simulator {
-    import org.si.sion.module.SiOPMTable;
-    import org.si.sion.sequencer.SiMMLChannelSetting;
-    
-    
-    /** Nintendo Entertainment System Simulator */
-    public class SiMMLSimulatorAPU extends SiMMLSimulatorBase
+package org.si.sion.sequencer.simulator;
+
+import org.si.sion.sequencer.simulator.SiMMLSimulatorBase;
+import org.si.sion.sequencer.simulator.SiMMLSimulatorVoice;
+import org.si.sion.sequencer.simulator.SiMMLSimulatorVoiceSet;
+
+import org.si.sion.module.SiOPMTable;
+import org.si.sion.sequencer.SiMMLChannelSetting;
+
+
+/** Nintendo Entertainment System Simulator */
+class SiMMLSimulatorAPU extends SiMMLSimulatorBase
+{
+    public function new()
     {
-        function SiMMLSimulatorAPU()
-        {
-            super(MT_APU, 4, new SiMMLSimulatorVoiceSet(11));
-            
-            var i:int, toneVoiceSet:SiMMLSimulatorVoiceSet;
-
-            // default voice set
-            for (i=0; i<8; i++) {
-                this._defaultVoiceSet.voices[i] = new SiMMLSimulatorVoice(SiOPMTable.PG_PULSE+i*2, SiOPMTable.PT_PSG);
-            }
-            this._defaultVoiceSet.voices[8]  = new SiMMLSimulatorVoice(SiOPMTable.PG_TRIANGLE_FC, SiOPMTable.PT_PSG);
-            this._defaultVoiceSet.voices[9]  = new SiMMLSimulatorVoice(SiOPMTable.PG_NOISE_PULSE, SiOPMTable.PT_PSG_NOISE);
-            this._defaultVoiceSet.voices[10] = new SiMMLSimulatorVoice(SiOPMTable.PG_NOISE_SHORT, SiOPMTable.PT_PSG_NOISE);
-            this._defaultVoiceSet.initVoiceIndex = 1;
-            
-            // voice set for channel 1,2
-            toneVoiceSet = new SiMMLSimulatorVoiceSet(8);
-            toneVoiceSet.initVoiceIndex = 4;
-            for (i=0; i<8; i++) {
-                toneVoiceSet.voices[i] = new SiMMLSimulatorVoice(SiOPMTable.PG_PULSE+i*2, SiOPMTable.PT_PSG);
-            }
-            this._channelVoiceSet[0] = toneVoiceSet;
-            this._channelVoiceSet[1] = toneVoiceSet;
-            
-            // voice set for channel 3
-            toneVoiceSet = new SiMMLSimulatorVoiceSet(1);
-            toneVoiceSet.initVoiceIndex = 0;
-            toneVoiceSet.voices[0] = new SiMMLSimulatorVoice(SiOPMTable.PG_TRIANGLE_FC, SiOPMTable.PT_PSG);
-            this._channelVoiceSet[2] = toneVoiceSet;
-
-            // voice set for channel 4
-            toneVoiceSet = new SiMMLSimulatorVoiceSet(2);
-            toneVoiceSet.initVoiceIndex = 0;
-            toneVoiceSet.voices[0] = new SiMMLSimulatorVoice(SiOPMTable.PG_NOISE_PULSE, SiOPMTable.PT_PSG_NOISE);
-            toneVoiceSet.voices[1] = new SiMMLSimulatorVoice(SiOPMTable.PG_NOISE_SHORT, SiOPMTable.PT_PSG_NOISE);
-            this._channelVoiceSet[3] = toneVoiceSet;
+        super(SiMMLSimulatorBase.MT_APU, 4, new SiMMLSimulatorVoiceSet(11));
+        
+        var i : Int;
+        var toneVoiceSet : SiMMLSimulatorVoiceSet;
+        
+        // default voice set
+        for (i in 0...8){
+            this._defaultVoiceSet.voices[i] = new SiMMLSimulatorVoice(SiOPMTable.PG_PULSE + i * 2, SiOPMTable.PT_PSG);
         }
+        this._defaultVoiceSet.voices[8] = new SiMMLSimulatorVoice(SiOPMTable.PG_TRIANGLE_FC, SiOPMTable.PT_PSG);
+        this._defaultVoiceSet.voices[9] = new SiMMLSimulatorVoice(SiOPMTable.PG_NOISE_PULSE, SiOPMTable.PT_PSG_NOISE);
+        this._defaultVoiceSet.voices[10] = new SiMMLSimulatorVoice(SiOPMTable.PG_NOISE_SHORT, SiOPMTable.PT_PSG_NOISE);
+        this._defaultVoiceSet.initVoiceIndex = 1;
+        
+        // voice set for channel 1,2
+        toneVoiceSet = new SiMMLSimulatorVoiceSet(8);
+        toneVoiceSet.initVoiceIndex = 4;
+        for (i in 0...8){
+            toneVoiceSet.voices[i] = new SiMMLSimulatorVoice(SiOPMTable.PG_PULSE + i * 2, SiOPMTable.PT_PSG);
+        }
+        this._channelVoiceSet[0] = toneVoiceSet;
+        this._channelVoiceSet[1] = toneVoiceSet;
+        
+        // voice set for channel 3
+        toneVoiceSet = new SiMMLSimulatorVoiceSet(1);
+        toneVoiceSet.initVoiceIndex = 0;
+        toneVoiceSet.voices[0] = new SiMMLSimulatorVoice(SiOPMTable.PG_TRIANGLE_FC, SiOPMTable.PT_PSG);
+        this._channelVoiceSet[2] = toneVoiceSet;
+        
+        // voice set for channel 4
+        toneVoiceSet = new SiMMLSimulatorVoiceSet(2);
+        toneVoiceSet.initVoiceIndex = 0;
+        toneVoiceSet.voices[0] = new SiMMLSimulatorVoice(SiOPMTable.PG_NOISE_PULSE, SiOPMTable.PT_PSG_NOISE);
+        toneVoiceSet.voices[1] = new SiMMLSimulatorVoice(SiOPMTable.PG_NOISE_SHORT, SiOPMTable.PT_PSG_NOISE);
+        this._channelVoiceSet[3] = toneVoiceSet;
     }
 }
+
 

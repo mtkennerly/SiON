@@ -4,146 +4,216 @@
 //  Distributed under BSD-style license (see org.si.license.txt).
 //----------------------------------------------------------------------------------------------------
 
-package org.si.sion.effector {
-    /** Composite effector class. */
-    public class SiCompositeEffector extends SiEffectBase
-    {
+package org.si.sion.effector;
+
+import org.si.sion.effector.SiEffectBase;
+
+/** Composite effector class. */
+class SiCompositeEffector extends SiEffectBase
+{
+    public var slot0(never, set) : Array<Dynamic>;
+    public var slot1(never, set) : Array<Dynamic>;
+    public var slot2(never, set) : Array<Dynamic>;
+    public var slot3(never, set) : Array<Dynamic>;
+    public var slot4(never, set) : Array<Dynamic>;
+    public var slot5(never, set) : Array<Dynamic>;
+    public var slot6(never, set) : Array<Dynamic>;
+    public var slot7(never, set) : Array<Dynamic>;
+    public var dry(never, set) : Float;
+    public var masterVolume(never, set) : Float;
+
     // variables
     //------------------------------------------------------------
-        private var _effectorSlot:Vector.<Array> = null;
-        private var _buffer:Vector.<Vector.<Number>> = null;
-        private var _sendLevel:Vector.<Number> = null;
-        private var _mixLevel:Vector.<Number> = null;
-        
-        
-        
+    private var _effectorSlot : Array<Array<Dynamic>> = null;
+    private var _buffer : Array<Array<Float>> = null;
+    private var _sendLevel : Array<Float> = null;
+    private var _mixLevel : Array<Float> = null;
+    
+    
+    
     // properties
     //--------------------------------------------------------------------------------
-        /** effector slot 0 */
-        public function set slot0(list:Array) : void { _effectorSlot[0] = list; }
-        
-        /** effector slot 1 */
-        public function set slot1(list:Array) : void { _effectorSlot[1] = list; }
-        
-        /** effector slot 2 */
-        public function set slot2(list:Array) : void { _effectorSlot[2] = list; }
-        
-        /** effector slot 3 */
-        public function set slot3(list:Array) : void { _effectorSlot[3] = list; }
-        
-        /** effector slot 4 */
-        public function set slot4(list:Array) : void { _effectorSlot[4] = list; }
-        
-        /** effector slot 5 */
-        public function set slot5(list:Array) : void { _effectorSlot[5] = list; }
-        
-        /** effector slot 6 */
-        public function set slot6(list:Array) : void { _effectorSlot[6] = list; }
-        
-        /** effector slot 7 */
-        public function set slot7(list:Array) : void { _effectorSlot[7] = list; }
-        
-        /** dry level*/
-        public function set dry(n:Number) : void { _sendLevel[0] = n; }
-        
-        /** master output level */
-        public function set masterVolume(n:Number) : void { _mixLevel[0] = n; }
-        
-        
-        
-        
+    /** effector slot 0 */
+    private ‰function set_slot0(list : Array<Dynamic>) : Array<Dynamic>{_effectorSlot[0] = list;
+        return list;
+    }
+    
+    /** effector slot 1 */
+    private function set_slot1(list : Array<Dynamic>) : Array<Dynamic>{_effectorSlot[1] = list;
+        return list;
+    }
+    
+    /** effector slot 2 */
+    private function set_slot2(list : Array<Dynamic>) : Array<Dynamic>{_effectorSlot[2] = list;
+        return list;
+    }
+    
+    /** effector slot 3 */
+    private function set_slot3(list : Array<Dynamic>) : Array<Dynamic>{_effectorSlot[3] = list;
+        return list;
+    }
+    
+    /** effector slot 4 */
+    private function set_slot4(list : Array<Dynamic>) : Array<Dynamic>{_effectorSlot[4] = list;
+        return list;
+    }
+    
+    /** effector slot 5 */
+    private function set_slot5(list : Array<Dynamic>) : Array<Dynamic>{_effectorSlot[5] = list;
+        return list;
+    }
+    
+    /** effector slot 6 */
+    private function set_slot6(list : Array<Dynamic>) : Array<Dynamic>{_effectorSlot[6] = list;
+        return list;
+    }
+    
+    /** effector slot 7 */
+    private function set_slot7(list : Array<Dynamic>) : Array<Dynamic>{_effectorSlot[7] = list;
+        return list;
+    }
+    
+    /** dry level*/
+    private function set_dry(n : Float) : Float{_sendLevel[0] = n;
+        return n;
+    }
+    
+    /** master output level */
+    private function set_masterVolume(n : Float) : Float{_mixLevel[0] = n;
+        return n;
+    }
+    
+    
+    
+    
     // constructor
     //------------------------------------------------------------
-        /** Constructor. do nothing. */
-        function SiCompositeEffector() {
-        }
+    /** Constructor. do nothing. */
+    public function new()
+    {
+        super();
         
-        
-        
-        
+    }
+    
+    
+    
+    
     // callback functions
     //------------------------------------------------------------
-        /** set effect input/output level of one slot */
-        public function setLevel(slotNum:int, inputLevel:Number, outputLevel:Number) : void 
-        {
-            _sendLevel[slotNum] = inputLevel;
-            _mixLevel[slotNum] = outputLevel;
-        }
-        
-        
-        /** @private */
-        override public function initialize() : void
-        {
-            _effectorSlot = new Vector.<Array>(8, true);
-            _buffer = new Vector.<Vector.<Number>>(8, true);
-            _sendLevel = new Vector.<Number>(8, true);
-            _mixLevel  = new Vector.<Number>(8, true);
-            for (var i:int=0; i<8; i++) {
-                _effectorSlot[i] = null;
-                _buffer[i] = Vector.<Number>();
-                _mixLevel[i] = _sendLevel[i] = 1;
-            }
-        }
-        
-        
-        /** @private */
-        override public function mmlCallback(args:Vector.<Number>) : void
-        {
-        }
-        
-        
-        /** @private */
-        override public function prepareProcess() : int
-        {
-            var i:int, imax:int, slotNum:int, list:Array;
-            for (slotNum=0; slotNum<8; slotNum++) {
-                if (_effectorSlot[slotNum]) {
-                    list = _effectorSlot[slotNum];
-                    imax = list.length;
-                    for (i=0; i<imax; i++) list[i].prepareProcess();
-                }
-            }
-            return 2;
-        }
-        
-        
-        /** @private */
-        override public function process(channels:int, buffer:Vector.<Number>, startIndex:int, length:int) : int
-        {
-            var i:int, j:int, imax:int, slotNum:int, list:Array, str:Vector.<Number>, ch:int, lvl:Number;
-            for (slotNum=1; slotNum<8; slotNum++) {
-                if (_effectorSlot[slotNum]) {
-                    str = _buffer[slotNum];
-                    lvl = _sendLevel[slotNum];
-                    if (str.length < buffer.length) str.length = buffer.length;
-                    for (i=0,j=startIndex; i<length; i++,j++) str[j] = buffer[j] * lvl;
-                }
-            }
-            lvl = _sendLevel[0];
-            for (i=0,j=startIndex; i<length; i++,j++) buffer[j] *= lvl;
-            for (slotNum=1; slotNum<8; slotNum++) {
-                if (_effectorSlot[slotNum]) {
-                    ch = channels;
-                    list = _effectorSlot[slotNum];
-                    imax = list.length;
-                    for (i=0; i<imax; i++) ch = list[i].process(ch, str[slotNum], startIndex, length);
-                    lvl = _mixLevel[slotNum];
-                    for (i=0,j=startIndex; i<length; i++,j++) buffer[j] += str[j] * lvl;
-                }
-            }
-            if (_effectorSlot[0]) {
-                list = _effectorSlot[0];
-                imax = list.length;
-                for (i=0; i<imax; i++) channels = list[i].process(channels, buffer, startIndex, length);
-                if (_mixLevel[0] != 1) {
-                    lvl = _mixLevel[0];
-                    for (i=0,j=startIndex; i<length; i++,j++) buffer[j] *= lvl;
-                }
-
-            }
-
-            return channels;
+    /** set effect input/output level of one slot */
+    public function setLevel(slotNum : Int, inputLevel : Float, outputLevel : Float) : Void
+    {
+        _sendLevel[slotNum] = inputLevel;
+        _mixLevel[slotNum] = outputLevel;
+    }
+    
+    
+    /** @private */
+    override public function initialize() : Void
+    {
+        _effectorSlot = new Array<Array<Dynamic>>();
+        _buffer = new Array<Array<Float>>();
+        _sendLevel = new Array<Float>();
+        _mixLevel = new Array<Float>();
+        for (i in 0...8){
+            _effectorSlot[i] = null;
+            _buffer[i] = Array/*Vector.<T> call?*/();
+            _mixLevel[i] = _sendLevel[i] = 1;
         }
     }
+    
+    
+    /** @private */
+    override public function mmlCallback(args : Array<Float>) : Void
+    {
+        
+    }
+    
+    
+    /** @private */
+    override public function prepareProcess() : Int
+    {
+        var i : Int;
+        var imax : Int;
+        var slotNum : Int;
+        var list : Array<Dynamic>;
+        for (8){
+            if (_effectorSlot[slotNum]) {
+                list = _effectorSlot[slotNum];
+                imax = list.length;
+                for (imax){list[i].prepareProcess();
+                }
+            }
+        }
+        return 2;
+    }
+    
+    
+    /** @private */
+    override public function process(channels : Int, buffer : Array<Float>, startIndex : Int, length : Int) : Int
+    {
+        var i : Int;
+        var j : Int;
+        var imax : Int;
+        var slotNum : Int;
+        var list : Array<Dynamic>;
+        var str : Array<Float>;
+        var ch : Int;
+        var lvl : Float;
+        for (8){
+            if (_effectorSlot[slotNum]) {
+                str = _buffer[slotNum];
+                lvl = _sendLevel[slotNum];
+                if (str.length < buffer.length)                     str.length = buffer.length;
+                i = 0;
+j = startIndex;
+                while (i < length){str[j] = buffer[j] * lvl;
+                    i++;
+                    j++;
+                }
+            }
+        }
+        lvl = _sendLevel[0];
+        i = 0;
+j = startIndex;
+        while (i < length){buffer[j] *= lvl;
+            i++;
+            j++;
+        }
+        for (8){
+            if (_effectorSlot[slotNum]) {
+                ch = channels;
+                list = _effectorSlot[slotNum];
+                imax = list.length;
+                for (imax){ch = list[i].process(ch, str[slotNum], startIndex, length);
+                }
+                lvl = _mixLevel[slotNum];
+                i = 0;
+j = startIndex;
+                while (i < length){buffer[j] += str[j] * lvl;
+                    i++;
+                    j++;
+                }
+            }
+        }
+        if (_effectorSlot[0]) {
+            list = _effectorSlot[0];
+            imax = list.length;
+            for (imax){channels = list[i].process(channels, buffer, startIndex, length);
+            }
+            if (_mixLevel[0] != 1) {
+                lvl = _mixLevel[0];
+                i = 0;
+j = startIndex;
+                while (i < length){buffer[j] *= lvl;
+                    i++;
+                    j++;
+                }
+            }
+        }
+        
+        return channels;
+    }
 }
+
 

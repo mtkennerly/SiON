@@ -5,103 +5,121 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sion.midi {
-    import org.si.sion.sequencer.SiMMLTrack;
-    
-    
-    /** @private MIDI sound module operator */
-    internal class MIDIModuleOperator
-    {
+package org.si.sion.midi;
+
+
+import org.si.sion.sequencer.SiMMLTrack;
+
+
+/** @private MIDI sound module operator */
+class MIDIModuleOperator
+{
     // variables
     //--------------------------------------------------------------------------------
-        internal var next:MIDIModuleOperator, prev:MIDIModuleOperator;
-        internal var sionTrack:SiMMLTrack = null;
-        internal var length:int = 0;
-        internal var programNumber:int;
-        internal var channel:int;
-        internal var note:int;
-        internal var isNoteOn:Boolean;
-        internal var drumExcID:int;
-        
-        
-        
-        
+    @:allow(org.si.sion.midi)
+    private var next : MIDIModuleOperator;@:allow(org.si.sion.midi)
+    private var prev : MIDIModuleOperator;
+    @:allow(org.si.sion.midi)
+    private var sionTrack : SiMMLTrack = null;
+    @:allow(org.si.sion.midi)
+    private var length : Int = 0;
+    @:allow(org.si.sion.midi)
+    private var programNumber : Int;
+    @:allow(org.si.sion.midi)
+    private var channel : Int;
+    @:allow(org.si.sion.midi)
+    private var note : Int;
+    @:allow(org.si.sion.midi)
+    private var isNoteOn : Bool;
+    @:allow(org.si.sion.midi)
+    private var drumExcID : Int;
+    
+    
+    
+    
     // constructor
     //--------------------------------------------------------------------------------
-        function MIDIModuleOperator(sionTrack:SiMMLTrack)
-        {
-            this.sionTrack = sionTrack;
-            next = prev = this;
-            programNumber = -1;
-            channel = -1;
-            note = -1;
-            isNoteOn = false;
-            drumExcID = -1;
-        }
-        
-        
-        
-        
+    @:allow(org.si.sion.midi)
+    public function new(sionTrack : SiMMLTrack)
+    {
+        this.sionTrack = sionTrack;
+        next = prev = this;
+        programNumber = -1;
+        channel = -1;
+        note = -1;
+        isNoteOn = false;
+        drumExcID = -1;
+    }
+    
+    
+    
+    
     // list operation
     //--------------------------------------------------------------------------------
-        internal function clear() : void
-        {
-            prev = next = this;
-            length = 0;
-        }
-        
-        
-        internal function push(ope:MIDIModuleOperator) : void
-        {
-            ope.prev = prev;
-            ope.next = this;
-            prev.next = ope;
-            prev = ope;
-            length++;
-        }
-        
-        
-        internal function pop() : MIDIModuleOperator
-        {
-            if (prev == this) return null;
-            var ret:MIDIModuleOperator = prev;
-            prev = prev.prev;
-            prev.next = this;
-            ret.prev = ret.next = ret;
-            length--;
-            return ret;
-        }
-        
-        
-        internal function unshift(ope:MIDIModuleOperator) : void
-        {
-            ope.prev = this;
-            ope.next = next;
-            next.prev = ope;
-            next = ope;
-            length++;
-        }
-        
-        
-        internal function shift() : MIDIModuleOperator
-        {
-            if (next == this) return null;
-            var ret:MIDIModuleOperator = next;
-            next = next.next;
-            next.prev = this;
-            ret.prev = ret.next = ret;
-            length--;
-            return ret;
-        }
-        
-        
-        internal function remove(ope:MIDIModuleOperator) : void
-        {
-            ope.prev.next = ope.next;
-            ope.next.prev = ope.prev;
-            ope.prev = ope.next = this;
-            length--;
-        }
+    @:allow(org.si.sion.midi)
+    private function clear() : Void
+    {
+        prev = next = this;
+        length = 0;
+    }
+    
+    
+    @:allow(org.si.sion.midi)
+    private function push(ope : MIDIModuleOperator) : Void
+    {
+        ope.prev = prev;
+        ope.next = this;
+        prev.next = ope;
+        prev = ope;
+        length++;
+    }
+    
+    
+    @:allow(org.si.sion.midi)
+    private function pop() : MIDIModuleOperator
+    {
+        if (prev == this)             return null;
+        var ret : MIDIModuleOperator = prev;
+        prev = prev.prev;
+        prev.next = this;
+        ret.prev = ret.next = ret;
+        length--;
+        return ret;
+    }
+    
+    
+    @:allow(org.si.sion.midi)
+    private function unshift(ope : MIDIModuleOperator) : Void
+    {
+        ope.prev = this;
+        ope.next = next;
+        next.prev = ope;
+        next = ope;
+        length++;
+    }
+    
+    
+    @:allow(org.si.sion.midi)
+    private function shift() : MIDIModuleOperator
+    {
+        if (next == this)             return null;
+        var ret : MIDIModuleOperator = next;
+        next = next.next;
+        next.prev = this;
+        ret.prev = ret.next = ret;
+        length--;
+        return ret;
+    }
+    
+    
+    @:allow(org.si.sion.midi)
+    private function remove(ope : MIDIModuleOperator) : Void
+    {
+        ope.prev.next = ope.next;
+        ope.next.prev = ope.prev;
+        ope.prev = ope.next = this;
+        length--;
     }
 }
+
 

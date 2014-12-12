@@ -5,28 +5,36 @@
 //--------------------------------------------------------------------------------
 
 
-package org.si.sound.nsf {
-    public class APU {
-        //public var apu:APU_internal = new APU_internal();
+package org.si.sound.nsf;
+
+
+class APU
+{
+    //public var apu:APU_internal = new APU_internal();
+    
+    public function new()
+    {
         
-        function APU() {
-        }
+    }
+    
+    public function reset() : Void{
+        //apu.reset();
         
-        public function reset() : void {
-            //apu.reset();
-        }
+    }
+    
+    public function sync(cycles : Int) : Void{
+        //apu.sync(cycles);
         
-        public function sync(cycles:int) : void {
-            //apu.sync(cycles);
-        }
+    }
+    
+    public function readReg(addr : Int) : Int{
+        return 0;
+    }
+    
+    public function writeReg(addr : Int, data : Int) : Void{
         
-        public function readReg(addr:int) : int {
-            return 0;
-        }
-        
-        public function writeReg(addr:int, data:int) : void {
-        }
     }
 }
+
 
 

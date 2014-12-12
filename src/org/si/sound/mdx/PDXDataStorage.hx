@@ -5,56 +5,59 @@
 //----------------------------------------------------------------------------------------------------
 
 
-package org.si.sound.mdx {
-    import flash.events.*;
-    import flash.net.URLRequest;
-    import flash.utils.ByteArray;
-    import org.si.sion.utils.SiONUtil;
-    import org.si.utils.AbstructLoader;
-    
-    
-    
-    /** PDX data storage */
-    dynamic public class PDXDataStorage
-    {
+package org.si.sound.mdx;
+
+
+import openfl.events.*;
+import openfl.net.URLRequest;
+import openfl.utils.ByteArray;
+import org.si.sion.utils.SiONUtil;
+import org.si.utils.AbstructLoader;
+
+
+
+/** PDX data storage */
+class PDXDataStorage
+{
     // constructor
     //--------------------------------------------------------------------------------
-        /** constructor */
-        function PDXDataStorage()
-        {
-        }
+    /** constructor */
+    public function new()
+    {
         
-        
-        
-        
+    }
+    
+    
+    
+    
     // operations
     //--------------------------------------------------------------------------------
-        /** Clear. */
-        public function clear() : void
-        {
-            var key:String
-            for (key in this) delete this[key];
+    /** Clear. */
+    public function clear() : Void
+    {
+        var key : String;
+        for (key in Reflect.fields(this));
+    }
+    
+    
+    /** load pdx data from url */
+    public function load(url : URLRequest) : PDXData
+    {
+        var fileName : String = extractFileName(url.url);
+        if (this[fileName] == null) {
+            var pdxData : PDXData = new PDXData();
+            this[fileName] = pdxData;
+            pdxData.load(url);
         }
-        
-        
-        /** load pdx data from url */
-        public function load(url:URLRequest) : PDXData
-        {
-            var fileName:String = extractFileName(url.url);
-            if (this[fileName] == null) {
-                var pdxData:PDXData = new PDXData();
-                this[fileName] = pdxData;
-                pdxData.load(url);
-            }
-            return this[fileName];
-        }
-        
-
-        /** extract file name from url string */
-        public function extractFileName(url:String) : String {
-            var index:int = url.lastIndexOf('/');
-            return ((index == -1) ? (url) : (url.substr(index+1))).toUpperCase();
-        }
+        return this[fileName];
+    }
+    
+    
+    /** extract file name from url string */
+    public function extractFileName(url : String) : String{
+        var index : Int = url.lastIndexOf("/");
+        return (((index == -1)) ? (url) : (url.substr(index + 1))).toUpperCase();
     }
 }
+
 
