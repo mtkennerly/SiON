@@ -8,7 +8,7 @@ package org.si.sion.sequencer.base;
 
 import openfl.errors.Error;
 
-import org.si.sion.namespaces.SionInternal;
+
 
 /**
  *  MMLSequencer is the basic class of a bridges between MMLEvents, sound modules and sound systems. 

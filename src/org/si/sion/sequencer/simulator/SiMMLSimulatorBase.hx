@@ -11,7 +11,7 @@ import org.si.sion.sequencer.base.MMLSequence;
 import org.si.sion.module.SiOPMChannelParam;
 import org.si.sion.module.channels.SiOPMChannelManager;
 import org.si.sion.module.channels.SiOPMChannelBase;
-import org.si.sion.sequencer.base.SionSequencerInternal;
+
 
 
 /** Base class of all module simulators which control "SiMMLTrack" (not SiOPMChannel) to simulate various modules. */

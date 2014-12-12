@@ -13,7 +13,7 @@ import org.si.sion.*;
 import org.si.sion.sequencer.base.*;
 import org.si.sion.sequencer.SiMMLTrack;
 import org.si.sound.patterns.*;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 import org.si.sound.synthesizers.*;
 
 

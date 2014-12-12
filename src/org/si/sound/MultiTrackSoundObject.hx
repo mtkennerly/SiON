@@ -12,7 +12,7 @@ import org.si.sound.VoiceReference;
 
 import org.si.sion.*;
 import org.si.sion.sequencer.SiMMLTrack;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 import org.si.sound.synthesizers.*;
 
 

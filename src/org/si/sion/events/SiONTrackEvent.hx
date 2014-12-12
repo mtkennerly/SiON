@@ -13,7 +13,7 @@ import openfl.events.Event;
 import org.si.sion.SiONDriver;
 import org.si.sion.SiONData;
 import org.si.sion.sequencer.SiMMLTrack;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 /** SiON Track Event class. */

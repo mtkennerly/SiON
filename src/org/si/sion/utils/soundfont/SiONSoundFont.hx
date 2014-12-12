@@ -7,7 +7,7 @@
 package org.si.sion.utils.soundfont;
 
 import openfl.media.Sound;
-import org.si.sion.namespaces.SionInternal;
+
 import org.si.sion.*;
 import org.si.sion.module.*;
 import org.si.sion.sequencer.*;

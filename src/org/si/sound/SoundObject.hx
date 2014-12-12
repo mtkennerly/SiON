@@ -22,19 +22,19 @@ import openfl.events.EventDispatcher;
 import org.si.sion.*;
 import org.si.sion.utils.Translator;
 import org.si.sion.utils.Fader;
-import org.si.sion.namespaces.SionInternal;
+
 import org.si.sion.events.SiONEvent;
 import org.si.sion.events.SiONTrackEvent;
 import org.si.sion.effector.SiEffectBase;
 import org.si.sion.module.SiOPMModule;
 import org.si.sion.sequencer.SiMMLTrack;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 import org.si.sound.core.EffectChain;
 import org.si.sound.patterns.Sequencer;
 import org.si.sound.events.SoundObjectEvent;
 import org.si.sound.synthesizers.VoiceReference;
 import org.si.sound.synthesizers.BasicSynth;
-import org.si.sound.synthesizers.SynthesizerInternal;
+
 
 
 /** @eventType org.si.sound.events.SoundObjectEvent.NOTE_ON_STREAM */

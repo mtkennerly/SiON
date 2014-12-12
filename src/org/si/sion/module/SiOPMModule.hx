@@ -9,7 +9,7 @@ package org.si.sion.module;
 import org.si.utils.SLLNumber;
 import org.si.utils.SLLint;
 import org.si.sion.module.channels.*;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 /** SiOPM sound module */

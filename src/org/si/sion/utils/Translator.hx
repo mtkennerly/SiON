@@ -8,7 +8,7 @@ package org.si.sion.utils;
 
 import openfl.errors.Error;
 
-import org.si.sion.namespaces.SionInternal;
+
 import org.si.sion.SiONVoice;
 import org.si.sion.module.*;
 import org.si.sion.sequencer.*;

@@ -9,7 +9,7 @@ package org.si.sion.sequencer;
 
 import org.si.utils.SLLint;
 import org.si.sion.utils.Translator;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 /** Tabel evnelope data. */

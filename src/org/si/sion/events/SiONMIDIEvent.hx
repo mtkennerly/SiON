@@ -12,7 +12,7 @@ import openfl.utils.ByteArray;
 import org.si.sion.SiONDriver;
 import org.si.sion.SiONData;
 import org.si.sion.sequencer.SiMMLTrack;
-import org.si.sion.namespaces.SionInternal;
+
 import org.si.sion.midi.MIDIModule;
 import org.si.sion.midi.MIDIModuleChannel;
 

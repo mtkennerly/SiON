@@ -15,7 +15,7 @@ import org.si.sound.core.SiOPMStream;
 import org.si.sion.*;
 import org.si.sion.effector.*;
 import org.si.sion.module.SiOPMStream;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 
 
 /** Effector chain class. This class manages local effector chain of SoundObject. */

@@ -13,7 +13,7 @@ import org.si.sion.*;
 import org.si.sion.sequencer.SiMMLTrack;
 import org.si.sion.sequencer.SiMMLSequencer;
 import org.si.sion.sequencer.base.MMLSequence;
-import org.si.sound.synthesizers.SynthesizerInternal;
+
 
 
 /** MML Player provides sequence sound written by MML, and you can control all tracks during playing sequence. */

@@ -19,7 +19,7 @@ import org.si.sion.module.SiOPMWavePCMTable;
 import org.si.sion.module.SiOPMWavePCMData;
 import org.si.sion.module.SiOPMWaveSamplerTable;
 import org.si.sion.module.SiOPMWaveSamplerData;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 /** The SiONData class provides musical score (and voice settings) data of SiON.

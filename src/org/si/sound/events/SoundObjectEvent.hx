@@ -15,7 +15,7 @@ import org.si.sound.events.SoundObject;
 import openfl.events.*;
 import org.si.sion.events.SiONTrackEvent;
 import org.si.sion.sequencer.SiMMLTrack;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 import org.si.sound.SoundObject;
 
 

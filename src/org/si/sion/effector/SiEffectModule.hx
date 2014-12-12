@@ -8,7 +8,7 @@ package org.si.sion.effector;
 
 import org.si.sion.module.SiOPMModule;
 import org.si.sion.module.SiOPMStream;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 /** Effect Module. */

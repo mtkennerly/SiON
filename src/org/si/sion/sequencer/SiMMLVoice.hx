@@ -15,8 +15,8 @@ import org.si.sion.module.SiOPMWavePCMTable;
 import org.si.sion.module.SiOPMWavePCMData;
 import org.si.sion.module.SiOPMWaveTable;
 import org.si.sion.module.SiOPMWaveSamplerTable;
-import org.si.sion.namespaces.SionInternal;
-import org.si.sion.sequencer.base.SionSequencerInternal;
+
+
 
 
 /** Voice data. This includes SiOPMChannelParam.

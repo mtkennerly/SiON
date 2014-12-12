@@ -14,7 +14,7 @@ import org.si.sound.MultiTrackSoundObject;
 
 import org.si.sion.SiONData;
 import org.si.sion.sequencer.SiMMLTrack;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 import org.si.sound.synthesizers.DrumMachinePresetVoice;
 import org.si.sound.patterns.DrumMachinePresetPattern;
 import org.si.sound.patterns.Sequencer;

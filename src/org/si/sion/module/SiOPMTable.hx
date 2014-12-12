@@ -16,7 +16,7 @@ import org.si.sion.module.SiOPMWaveTable;
 import openfl.media.Sound;
 import org.si.utils.SLLint;
 import org.si.sion.sequencer.SiMMLVoice;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 /** SiOPM table */

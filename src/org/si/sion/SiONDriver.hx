@@ -17,7 +17,6 @@ import openfl.utils.ByteArray;
 import org.si.utils.SLLint;
 import org.si.utils.SLLNumber;
 import org.si.sion.events.*;
-import org.si.sion.sequencer.base.SionSequencerInternal;
 import org.si.sion.sequencer.base.MMLSequence;
 import org.si.sion.sequencer.base.MMLEvent;
 import org.si.sion.sequencer.SiMMLSequencer;
@@ -39,7 +38,6 @@ import org.si.sion.effector.SiEffectBase;
 import org.si.sion.utils.soundloader.SoundLoader;
 import org.si.sion.utils.SiONUtil;
 import org.si.sion.utils.Fader;
-import org.si.sion.namespaces.SionInternal;
 import org.si.sion.SiONData;
 
 #if MIDI_ENABLED
@@ -579,6 +577,7 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
     public function new(bufferLength : Int = 2048, channelCount : Int = 2, sampleRate : Int = 44100, bitRate : Int = 0)
     {
         super();
+
         // check mutex
         if (_mutex != null && !_allowPluralDrivers)             throw errorPluralDrivers();
 

@@ -14,9 +14,9 @@ import org.si.sion.sequencer.base.MMLEvent;
 import org.si.sion.sequencer.base.MMLSequence;
 import org.si.sion.sequencer.base.MMLExecutor;
 import org.si.sion.sequencer.base.BeatPerMinutes;
-import org.si.sion.sequencer.base.SionSequencerInternal;
+
 import org.si.sion.sequencer.simulator.SiMMLSimulatorBase;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 /** Track is a musical sequence player for one voice.

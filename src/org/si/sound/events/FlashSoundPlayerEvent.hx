@@ -15,7 +15,7 @@ import openfl.media.Sound;
 import org.si.sion.*;
 import org.si.sion.effector.*;
 import org.si.sion.module.SiOPMStream;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 
 
 /** FlashSoundPlayerEvent is dispatched by FlashSoundPlayer. @see org.si.sound.FlashSoundPlayer */

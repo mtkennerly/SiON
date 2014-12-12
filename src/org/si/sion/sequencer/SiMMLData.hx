@@ -13,10 +13,10 @@ import org.si.sion.module.SiOPMTable;
 import org.si.sion.module.SiOPMWaveTable;
 import org.si.sion.module.SiOPMWavePCMTable;
 import org.si.sion.module.SiOPMWaveSamplerTable;
-import org.si.sion.module.SiopmModuleInternal;
+
 import org.si.sion.sequencer.base.MMLData;
 import org.si.utils.SLLint;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 

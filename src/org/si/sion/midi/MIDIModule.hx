@@ -8,7 +8,7 @@
 package org.si.sion.midi;
 
 import org.si.sion.*;
-import org.si.sion.namespaces.SionInternal;
+
 import org.si.sion.effector.*;
 import org.si.sion.events.SiONMIDIEvent;
 import org.si.sion.sequencer.SiMMLTrack;

@@ -31,8 +31,8 @@ import org.si.sion.*;
 import org.si.sion.sequencer.SiMMLTrack;
 import org.si.sound.synthesizers.*;
 import org.si.sound.events.FlashSoundPlayerEvent;
-import org.si.sound.namespaces.SoundObjectInternal;
-import org.si.sound.synthesizers.SynthesizerInternal;
+
+
 
 
 /** @eventType flash.events.Event */

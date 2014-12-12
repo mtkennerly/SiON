@@ -17,7 +17,7 @@ import org.si.sion.utils.Scale;
 import org.si.sound.patterns.Note;
 import org.si.sound.patterns.Sequencer;
 import org.si.sound.patterns.BassSequencerPresetPattern;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 
 /** @eventType org.si.sound.events.SoundObjectEvent.ENTER_FRAME */
 @:meta(Event(name="enterFrame",type="org.si.sound.events.SoundObjectEvent"))

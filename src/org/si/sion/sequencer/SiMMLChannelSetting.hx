@@ -13,7 +13,7 @@ import org.si.sion.module.SiOPMTable;
 import org.si.sion.module.SiOPMChannelParam;
 import org.si.sion.module.channels.SiOPMChannelManager;
 import org.si.sion.module.channels.SiOPMChannelBase;
-import org.si.sion.sequencer.base.SionSequencerInternal;
+
 
 
 /** @private SiOPM channel setting */

@@ -12,7 +12,7 @@ import org.si.sound.SiONVoice;
 import org.si.sion.*;
 import org.si.sound.synthesizers.*;
 import org.si.sound.core.EffectChain;
-import org.si.sound.namespaces.SoundObjectInternal;
+
 
 
 /** The SoundObjectContainer class is the base class for all objects that can serve as sound object containers on the sound list. 

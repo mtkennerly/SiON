@@ -16,14 +16,14 @@ import org.si.sion.sequencer.base.MMLEvent;
 import org.si.sion.sequencer.base.MMLSequenceGroup;
 import org.si.sion.sequencer.base.MMLSequence;
 import org.si.sion.sequencer.base.MMLParser;
-import org.si.sion.sequencer.base.SionSequencerInternal;
+
 import org.si.sion.module.SiOPMTable;
 import org.si.sion.module.SiOPMModule;
 import org.si.sion.module.SiOPMChannelParam;
 import org.si.sion.module.SiOPMWaveSamplerTable;
 import org.si.sion.module.SiOPMWavePCMTable;
 import org.si.sion.utils.Translator;
-import org.si.sion.namespaces.SionInternal;
+
 
 
 /** The SiMMLSequencer operates SiOPMModule by MML.

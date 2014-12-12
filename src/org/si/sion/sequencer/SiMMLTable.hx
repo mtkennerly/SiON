@@ -12,7 +12,7 @@ import org.si.sion.module.SiOPMChannelParam;
 import org.si.sion.module.SiOPMOperatorParam;
 import org.si.sion.module.channels.SiOPMChannelManager;
 
-import org.si.sion.namespaces.SionInternal;
+
 import org.si.sion.sequencer.simulator.*;
 
 

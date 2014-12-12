@@ -12,7 +12,7 @@ import org.si.sion.module.SiOPMTable;
 import org.si.sion.sequencer.SiMMLVoice;
 import org.si.sion.sequencer.SiMMLTable;
 import org.si.sion.sequencer.base.MMLSequence;
-import org.si.sion.sequencer.base.SionSequencerInternal;
+
 
 
 /** YAMAHA YM3812 simulartor */
