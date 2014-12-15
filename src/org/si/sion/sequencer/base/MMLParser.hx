@@ -378,6 +378,7 @@ class MMLParser
     private static inline var REX_PARAM : Int = 9;
     private static inline var REX_PERIOD : Int = 10;
     private static var _mmlRegExp : EReg = null;
+    private static var _lastMatchedPos : Int = 0;
 
     private static function createRegExp(reset : Bool) : EReg
     {
@@ -414,14 +415,18 @@ class MMLParser
      */
     public static function prepareParse(setting : MMLParserSetting, mml : String) : Void
     {
+        trace('MMLParser.prepareParse()');
         // set internal parameters
         _setting = setting;
         _mmlString = mml;
         _parsingTime = Math.round(haxe.Timer.stamp() * 1000);
+        trace('Creating regexp');
         // create EReg
         createRegExp(true);
+        trace('Initializing');
         // initialize
         _initialize();
+        trace('Done preparing the parse.');
     }
     
     
@@ -438,7 +443,9 @@ class MMLParser
         var res : Dynamic;
         var mml2nn : Int = _setting.mml2nn;
         var codeC : Int = "c".charCodeAt(0);
-        
+
+        trace('MMLParser.parse()');
+
         // set interrupting interval
         _interruptInterval = interrupt;
         _startTime = Math.round(haxe.Timer.stamp() * 1000);
@@ -473,9 +480,8 @@ class MMLParser
             return res[REX_PERIOD].length;
         };
 
-        var matchString = _mmlString;
-
-        while (rex.match(matchString) && rex.matched(0).length > 0) {
+        while (rex.matchSub(_mmlString, _lastMatchedPos) && rex.matched(0).length > 0) {
+            trace('Parse matched: ' + rex.matched(0));
             // Convert to the array format expected by all the functions
             res.splice(0,res.length); // Reset the matching array
             for (i in 0...REX_PERIOD + 1) {
@@ -555,8 +561,10 @@ class MMLParser
             
             if (halt) return null;
 
-            // Update the string so we can look for the next match
-            matchString = rex.matchedRight();
+            var position = rex.matchedPos();
+            if (position == null) throw "EReg matchedPos error";
+            trace('LastMatchedPos: ${position.len} bytes at ${position.pos}');
+            _lastMatchedPos = position.pos + position.len;
         }
 
         // check repeating stac
@@ -579,32 +587,43 @@ class MMLParser
     // initialize before parse
     private static function _initialize() : Void
     {
+        trace('MMLParser._iitialize()');
         // free all remains
         var e : MMLEvent = _terminator.next;
         while (e != null) {
             e = _freeEvent(e);
         }
 
+        trace('MMLP: 1');
         // initialize tempraries
         _systemEventIndex = 0;  // system event index
         _sequenceMMLIndex = 0;  // sequence mml index  
         _lastEvent = _terminator;  // clear event chain  
-        _lastSequenceHead = _pushMMLEvent(MMLEvent.SEQUENCE_HEAD, 0, 0);  // add first event (SEQUENCE_HEAD).  
-        if (_cacheMMLString)             addMMLEvent(MMLEvent.DEBUG_INFO, -1);
+        trace('MMLP: 2');
+        _lastSequenceHead = _pushMMLEvent(MMLEvent.SEQUENCE_HEAD, 0, 0);  // add first event (SEQUENCE_HEAD).
+        trace('MMLP: 3');
+        if (_cacheMMLString)  addMMLEvent(MMLEvent.DEBUG_INFO, -1);
+        trace('MMLP: 4');
         _initialize_track();
+        trace('MMLP: 5');
     }
     
     
     // initialize before starting new track.
     private static function _initialize_track() : Void
     {
+        trace("MMLParser._initialize_track()");
         _staticLength = _setting.defaultLength;  // initialize l command value  
         _staticOctave = _setting.defaultOctave;  // initialize o command value  
         _staticNoteShift = 0;  // initialize note shift  
-        _isLastEventLength = false;  // initialize l command flag  
+        _isLastEventLength = false;  // initialize l command flag
+        trace("MMLP.init_track: 1");
         while (_repeatStac.length > 0) _repeatStac.pop();  // clear repeating pointer stac
+        trace("MMLP.init_track: 2");
         var lastPosition = _mmlRegExp.matchedPos();
-        _headMMLIndex = lastPosition.pos;
+        trace('MMLP.init_track: 3: lastPosition = $lastPosition');
+        _headMMLIndex = _lastMatchedPos;
+        trace("MMLP.init_track: 4");
     }
     
     
@@ -788,7 +807,7 @@ class MMLParser
     // begin repeating
     private static function _repeatBegin(rep : Int) : Void
     {
-        if (rep < 1 || rep > 65535)             throw errorRangeOver("[", 1, 65535);
+        if (rep < 1 || rep > 65535) throw errorRangeOver("[", 1, 65535);
         addMMLEvent(MMLEvent.REPEAT_BEGIN, rep, 0);
         _repeatStac.unshift(_lastEvent);
     }
@@ -797,7 +816,7 @@ class MMLParser
     // break repeating
     private static function _repeatBreak() : Void
     {
-        if (_repeatStac.length == 0)             throw errorStacUnderflow("|");
+        if (_repeatStac.length == 0) throw errorStacUnderflow("|");
         addMMLEvent(MMLEvent.REPEAT_BREAK);
         _lastEvent.jump = cast((_repeatStac[0]), MMLEvent);
     }
@@ -814,7 +833,7 @@ class MMLParser
         
         // update repeat count
         if (rep != INT_MIN_VALUE) {
-            if (rep < 1 || rep > 65535)                 throw errorRangeOver("]", 1, 65535);
+            if (rep < 1 || rep > 65535) throw errorRangeOver("]", 1, 65535);
             beginEvent.data = rep;
         }
     }
@@ -865,6 +884,8 @@ class MMLParser
                 var position = _mmlRegExp.matchedPos();
                 // memory sequence MMLs id in _lastSequenceHead.next.data
                 _lastSequenceHead.next.data = _regSequenceMMLStrings(_mmlString.substring(_headMMLIndex, position.pos));
+                var sequence = _mmlString.substring(_headMMLIndex, position.pos);
+                trace('***** MML Sequence added "$sequence".');
             }
             addMMLEvent(MMLEvent.SEQUENCE_HEAD, 0);
             if (_cacheMMLString) addMMLEvent(MMLEvent.DEBUG_INFO, -1);

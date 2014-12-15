@@ -6,7 +6,6 @@
 
 	<source path="src" />
 
-	<haxelib name="lime" />
 	<haxelib name="openfl" />
 
 	<assets path="Assets" rename="assets" exclude="lime.svg" />

@@ -905,32 +905,43 @@ class SiMMLTrack
     {
         var i : Int;
         
+        trace('SiMMLTrack._reset()');
+
         // channel module setting
         _channelModuleSetting = _table.channelModuleSetting[SiMMLTable.MT_PSG];
         _simulator = _table.simulators[SiMMLTable.MT_PSG];
         _channelNumber = 0;
-        
+
+        trace('SiMMLT: 1');
+
         // initialize channel by channel settings
         if (_mmlData != null) {
+            trace('SiMMLT: 2');
             _vcommandShift = _mmlData.defaultVCommandShift;
             _velocityMode = _mmlData.defaultVelocityMode;
             _expressionMode = _mmlData.defaultExpressionMode;
         }
         else {
+            trace('SiMMLT: 3');
             _vcommandShift = 4;
             _velocityMode = SiOPMTable.VM_LINEAR;
             _expressionMode = SiOPMTable.VM_LINEAR;
         }
+        trace('SiMMLT: 4');
         _velocity = 256;
         _expression = 128;
         _pitchBend = 0;
         _note = -1;
         channel = null;
+        trace('SiMMLT: 4a');
         _voiceIndex = _channelModuleSetting.initializeTone(this, INT_MIN_VALUE, bufferIndex);
         //_voiceIndex = _simulator.initializeTone(this, int.MIN_VALUE, bufferIndex);
+        trace('SiMMLT: 4b');
         var tlTables : Array<Array<Int>> = SiOPMTable.instance.eg_tlTables;
+        trace('SiMMLT: 4c');
         channel.setVolumeTables(tlTables[_velocityMode], tlTables[_expressionMode]);
-        
+
+        trace('SiMMLT: 5');
         // initialize parameters
         noteShift = 0;
         pitchShift = 0;
@@ -962,9 +973,11 @@ class SiMMLTrack
         _env_filter = null;
         _env_ma = null;
         _env_mp = null;
-        
+
+        trace('SiMMLT: 6');
         // reset envelop tables
         for (i in 0...2){
+            trace('SiMMLT: 7');
             _set_processMode[i] = NORMAL;
             _set_env_exp[i] = null;
             _set_env_voice[i] = null;
@@ -982,11 +995,12 @@ class SiMMLTrack
             _set_sweep_end[i] = 0;
             _table_env_ma[i] = null;
             _table_env_mp[i] = null;
-        }  // reset pointer  
-        
-        
-        
+        }
+
+         // reset pointer
+        trace('SiMMLT: 8');
         executor.resetPointer();
+        trace('SiMMLT: 9');
     }
     
     

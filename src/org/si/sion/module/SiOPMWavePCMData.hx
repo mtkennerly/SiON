@@ -6,10 +6,14 @@
 
 package org.si.sion.module;
 
-//import openfl._v2.errors.Error;
-
+#if flash
+import flash.errors.Error;
+import flash.media.Sound;
+#else
 import openfl.errors.Error;
 import openfl._v2.media.Sound;
+#end
+
 import org.si.sion.utils.SiONUtil;
 import org.si.sion.sequencer.SiMMLTable;
 import org.si.sion.module.SiOPMTable;
@@ -103,7 +107,7 @@ class SiOPMWavePCMData extends SiOPMWaveBase
         srcChannelCount = ((srcChannelCount == 1)) ? 1 : 2;
         if (channelCount == 0)             channelCount = srcChannelCount;
         this.channelCount = ((channelCount == 1)) ? 1 : 2;
-        _listenSoundLoadingEvents(try cast(data, Sound) catch(e:Dynamic) null);
+        _listenSoundLoadingEvents(data);
         this.samplingPitch = samplingPitch;
 
         _startPoint = 0;

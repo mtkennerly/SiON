@@ -6,12 +6,20 @@
 
 package org.si.sion.utils;
 
+#if flash
+import flash.errors.Error;
+import flash.display.Loader;
+import flash.events.*;
+import flash.utils.ByteArray;
+import flash.media.Sound;
+import flash.utils.Endian;
+#else
 import openfl.errors.Error;
 import openfl.display.Loader;
 import openfl.events.*;
 import openfl.utils.ByteArray;
 import openfl.media.Sound;
-
+#end
 
 /**
  * Refer from http://www.flashcodersbrighton.org/wordpress/?p=9
@@ -48,9 +56,9 @@ import openfl.media.Sound;
         var head : Int;
         var version : Int;
         var bitrate : Int;
-        var frequency : Int;
+        var frequency : Int = 0;
         var padding : Int;
-        var channels : Int;
+        var channels : Int = 0;
         var frameLength : Int;
         bytes.position = 0;
         var id : String;
@@ -78,7 +86,11 @@ import openfl.media.Sound;
             frameCount++;
         }
         var src : ByteArray = new ByteArray();
+#if flash
+        src.endian = LITTLE_ENDIAN;
+#else
         src.endian = "littleEndian";
+#end
         src.writeInt(frameCount * 1152);
         src.writeShort(0);
         src.writeBytes(bytes, headPosition, byteCount);
@@ -122,7 +134,11 @@ import openfl.media.Sound;
             }
         };
 
+#if flash
+        bytes.endian = LITTLE_ENDIAN;
+#else
         bytes.endian = "littleEndian";
+#end
         bytes.position = 0;
         _write(_header);
         bytes.position = 257;
@@ -139,11 +155,19 @@ import openfl.media.Sound;
         bytes.position = 0;
         
         var loader : Loader = new Loader();
-        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e : Event) : Void{
+        loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e : Event) : Void {
                     var soundClass : Class<Dynamic> = Type.getClass(loader.contentLoaderInfo.applicationDomain.getDefinition("SoundClass"));
-                    onComplete(((soundClass != null)) ? try cast((Type.createInstance(soundClass, [])), Sound) catch(e:Dynamic) null : null);
+                    var createdSound = Type.createInstance(soundClass, []);
+                    var castedSound : Sound;
+                    try {
+                        castedSound = cast(createdSound, Sound);
+                    }
+                    catch (e : Dynamic) {
+                        castedSound = null;
+                    }
+                    onComplete(castedSound);
                 });
-        loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, function(e : Event) : Void{
+        loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, function(e : Event) : Void {
                     throw new Error(Std.string(e));
                 });
         loader.loadBytes(bytes);
@@ -164,7 +188,11 @@ import openfl.media.Sound;
             }
         };
 
+#if flash
+        bytes.endian = LITTLE_ENDIAN;
+#else
         bytes.endian = "littleEndian";
+#end
         bytes.position = 0;
         _write(_header);
         bytes.position = 4;
@@ -186,7 +214,9 @@ import openfl.media.Sound;
         var loader : Loader = new Loader();
         loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e : Event) : Void{
                     var soundClass : Class<Dynamic> = Type.getClass(loader.contentLoaderInfo.applicationDomain.getDefinition("SoundClass"));
-                    onComplete(((soundClass != null)) ? try cast((Type.createInstance(soundClass, [])), Sound) catch(e:Dynamic) null : null);
+                    var createdSound = Type.createInstance(soundClass, []);
+                    var castedSound = cast(createdSound, Sound);
+                    onComplete(castedSound);
                 });
         loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, function(e : Event) : Void{
                     throw new Error(Std.string(e));

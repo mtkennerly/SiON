@@ -306,9 +306,11 @@ class SiOPMOperator
         return i;
     }
     /** Total level [0,127] */
-    private function set_tl(i : Int) : Int{
+    private function set_tl(i : Int) : Int {
+        trace('set_tl($i)');
         _tl = ((i < 0)) ? 0 : ((i > 127)) ? 127 : i;
         _updateTotalLevel();
+        trace('done with set_tl');
         return i;
     }
     /** Key scaling rate [0,3] */
@@ -581,11 +583,14 @@ class SiOPMOperator
     /** constructor */
     public function new(chip : SiOPMModule)
     {
+        trace('              ########## SiOPMOperator($chip) ##########');
         _table = SiOPMTable.instance;
         _chip = chip;
         _feedPipe = SLLint.allocRing(1);
         _eg_incTable = _table.eg_incTables[17];
+        trace('LevelTable set to ${_table.eg_levelTables[0]}');
         _eg_levelTable = _table.eg_levelTables[0];
+        trace('_eg_levelTable is now $_eg_levelTable');
         _eg_nextState = _table_nextState[0];
     }
     
@@ -597,15 +602,19 @@ class SiOPMOperator
     /** Initialize. */
     public function initialize() : Void
     {
+        trace('SiOPMOperator.initialize()');
         // reset operator connections
         _final = true;
         _inPipe = _chip.zeroBuffer;
         _basePipe = _chip.zeroBuffer;
         _feedPipe.i = 0;
-        
+
+        trace('SiOPMO: 1. chip is "$_chip"');
+
         // reset all parameters
         setSiOPMOperatorParam(_chip.initOperatorParam);
-        
+        trace('SiOPMO: 2');
+
         // reset some other parameters
         _eg_tl_offset = 0;  // The _eg_tl_offset is controled by velocity and expression.  
         _pitchIndexShift2 = 0;  // The _pitchIndexShift2 is controled by pitch modulation.  
@@ -613,9 +622,11 @@ class SiOPMOperator
         _pcm_startPoint = 0;
         _pcm_endPoint = 0;
         _pcm_loopPoint = -1;
-        
+
+        trace('SiOPMO: 3');
         // reset pg and eg status
         reset();
+        trace('SiOPMO: 4');
     }
     
     
@@ -634,13 +645,16 @@ class SiOPMOperator
     /** Set paramaters by SiOPMOperatorParam */
     public function setSiOPMOperatorParam(param : SiOPMOperatorParam) : Void
     {
+        trace('SiOPMOperator.setSiOPMOperatorParam($param)');
         pgType = param.pgType;
         ptType = param.ptType;
         
-        if (param.phase == 255)             _keyon_phase = -2
-        else if (param.phase == -1)             _keyon_phase = -1
+        if (param.phase == 255) _keyon_phase = -2
+        else if (param.phase == -1) _keyon_phase = -1
         else _keyon_phase = (param.phase & 255) << (SiOPMTable.PHASE_BITS - 8);
-        
+
+        trace('SiOMPO: 1');
+
         _ar = param.ar & 63;
         _dr = param.dr & 63;
         _sr = param.sr & 63;
@@ -656,27 +670,35 @@ class SiOPMOperator
         ssgec = param.ssgec;
         _mute = ((param.mute)) ? SiOPMTable.ENV_BOTTOM : 0;
         _erst = param.erst;
-        
+
+        trace('SiOMPO: 2');
         // fixed pitch
         if (param.fixedPitch == 0) {
+            trace('SiOMPO: 3');
             //_pitchIndex = 3840;
             //_updateKC(_table.nnToKC[(_pitchIndex>>6)&127]);
             _pitchFixed = false;
         }
         else {
+            trace('SiOMPO: 4');
             _pitchIndex = param.fixedPitch;
             _updateKC(_table.nnToKC[(_pitchIndex >> 6) & 127]);
             _pitchFixed = true;
         }  // key scale level  
-        
-        _eg_key_scale_level_rshift = ((_ksl == 0)) ? 8 : (5 - _ksl);
+
+        trace('SiOMPO: 5: _ksl is "$_ksl"');
+        _eg_key_scale_level_rshift = (_ksl == 0) ? 8 : (5 - _ksl);
         // ar for ssgec
         _eg_ssgec_ar = ((_ssg_type == 8 || _ssg_type == 12)) ? (((_ar >= 56)) ? 1 : 0) : (((_ar >= 60)) ? 1 : 0);
+        trace('SiOMPO: param is "$param"');
         // sl,tl requires some special calculation
         sl = param.sl & 15;
+        trace('sl done. Trying tl');
         tl = param.tl;
-        
+
+        trace('SiOMPO: 6');
         _updatePitch();
+        trace('SiOMPO: 7');
     }
     
     
@@ -961,10 +983,15 @@ class SiOPMOperator
     // Internal update total level
     private function _updateTotalLevel() : Void
     {
+        trace('SiOPMO._updateTotalLevel');
         _eg_total_level = ((_tl + (_kc >> _eg_key_scale_level_rshift)) << SiOPMTable.ENV_LSHIFT) + _eg_tl_offset + _mute;
-        if (_eg_total_level > SiOPMTable.ENV_BOTTOM)             _eg_total_level = SiOPMTable.ENV_BOTTOM;
-        _eg_total_level -= SiOPMTable.ENV_TOP;  // table index +192.  
+        trace('SiOPMO: 1');
+        if (_eg_total_level > SiOPMTable.ENV_BOTTOM) _eg_total_level = SiOPMTable.ENV_BOTTOM;
+        trace('SiOPMO: 2');
+        _eg_total_level -= SiOPMTable.ENV_TOP;  // table index +192.
+        trace('SiOPMO: 3');
         _eg_out = (_eg_levelTable[_eg_level] + _eg_total_level) << 3;
+        trace('SiOPMO: 4');
     }
 }
 

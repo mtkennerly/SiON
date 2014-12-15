@@ -94,24 +94,29 @@ class SiMMLChannelSetting
     @:allow(org.si.sion.sequencer)
     private function initializeTone(track : SiMMLTrack, chNum : Int, bufferIndex : Int) : Int
     {
+        trace('SiMMLCS.initializeTone($track, $chNum, $bufferIndex)');
+
         // update channel instance
         if (track.channel == null) {
+            trace('SiMMLCS: 1');
             // create new channel
             track.channel = SiOPMChannelManager.newChannel(_channelType, null, bufferIndex);
         }
-        else 
-        if (track.channel.channelType != _channelType) {
+        else if (track.channel.channelType != _channelType) {
+            trace('SiMMLCS: 2');
             // change channel type
             var prev : SiOPMChannelBase = track.channel;
             track.channel = SiOPMChannelManager.newChannel(_channelType, prev, bufferIndex);
             SiOPMChannelManager.deleteChannel(prev);
         }
         else {
+            trace('SiMMLCS: 3');
             // initialize channel
             track.channel.initialize(track.channel, bufferIndex);
             track._resetVolumeOffset();
         }  // voiceIndex = chNum except for PSG, APU and analog    // initialize  
-        
+
+        trace('SiMMLCS: 4');
         var voiceIndex : Int = _initVoiceIndex;
         var chNumRestrict : Int = chNum;
         if (0 <= chNum && chNum < _voiceIndexTable.length)             voiceIndex = _voiceIndexTable[chNum]
@@ -122,7 +127,8 @@ class SiMMLChannelSetting
         track.channel.setChannelNumber(chNumRestrict);
         track.channel.setAlgorism(_defaultOpeCount, 0);
         selectTone(track, voiceIndex);
-        
+
+        trace('SiMMLCS: 5');
         // return voice index
         return ((chNum == -1)) ? -1 : voiceIndex;
     }

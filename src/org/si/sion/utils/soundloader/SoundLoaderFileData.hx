@@ -266,7 +266,16 @@ class SoundLoaderFileData extends EventDispatcher
                 _content = _fontLoader.soundFont;
                 _soundLoader._onComplete(this);
             case "ssfpng":
-                _convertBitmapDataToSoundFont(try cast(cast((_loader.content), Bitmap).bitmapData, BitmapData) catch(e:Dynamic) null);
+                {
+                    var bitmapSound : Bitmap;
+                    try {
+                        bitmapSound = cast((_loader.content), Bitmap);
+                    }
+                    catch (e : Dynamic) {
+                        bitmapSound = null;
+                    }
+                    _convertBitmapDataToSoundFont(bitmapSound.bitmapData);
+                }
             case "img", "b2img":
                 _content = _loader.content;
                 _soundLoader._onComplete(this);

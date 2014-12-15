@@ -183,7 +183,7 @@ class SiOPMTable
     /** EG:table selector. */
     public var eg_tableSelector : Array<Dynamic> = null;
     /** EG:table to calculate eg_level. */
-    public var eg_levelTables : Array<Dynamic> = null;
+    public var eg_levelTables : Array<Array<Int>> = null;
     /** EG:table from sgg_type to eg_levelTables index. */
     public var eg_ssgTableIndex : Array<Dynamic> = null;
     /** EG:timer step. */
@@ -338,7 +338,9 @@ class SiOPMTable
         var imax : Int;
         var imax2 : Int;
         var table : Array<Dynamic>;
-        
+
+        trace('********** SiOPMTable._createEGTables()');
+
         // 128 = 64rates + 32ks-rates + 32dummies for dr,sr=0
         eg_timerSteps = new Array<Int>();
         eg_tableSelector = new Array<Int>();
@@ -373,9 +375,10 @@ class SiOPMTable
         // table for ssgenv
         imax = (1 << ENV_BITS);
         imax2 = imax >> 2;
-        eg_levelTables = new Array<Int>();
+        eg_levelTables = new Array<Array<Int>>();
         for (i in 0...7) {
             eg_levelTables[i] = new Array<Int>();
+            trace('----- level table $i craeted.');
         }
         for (i in 0...imax2) {
             eg_levelTables[0][i] = i;  // normal table  
@@ -386,7 +389,7 @@ class SiOPMTable
             eg_levelTables[5][i] = 0;  // ssg fixed at max  
             eg_levelTables[6][i] = 1024;
         }
-        while (i < imax){
+        for (i in imax2...imax){
             eg_levelTables[0][i] = i;  // normal table  
             eg_levelTables[1][i] = 1024;  // ssg positive  
             eg_levelTables[2][i] = 0;  // ssg negative  
@@ -394,7 +397,6 @@ class SiOPMTable
             eg_levelTables[4][i] = 512;  // ssg negative + offset  
             eg_levelTables[5][i] = 0;  // ssg fixed at max  
             eg_levelTables[6][i] = 1024;
-            i++;
         }
         
         eg_ssgTableIndex = new Array<Dynamic>();
@@ -475,7 +477,7 @@ class SiOPMTable
         var j : Int;
         var jmax : Int;
         var v : Float;
-        var iv : Int;
+        var iv : Int = 0;
         var table : Array<Int>;
         
         

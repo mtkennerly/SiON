@@ -6,12 +6,20 @@
 
 package org.si.sion.utils;
 
+#if flash
+import flash.events.ErrorEvent;
+import flash.errors.Error;
+import flash.events.*;
+import flash.utils.ByteArray;
+import flash.utils.Endian;
+#else
 import openfl.events.ErrorEvent;
 import openfl.errors.Error;
 import openfl.events.*;
 import openfl.utils.ByteArray;
+#end
+
 import org.si.utils.ByteArrayExt; 
-//import org.si.sion.module.*;    
 
 /** PCM sample loader/saver */  
 class PCMSample extends EventDispatcher
@@ -389,7 +397,11 @@ class PCMSample extends EventDispatcher
         var pos : Int;
         
         if (bae == null) bae = new ByteArrayExt(waveFile);
+#if flash
+        bae.endian = LITTLE_ENDIAN;
+#else
         bae.endian = "littleEndian";
+#end
         bae.position = 0;
         header = bae.readChunk(content);
         if (header.chunkID != "RIFF" || header.listType != "WAVE")
@@ -442,17 +454,29 @@ class PCMSample extends EventDispatcher
             _updateWaveDataFromSamples();
         }  
         // write wave file  
+#if flash
+        fmt.endian = LITTLE_ENDIAN;
+#else
         fmt.endian = "littleEndian";
+#end
         fmt.writeShort(1);
         fmt.writeShort(_outputChannels);
         fmt.writeInt(Std.int(_outputSampleRate));
         fmt.writeInt(Std.int(_outputSampleRate * bytesPerSample));
         fmt.writeShort(bytesPerSample);
         fmt.writeShort(_outputBitRate);
+#if flash
+        content.endian = LITTLE_ENDIAN;
+#else
         content.endian = "littleEndian";
+#end
         content.writeChunk("fmt ", fmt);
         content.writeChunk("data", _waveData);
+#if flash
+        waveFile.endian = LITTLE_ENDIAN;
+#else
         waveFile.endian = "littleEndian";
+#end
         waveFile.writeChunk("RIFF", content, "WAVE");
         return waveFile;
     }
@@ -615,7 +639,7 @@ class PCMSample extends EventDispatcher
         var t : Float;
         var n : Float;
         var pl0 : Int;
-        var pl1 : Int;
+        var pl1 : Int = 0;
 
         for (i in 0...imax) {
             iptr0 = iptr1;
@@ -642,7 +666,7 @@ class PCMSample extends EventDispatcher
         var t : Float;
         var n : Float;
         var pl0 : Int;
-        var pl1 : Int;
+        var pl1 : Int = 0;
 
         i=0;
         while (i < imax) {
@@ -725,7 +749,6 @@ class PCMSample extends EventDispatcher
 
         // initialize
         _waveData.clear();
-        _waveData.setLength(Std.int(output.length * byteRate));
         _waveData.position = 0;
 
         // convert

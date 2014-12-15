@@ -163,7 +163,7 @@ class MMLSequencer
     public function newMMLEventListener(letter : String, func : MMLEvent->MMLEvent, isGlobal : Bool = false) : Int
     {
         var id : Int = _newUserDefinedEventID++;
-        Reflect.setField(_userDefinedEventID, letter, id);
+        _userDefinedEventID.set(letter, id);
         _eventCommandLetter[id] = letter;
         _eventHandlers[id] = func;
         _eventGlobalFlags[id] = isGlobal;
@@ -205,28 +205,33 @@ class MMLSequencer
      */
     public function prepareCompile(data : MMLData, mml : String) : Bool
     {
+        trace("MMLSequencer.prepareCompile()");
         // set internal parameters
         mmlData = data;
         if (mmlData == null) return false;
 
-
+        trace('Clearing');
         // clear mml data
         mmlData.clear();
-        
+
+        trace('Setting. MMLParser is $MMLParser');
         // setting
         MMLParser._setUserDefinedEventID(_userDefinedEventID);
         MMLParser._setGlobalEventFlags(_eventGlobalFlags);
-        
+
+        trace('MMLS: 2');
+
         // callback before compiling
         var mmlString : String = onBeforeCompile(mml);
         if (mmlString == null) {
             mmlData = null;
             return false;
-        }  // prepare  
-        
-        
-        
+        }
+
+        trace('MMLS: 3');
+        // prepare
         MMLParser.prepareParse(setting, mmlString);
+        trace('MMLS: 4');
         return true;
     }
     
@@ -237,14 +242,12 @@ class MMLSequencer
      */
     public function compile(interval : Int = 1000) : Float
     {
-        if (mmlData == null)             return 1;
-
+        if (mmlData == null) return 1;
 
         // parse mmlString
         var e : MMLEvent = MMLParser.parse(interval);
-        // null means parse imcompleted.
-        if (e == null)             return MMLParser.parseProgress;
-
+        // null means parse incomplete.
+        if (e == null) return MMLParser.parseProgress;
 
         // create main sequence group
         mmlData.sequenceGroup.alloc(e);

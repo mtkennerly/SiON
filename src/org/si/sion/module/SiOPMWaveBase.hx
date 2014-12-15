@@ -30,7 +30,7 @@ class SiOPMWaveBase
     /** @private listen sound loading events */
     private function _listenSoundLoadingEvents(sound : Sound) : Void
     {
-        if (sound.bytesTotal == 0 || sound.bytesTotal > sound.bytesLoaded) {
+        if (sound.bytesTotal == 0 || cast(sound.bytesTotal, UInt) > cast(sound.bytesLoaded, UInt)) {
             _loadingTarget = sound;
             sound.addEventListener(Event.COMPLETE, _cmp);
             sound.addEventListener(IOErrorEvent.IO_ERROR, _err);

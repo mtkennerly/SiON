@@ -6,6 +6,17 @@
 
 package org.si.utils;
 
+#if flash
+import flash.utils.CompressionAlgorithm;
+import flash.net.URLLoaderDataFormat;
+import flash.events.IOErrorEvent;
+import flash.net.URLRequest;
+import flash.net.URLLoader;
+import flash.utils.Endian;
+import flash.utils.ByteArray;
+import flash.events.Event;
+import flash.display.BitmapData;
+#else
 import openfl._v2.utils.CompressionAlgorithm;
 import openfl.net.URLLoaderDataFormat;
 import openfl.events.IOErrorEvent;
@@ -15,6 +26,7 @@ import openfl.utils.Endian;
 import openfl.utils.ByteArray;
 import openfl.events.Event;
 import openfl.display.BitmapData;
+#end
 
 typedef CallbackType = Event->Void;
 
@@ -94,7 +106,7 @@ class ByteArrayExt extends ByteArray
      */
     public function toBitmapData(width : Int = 0, height : Int = 0, transparent : Bool = true, fillColor : Int = 0xFFFFFFFF) : BitmapData
     {
-        var x : Int;
+        var x : Int = 0;
         var y : Int;
         var reqh : Int;
         var bmd : BitmapData;

@@ -174,7 +174,9 @@ class SiMMLSequencer extends MMLSequencer
         super();
         
         var i : Int;
-        
+
+        trace('SiMMLSequencer constructor');
+
         // initialize
         _table = SiMMLTable.instance;
         _module = module;
@@ -190,9 +192,12 @@ class SiMMLSequencer extends MMLSequencer
         _maxTrackCount = DEFAULT_MAX_TRACK_COUNT;
         _isSequenceFinished = true;
         _dummyProcess = false;
-        
+
+        trace('SMML: 1');
+
         // pitch
         newMMLEventListener("k", _onDetune);
+        trace('SMML: 1a');
         newMMLEventListener("kt", _onKeyTrans);
         newMMLEventListener("!@kr", _onRelativeDetune);
         
@@ -310,15 +315,21 @@ class SiMMLSequencer extends MMLSequencer
     /** @private [sion internal] Reset all tracks. */
     public function _resetAllTracks() : Void
     {
+        trace('SiMMLS._resetAllTracks()');
         for (trk in tracks){
+            trace('Reset track "$trk"');
             trk._reset(0);
+            trace('SiMMLS: 1');
             trk.velocity = setting.defaultVolume;
             trk.quantRatio = setting.defaultQuantRatio / setting.maxQuantRatio;
+            trace('SiMMLS: 2');
             trk.quantCount = calcSampleCount(setting.defaultQuantCount);
             trk.channel.masterVolume = setting.defaultFineVolume;
+            trace('SiMMLS: 3');
         }
         _processedSampleCount = 0;
         _isSequenceFinished = (tracks.length == 0);
+        trace('SiMMLS: 4');
     }
     
     
@@ -424,8 +435,12 @@ class SiMMLSequencer extends MMLSequencer
      */
     override public function prepareCompile(data : MMLData, mml : String) : Bool
     {
+        trace('Sequencer.prepareCompile()');
         _freeAllTracks();
-        return super.prepareCompile(data, mml);
+        trace('Sequencer.prepare calling super');
+        var returnValue = super.prepareCompile(data, mml);
+        trace('Sequencer.superPrepare finished');
+        return returnValue;
     }
     
     
@@ -439,23 +454,32 @@ class SiMMLSequencer extends MMLSequencer
      */
     override public function _prepareProcess(data : MMLData, sampleRate : Int, bufferLength : Int) : Void
     {
+        trace('SiMMLSequencer($data, $sampleRate, $bufferLength)');
         // initialize all channels
         _freeAllTracks();
         _processedSampleCount = 0;
         _enableChangeBPM = true;
-        
+
+        trace('SiMMLS: 1');
+
         // call super function (set mmlData/grobalSequence/defaultBPM inside)
         super._prepareProcess(data, sampleRate, bufferLength);
-        
+
+        trace('SiMMLS: 2');
+
         if (mmlData != null) {
             // initialize all sequence tracks
             var trk : SiMMLTrack;
             var seq : MMLSequence = mmlData.sequenceGroup.headSequence;
             var idx : Int = 0;
             var internalTrackID : Int;
-            
+
+            trace('SiMMLS: 3');
+
             while (seq != null){
+                trace('SiMMLS: 4');
                 if (seq.isActive) {
+                    trace('SiMMLS: 5');
                     trk = _freeTracks.pop();
                     if (trk == null) trk = new SiMMLTrack();
                     internalTrackID = idx | SiMMLTrack.MML_TRACK;
@@ -467,8 +491,10 @@ class SiMMLSequencer extends MMLSequencer
             }
         }
 
+        trace('SiMMLS: 6');
         // reset
         _resetAllTracks();
+        trace('SiMMLS: 7');
     }
     
     
@@ -831,7 +857,14 @@ class SiMMLSequencer extends MMLSequencer
                 postfix : pfx
             };
 
-            if (_callbackParseSysCmd == null || !_callbackParseSysCmd(try cast(mmlData, SiMMLData) catch(e:Dynamic) null, commandObject)) {
+            var simmlData : SiMMLData;
+            try {
+                simmlData = cast(mmlData, SiMMLData);
+            }
+            catch (e : Dynamic) {
+                simmlData = null;
+            }
+            if (_callbackParseSysCmd == null || !_callbackParseSysCmd(simmlData, commandObject)) {
                 mmlData.systemCommands.push(commandObject);
             }
         };
