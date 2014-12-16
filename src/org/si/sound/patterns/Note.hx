@@ -22,9 +22,9 @@ class Note
     /** Voice index refering from PatternSequencer.voiceList, -1 (or all negatives) sets no voice changing.
      *  @see si.org.sound.PatternSequencer.voiceList 
      */
-    public var voiceIndex : Float = 0;
+    public var voiceIndex : Int = 0;
     /** Gate time of this note, Number.NaN sets playing with swquencers default gateTime. */
-    public var gateTime : Float = Float.NaN;
+    public var gateTime : Float = Math.NaN;
     /** Any informations */
     public var data : Dynamic = null;
     
@@ -42,8 +42,11 @@ class Note
      *  @param data Any informations you want.
      *  @see si.org.sound.PatternSequencer.voiceList.
      */
-    public function new(note : Int = -1, velocity : Int = 0, length : Float = Float.NaN, voiceIndex : Int = -1, gateTime : Float = Float.NaN, data : Dynamic = null)
+    public function new(note : Int = -1, velocity : Int = 0, length : Float = -1, voiceIndex : Int = -1, gateTime : Float = -1, data : Dynamic = null)
     {
+        if (length == -1) length = Math.NaN;
+        if (gateTime == -1) gateTime = Math.NaN;
+
         this.note = note;
         this.velocity = velocity;
         this.length = length;
@@ -66,8 +69,11 @@ class Note
      *  @param data Any informations you want.
      *  @return this instance.
      */
-    public function setNote(note : Int = -1, velocity : Int = -1, length : Float = Float.NaN, voiceIndex : Int = -1, gateTime : Float = Float.NaN, data : Dynamic = null) : Note
+    public function setNote(note : Int = -1, velocity : Int = -1, length : Float = -1, voiceIndex : Int = -1, gateTime : Float = -1, data : Dynamic = null) : Note
     {
+        if (length == -1) length = Math.NaN;
+        if (gateTime == -1) gateTime = Math.NaN;
+
         this.note = note;
         this.velocity = velocity;
         this.length = length;
@@ -100,7 +106,7 @@ class Note
         gateTime = src.gateTime;
         if (src.data) {
             data = { };
-            for (key in Reflect.fields(src.data))Reflect.setField(data, key, src.data[key]);
+            data.copy(src.data);
         }
         else {
             data = null;

@@ -7,11 +7,6 @@
 
 package org.si.sound.events;
 
-import org.si.sound.events.Event;
-import org.si.sound.events.SiMMLTrack;
-import org.si.sound.events.SiONTrackEvent;
-import org.si.sound.events.SoundObject;
-
 import openfl.events.*;
 import org.si.sion.events.SiONTrackEvent;
 import org.si.sion.sequencer.SiMMLTrack;
@@ -28,13 +23,6 @@ class SoundObjectEvent extends Event
     public var note(get, never) : Int;
     public var bufferIndex(get, never) : Int;
 
-    // namespace
-    //----------------------------------------
-    
-    
-    
-    
-    
     // constants
     //----------------------------------------
     /** Dispatch when the note on appears.
@@ -144,10 +132,10 @@ class SoundObjectEvent extends Event
     private var _track : SiMMLTrack;
     
     /** @private trigger event id */
-    private var _eventTriggerID : Int;
+    public var _eventTriggerID : Int;
     
     /** @private note number */
-    private var _note : Int;
+    public var _note : Int;
     
     /** @private buffering index */
     private var _bufferIndex : Int;

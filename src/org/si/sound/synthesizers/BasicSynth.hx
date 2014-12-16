@@ -6,9 +6,6 @@
 
 package org.si.sound.synthesizers;
 
-import org.si.sound.synthesizers.SiONVoice;
-import org.si.sound.synthesizers.VoiceReference;
-
 import org.si.sion.*;
 import org.si.sion.module.SiOPMTable;
 import org.si.sion.module.SiOPMChannelParam;
@@ -62,7 +59,7 @@ class BasicSynth extends VoiceReference
         var imax : Int = _tracks.length;
         var p : SiOPMChannelParam = _voice.channelParam;
         p.cutoff = ((c <= 0)) ? 0 : ((c >= 1)) ? 128 : Math.floor(c * 128);
-        for (imax){
+        for (i in 0...imax) {
             _tracks[i].channel.setSVFilter(p.cutoff, p.resonance, p.far, p.fdr1, p.fdr2, p.frr, p.fdc1, p.fdc2, p.fsc, p.frc);
         }
         return c;
@@ -77,7 +74,7 @@ class BasicSynth extends VoiceReference
         var imax : Int = _tracks.length;
         var p : SiOPMChannelParam = _voice.channelParam;
         p.resonance = ((r <= 0)) ? 0 : ((r >= 1)) ? 9 : Math.floor(r * 9);
-        for (imax){
+        for (i in 0...imax) {
             _tracks[i].channel.setSVFilter(p.cutoff, p.resonance, p.far, p.fdr1, p.fdr2, p.frr, p.fdc1, p.fdc2, p.fsc, p.frc);
         }
         return r;
@@ -91,7 +88,7 @@ class BasicSynth extends VoiceReference
         var i : Int;
         var imax : Int = _tracks.length;
         _voice.channelParam.filterType = t;
-        for (imax){
+        for (i in 0...imax) {
             _tracks[i].channel.filterType = t;
         }
         return t;
@@ -116,7 +113,7 @@ class BasicSynth extends VoiceReference
         var i : Int;
         var imax : Int = _tracks.length;
         var ms : Float = frame * 1000 / 60;
-        for (imax){
+        for (i in 0...imax) {
             _tracks[i].channel.setLFOCycleTime(ms);
         }
         return frame;
@@ -129,7 +126,7 @@ class BasicSynth extends VoiceReference
         _voice.channelParam.amd = _voice.amDepth = m;
         var i : Int;
         var imax : Int = _tracks.length;
-        for (imax){
+        for (i in 0...imax) {
             _tracks[i].channel.setAmplitudeModulation(m);
         }
         return m;
@@ -143,7 +140,7 @@ class BasicSynth extends VoiceReference
         _voice.channelParam.pmd = _voice.pmDepth = m;
         var i : Int;
         var imax : Int = _tracks.length;
-        for (imax){
+        for (i in 0...imax) {
             _tracks[i].channel.setPitchModulation(m);
         }
         return m;
@@ -157,14 +154,14 @@ class BasicSynth extends VoiceReference
     }
     private function set_attackTime(n : Float) : Float{
         var flg : Int = SiOPMTable.instance.final_oscilator_flags[_voice.channelParam.opeCount][_voice.channelParam.alg];
-        var iar : Int = ((n == 0)) ? 63 : ((1 - n) * 48);
-        if (flg & 1)             _voice.channelParam.operatorParam[0].ar = iar;
-        if (flg & 2)             _voice.channelParam.operatorParam[1].ar = iar;
-        if (flg & 4)             _voice.channelParam.operatorParam[2].ar = iar;
-        if (flg & 8)             _voice.channelParam.operatorParam[3].ar = iar;
+        var iar : Int = (n == 0) ? 63 : Math.floor((1 - n) * 48);
+        if ((flg & 1) != 0) _voice.channelParam.operatorParam[0].ar = iar;
+        if ((flg & 2) != 0) _voice.channelParam.operatorParam[1].ar = iar;
+        if ((flg & 4) != 0) _voice.channelParam.operatorParam[2].ar = iar;
+        if ((flg & 8) != 0) _voice.channelParam.operatorParam[3].ar = iar;
         var i : Int;
         var imax : Int = _tracks.length;
-        for (imax){
+        for (i in 0...imax) {
             _tracks[i].channel.setAllAttackRate(iar);
         }
         return n;
@@ -172,20 +169,20 @@ class BasicSynth extends VoiceReference
     
     
     /** release rate (0-1), lower value makes release slow. */
-    private function get_releaseTime() : Float{
+    private function get_releaseTime() : Float {
         var irr : Int = _voice.channelParam.operatorParam[_voice.channelParam.opeCount - 1].rr;
         return ((irr > 48)) ? 0 : (1 - irr * 0.020833333333333332);
     }
     private function set_releaseTime(n : Float) : Float{
         var flg : Int = SiOPMTable.instance.final_oscilator_flags[_voice.channelParam.opeCount][_voice.channelParam.alg];
-        var irr : Int = ((n == 0)) ? 63 : ((1 - n) * 48);
-        if (flg & 1)             _voice.channelParam.operatorParam[0].rr = irr;
-        if (flg & 2)             _voice.channelParam.operatorParam[1].rr = irr;
-        if (flg & 4)             _voice.channelParam.operatorParam[2].rr = irr;
-        if (flg & 8)             _voice.channelParam.operatorParam[3].rr = irr;
+        var irr : Int = ((n == 0)) ? 63 : Math.floor((1 - n) * 48);
+        if ((flg & 1) != 0) _voice.channelParam.operatorParam[0].rr = irr;
+        if ((flg & 4) != 0) _voice.channelParam.operatorParam[2].rr = irr;
+        if ((flg & 2) != 0) _voice.channelParam.operatorParam[1].rr = irr;
+        if ((flg & 8) != 0) _voice.channelParam.operatorParam[3].rr = irr;
         var i : Int;
         var imax : Int = _tracks.length;
-        for (imax){
+        for (i in 0...imax) {
             _tracks[i].channel.setAllReleaseRate(irr);
         }
         return n;
@@ -229,7 +226,7 @@ class BasicSynth extends VoiceReference
      */
     public function setFilterEnvelop(filterType : Int = 0, cutoff : Float = 1, resonance : Float = 0, far : Int = 0, fdr1 : Int = 0, fdr2 : Int = 0, frr : Int = 0, fdc1 : Float = 1, fdc2 : Float = 0.5, fsc : Float = 0.25, frc : Float = 1) : Void
     {
-        _voice.setFilterEnvelop(filterType, cutoff * 128, resonance * 9, far, fdr1, fdr2, frr, fdc1 * 128, fdc2 * 128, fsc * 128, frc * 128);
+        _voice.setFilterEnvelop(filterType, Math.round(cutoff * 128), Math.round(resonance * 9), far, fdr1, fdr2, frr, Math.floor(fdc1 * 128), Math.floor(fdc2 * 128), Math.floor(fsc * 128), Math.floor(frc * 128));
         _voiceUpdateNumber++;
     }
     
@@ -297,8 +294,8 @@ class BasicSynth extends VoiceReference
         var i0 : Int = _tracks.length;
         var imax : Int = tracks.length;
         var i : Int;
-        _tracks.length = i0 + imax;
-        for (imax){_tracks[i0 + i] = tracks[i];
+        for (i in 0...imax) {
+            _tracks[i0 + i] = tracks[i];
         }
     }
     

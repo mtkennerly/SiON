@@ -71,7 +71,7 @@ class Scale
     private static inline var ST_RYUKYU : Int = 0x18b18b1;
     
     /** scale table dictionary */
-    static @:protected var _scaleTableDictionary = [
+    static public var _scaleTableDictionary = [
         "m"    => ST_MINOR,
         "nm"   => ST_MINOR,
         "aeo"  => ST_MINOR,
@@ -160,35 +160,36 @@ class Scale
      *  </table>
      *  If you want to set "G sharp harmonic minor scale", name = "G+hm".
      */
-    private function get_name() : String{return _noteNames[_scaleNotes[0] % 12] + _scaleName;
+    private function get_name() : String {
+        return _noteNames[_scaleNotes[0] % 12] + _scaleName;
     }
-    private function set_name(str : String) : String{
+    private function set_name(str : String) : String
+    {
         if (str == null || str == "") {
             _scaleName = "";
             _scaleTable = ST_MAJOR;
             this.rootNote = _defaultCenterOctave * 12;
-            return;
+            return _scaleName;
         }
         
         var rex : EReg = new EReg('(o[0-9])?([A-Ga-g])([+#\\-b])?([a-z0-9]+)?', "");
-        var mat : Dynamic = rex.exec(str);
         var i : Int;
-        if (mat != null) {
+        if (rex.match(str)) {
             _scaleName = str;
-            var note : Int = [9, 11, 0, 2, 4, 5, 7][Std.string(mat[2]).toLowerCase().charCodeAt() - "a".charCodeAt()];
-            if (mat[3]) {
-                if (mat[3] == "+" || mat[3] == "#")                     note++
-                else if (mat[3] == "-")                     note--;
+            var note : Int = [9, 11, 0, 2, 4, 5, 7][Std.string(rex.matched(2)).toLowerCase().charCodeAt(0) - "a".charCodeAt(0)];
+            if (rex.matched(3) != null) {
+                if (rex.matched(3) == "+" || rex.matched(3) == "#") note++
+                else if (rex.matched(3) == "-")                     note--;
             }
             if (note < 0) note += 12
             else if (note > 11)  note -= 12;
-            if (mat[1])  note += Std.parseInt(mat[1].charAt(1)) * 12
+            if (rex.matched(1) != null)  note += Std.parseInt(rex.matched(1).charAt(1)) * 12
             else note += _defaultCenterOctave * 12;
             
-            if (mat[4]) {
-                if (!(Lambda.has(_scaleTableDictionary, mat[4])))                     throw _errorInvalidScaleName(str);
-                _scaleTable = _scaleTableDictionary[mat[4]];
-                _scaleName = mat[4];
+            if (rex.matched(4) != null) {
+                if (!_scaleTableDictionary.exists(rex.matched(4))) throw _errorInvalidScaleName(str);
+                _scaleTable = _scaleTableDictionary.get(rex.matched(4));
+                _scaleName = rex.matched(4);
             }
             else {
                 _scaleTable = ST_MAJOR;
@@ -210,35 +211,42 @@ class Scale
     private function set_centerOctave(oct : Int) : Int{
         _defaultCenterOctave = oct;
         var prevoct : Int = Math.floor(_scaleNotes[0] / 12);
-        if (prevoct == oct)             return;
+        if (prevoct == oct) return oct;
         var i : Int;
         var offset : Int = (oct - prevoct) * 12;
-        for (_scaleNotes.length){_scaleNotes[i] += offset;
+        for (i in 0..._scaleNotes.length) {
+            _scaleNotes[i] += offset;
         }
-        for (_tensionNotes.length){_tensionNotes[i] += offset;
+        for (i in 0..._tensionNotes.length) {
+            _tensionNotes[i] += offset;
         }
         return oct;
     }
     
     
     /** root note number */
-    private function get_rootNote() : Int{return _scaleNotes[0];
+    private function get_rootNote() : Int {
+        return _scaleNotes[0];
     }
     private function set_rootNote(note : Int) : Int{
-        _scaleNotes.length = 0;
-        _tensionNotes.length = 0;
-        for (i in 0...12){if (_scaleTable & (1 << i) != 0)                 _scaleNotes.push(i + note);
+        _scaleNotes.splice(0, _scaleNotes.length);
+        _tensionNotes.splice(0, _tensionNotes.length);
+        for (i in 0...12) {
+            if (_scaleTable & (1 << i) != 0) _scaleNotes.push(i + note);
         }
-        for (/* TODO: FIXME */24){if (_scaleTable & (1 << i) != 0)                 _tensionNotes.push(i + note);
+        for (i in 12...24) {
+            if (_scaleTable & (1 << i) != 0) _tensionNotes.push(i + note);
         }
         return note;
     }
     
     
     /** bass note number */
-    private function get_bassNote() : Int{return _scaleNotes[0];
+    private function get_bassNote() : Int {
+        return _scaleNotes[0];
     }
-    private function set_bassNote(note : Int) : Int{rootNote = note;
+    private function set_bassNote(note : Int) : Int {
+        rootNote = note;
         return note;
     }
     
@@ -278,7 +286,8 @@ class Scale
         var i : Int;
         var imax : Int = ((table.length < 25)) ? table.length : 25;
         _scaleTable = 0;
-        for (imax){if (table[i])                 _scaleTable |= (1 << i);
+        for (i in 0...imax) {
+            if (table[i]) _scaleTable |= (1 << i);
         }
         this.rootNote = rootNote;
     }
@@ -314,10 +323,12 @@ class Scale
         var up : Int;
         var dw : Int;
         up = n + 1;
-        while (up < 24 && (_scaleTable & (1 << up)) == 0){up++;
+        while (up < 24 && (_scaleTable & (1 << up)) == 0) {
+            up++;
         }
         dw = n - 1;
-        while (dw >= 0 && (_scaleTable & (1 << dw)) == 0){dw--;
+        while (dw >= 0 && (_scaleTable & (1 << dw)) == 0) {
+            dw--;
         }
         return note - n + ((((n - dw) <= (up - n))) ? dw : up);
     }
@@ -368,13 +379,13 @@ class Scale
         _scaleTable = src._scaleTable;
         var i : Int;
         var imax : Int = src._scaleNotes.length;
-        _scaleNotes.length = imax;
-        for (imax){
+        _scaleNotes.splice(0, _scaleNotes.length);
+        for (i in 0...imax) {
             _scaleNotes[i] = src._scaleNotes[i];
         }
         imax = src._tensionNotes.length;
-        _tensionNotes.length = imax;
-        for (imax){
+        _tensionNotes.splice(0, _tensionNotes.length);
+        for (i in 0...imax) {
             _tensionNotes[i] = src._tensionNotes[i];
         }
         return this;

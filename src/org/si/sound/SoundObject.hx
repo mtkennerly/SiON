@@ -8,16 +8,6 @@
 package org.si.sound;
 
 import openfl.errors.Error;
-import org.si.sound.EffectChain;
-import org.si.sound.EventDispatcher;
-import org.si.sound.Fader;
-import org.si.sound.SiONDriver;
-import org.si.sound.SiONEvent;
-import org.si.sound.SiONTrackEvent;
-import org.si.sound.SiONVoice;
-import org.si.sound.SoundObjectContainer;
-import org.si.sound.VoiceReference;
-
 import openfl.events.EventDispatcher;
 import org.si.sion.*;
 import org.si.sion.utils.Translator;
@@ -80,16 +70,8 @@ class SoundObject extends EventDispatcher
     public var effectSend3(get, set) : Float;
     public var effectSend4(get, set) : Float;
     public var pitchBend(get, set) : Float;
-    public var effectors(get, set) : Array<Dynamic>;
+    public var effectors(get, set) : Array<SiEffectBase>;
 
-    // namespace
-    //----------------------------------------
-    
-    
-    
-    
-    
-    
     // variables
     //----------------------------------------
     /** Name. */
@@ -126,7 +108,7 @@ class SoundObject extends EventDispatcher
     /** @private [protected] gate ratio (value of 'q' command * 0.125) */
     private var _gateTime : Float;
     /** @private [protected] Event mask (value of '&#64;mask' command) */
-    private var _eventMask : Float;
+    private var _eventMask : Int;
     /** @private [protected] Event trigger ID */
     private var _eventTriggerID : Int;
     /** @private [protected] note on trigger | (note off trigger &lt;&lt; 2) trigger type */
@@ -184,11 +166,11 @@ class SoundObject extends EventDispatcher
     
     /** Voice data to play */
     private function get_voice() : SiONVoice{
-        return _synthesizer_voice;
+        return _synthesizer._voice;
     }
     private function set_voice(v : SiONVoice) : SiONVoice{
         _voiceReference.voice = v;
-        if (!isPlaying)             _synthesizer = _voiceReference;
+        if (!isPlaying) _synthesizer = _voiceReference;
         return v;
     }
     
@@ -198,7 +180,8 @@ class SoundObject extends EventDispatcher
     }
     private function set_synthesizer(s : VoiceReference) : VoiceReference{
         if (isPlaying)             throw new Error("SoundObject: Synthesizer should not be changed during playing.");
-        _synthesizer = s || _voiceReference;
+        _synthesizer = s;
+        if (_synthesizer == null) _synthesizer = _voiceReference;
         return s;
     }
     
@@ -238,7 +221,7 @@ class SoundObject extends EventDispatcher
     }
     private function set_fineTune(p : Float) : Float{
         _pitchShift = p;
-        if (_track != null)             _track.pitchShift = _pitchShift * 64;
+        if (_track != null) _track.pitchShift = Std.int(_pitchShift * 64);
         return p;
     }
     /** Track gate time (0:Minimum - 1:Maximum). (value of 'q' command * 0.125) */
@@ -250,7 +233,8 @@ class SoundObject extends EventDispatcher
         return g;
     }
     /** Track event mask. (value of '&#64;mask' command) */
-    private function get_eventMask() : Int{return _eventMask;
+    private function get_eventMask() : Int {
+        return _eventMask;
     }
     private function set_eventMask(m : Int) : Int{
         _eventMask = m;
@@ -300,62 +284,67 @@ class SoundObject extends EventDispatcher
         _thisPan = p;
         _updatePan();
         _limitPan();
-        if (_track != null)             _track.channel.pan = _pan * 64;
+        if (_track != null) _track.channel.pan = Std.int(_pan * 64);
         return p;
     }
     
     
     /** Channel effect send level for slot 1 (0:Minimum - 1:Maximum), this property can control track after play(). */
-    private function get_effectSend1() : Float{return _volumes[1] * 0.0078125;
+    private function get_effectSend1() : Float {
+        return _volumes[1] * 0.0078125;
     }
     private function set_effectSend1(v : Float) : Float{
         v = ((v < 0)) ? 0 : ((v > 1)) ? 1 : v;
-        _volumes[1] = v * 128;
+        _volumes[1] = Std.int(v * 128);
         _updateStreamSend(1, v);
         return v;
     }
     /** Channel effect send level for slot 2 (0:Minimum - 1:Maximum), this property can control track after play(). */
-    private function get_effectSend2() : Float{return _volumes[2] * 0.0078125;
+    private function get_effectSend2() : Float {
+        return _volumes[2] * 0.0078125;
     }
     private function set_effectSend2(v : Float) : Float{
         v = ((v < 0)) ? 0 : ((v > 1)) ? 1 : v;
-        _volumes[2] = v * 128;
+        _volumes[2] = Std.int(v * 128);
         _updateStreamSend(2, v);
         return v;
     }
     /** Channel effect send level for slot 3 (0:Minimum - 1:Maximum), this property can control track after play(). */
-    private function get_effectSend3() : Float{return _volumes[3] * 0.0078125;
+    private function get_effectSend3() : Float {
+        return _volumes[3] * 0.0078125;
     }
     private function set_effectSend3(v : Float) : Float{
         v = ((v < 0)) ? 0 : ((v > 1)) ? 1 : v;
-        _volumes[3] = v * 128;
+        _volumes[3] = Std.int(v * 128);
         _updateStreamSend(3, v);
         return v;
     }
     /** Channel effect send level for slot 4 (0:Minimum - 1:Maximum), this property can control track after play(). */
-    private function get_effectSend4() : Float{return _volumes[4] * 0.0078125;
+    private function get_effectSend4() : Float {
+        return _volumes[4] * 0.0078125;
     }
-    private function set_effectSend4(v : Float) : Float{
+    private function set_effectSend4(v : Float) : Float {
         v = ((v < 0)) ? 0 : ((v > 1)) ? 1 : v;
-        _volumes[4] = v * 128;
+        _volumes[4] = Std.int(v * 128);
         _updateStreamSend(4, v);
         return v;
     }
     /** Channel pitch bend, 1 for halftone, this property can control track after play(). */
-    private function get_pitchBend() : Float{return _pitchBend;
+    private function get_pitchBend() : Float {
+        return _pitchBend;
     }
-    private function set_pitchBend(p : Float) : Float{
+    private function set_pitchBend(p : Float) : Float {
         _pitchBend = p;
-        if (_track != null)             _track.pitchBend = p * 64;
+        if (_track != null) _track.pitchBend = Std.int(p * 64);
         return p;
     }
     
     
     /** Array of SiEffectBase to modify this sound object's output. */
-    private function get_effectors() : Array<Dynamic>{
+    private function get_effectors() : Array<SiEffectBase> {
         return ((_effectChain != null)) ? _effectChain.effectList : null;
     }
-    private function set_effectors(effectList : Array<Dynamic>) : Array<Dynamic>{
+    private function set_effectors(effectList : Array<SiEffectBase>) : Array<SiEffectBase> {
         if (_effectChain != null) {
             _effectChain.effectList = effectList;
         }
@@ -380,11 +369,13 @@ class SoundObject extends EventDispatcher
     public function new(name : String = null, synth : VoiceReference = null)
     {
         super();
-        this.name = name || "";
+        this.name = name;
+        if (this.name == null) this.name = "";
         _parent = null;
         _childDepth = 0;
         _voiceReference = new VoiceReference();
-        _synthesizer = synth || _voiceReference;
+        _synthesizer = synth;
+        if (_synthesizer == null) _synthesizer = _voiceReference;
         _effectChain = null;
         _track = null;
         _tracks = null;
@@ -465,7 +456,7 @@ class SoundObject extends EventDispatcher
      */
     public function setVolume(slot : Int, volume : Float) : Void
     {
-        _volumes[slot] = ((volume < 0)) ? 0 : ((volume > 1)) ? 128 : (volume * 128);
+        _volumes[slot] = ((volume < 0)) ? 0 : ((volume > 1)) ? 128 : Math.floor(volume * 128);
     }
     
     
@@ -478,9 +469,9 @@ class SoundObject extends EventDispatcher
         if (drv != null) {
             if (!_fader.isActive) {
                 drv.addEventListener(SiONEvent.STREAM, _onStream);
-                drvforceDispatchStreamEvent();
+                drv.forceDispatchStreamEvent();
             }
-            _fader.setFade(_fadeVolume, 0, 1, time * drv.sampleRate / drv.bufferLength);
+            _fader.setFade(_fadeVolume, 0, 1, Std.int(time * drv.sampleRate / drv.bufferLength));
         }
     }
     
@@ -494,9 +485,9 @@ class SoundObject extends EventDispatcher
         if (drv != null) {
             if (!_fader.isActive) {
                 drv.addEventListener(SiONEvent.STREAM, _onStream);
-                drvforceDispatchStreamEvent();
+                drv.forceDispatchStreamEvent();
             }
-            _fader.setFade(_fadeVolume, 1, 0, time * drv.sampleRate / drv.bufferLength);
+            _fader.setFade(_fadeVolume, 1, 0, Std.int(time * drv.sampleRate / drv.bufferLength));
         }
     }
     
@@ -539,7 +530,7 @@ class SoundObject extends EventDispatcher
     private function _noteOn(note : Int, isDisposable : Bool) : SiMMLTrack
     {
         if (driver == null)             return null;
-        var voice : SiONVoice = _synthesizer_voice;
+        var voice : SiONVoice = _synthesizer._voice;
         var topEC : EffectChain = _topEffectChain();
         var track : SiMMLTrack = driver.noteOn(note, voice, _length, _delay, _quantize, _trackID, isDisposable);
         _addNoteEventListeners();
@@ -554,11 +545,11 @@ class SoundObject extends EventDispatcher
         else {
             track.channel.setAllStreamSendLevels(_volumes);
         }
-        track.channel.pan = _pan * 64;
+        track.channel.pan = Math.floor(_pan * 64);
         track.channel.mute = _mute;
-        track.pitchBend = _pitchBend * 64;
+        track.pitchBend = Math.floor(_pitchBend * 64);
         track.noteShift = _noteShift;
-        track.pitchShift = _pitchShift * 64;
+        track.pitchShift = Math.floor(_pitchShift * 64);
         if (voice != null && Math.isNaN(voice.defaultGateTime))             track.quantRatio = _gateTime;
         return track;
     }
@@ -587,12 +578,12 @@ class SoundObject extends EventDispatcher
     {
         if (driver == null)             return null;
         var len : Float = ((applyLength)) ? _length : 0;
-        var voice : SiONVoice = _synthesizer_voice;
+        var voice : SiONVoice = _synthesizer._voice;
         var topEC : EffectChain = _topEffectChain();
         var list : Array<SiMMLTrack> = driver.sequenceOn(data, voice, len, _delay, _quantize, _trackID, isDisposable);
         var track : SiMMLTrack;
-        var ps : Int = _pitchShift * 64;
-        var pb : Int = _pitchBend * 64;
+        var ps : Int = Std.int(_pitchShift * 64);
+        var pb : Int = Std.int(_pitchBend * 64);
         _addNoteEventListeners();
         if (_effectChain != null) {
             _effectChain._activateLocalEffect(_childDepth);
@@ -606,7 +597,7 @@ class SoundObject extends EventDispatcher
             else {
                 track.channel.setAllStreamSendLevels(_volumes);
             }
-            track.channel.pan = _pan * 64;
+            track.channel.pan = Std.int(_pan * 64);
             track.channel.mute = _mute;
             track.pitchBend = pb;
             track.noteShift = _noteShift;
@@ -701,7 +692,9 @@ class SoundObject extends EventDispatcher
     // top effect chain
     private function _topEffectChain() : EffectChain
     {
-        return _effectChain || (((_parent != null)) ? _parent._topEffectChain() : null);
+        if (_effectChain != null) return _effectChain;
+        if (_parent == null) return null
+        else return _parent._topEffectChain();
     }
     
     
@@ -709,7 +702,7 @@ class SoundObject extends EventDispatcher
     @:allow(org.si.sound)
     private function _setParent(parent : SoundObjectContainer) : Void
     {
-        if (_parent != null)             _parent.removeChild(this);
+        if (_parent != null) _parent.removeChild(this);
         _parent = parent;
         _updateChildDepth();
         _updateMute();
@@ -741,8 +734,8 @@ class SoundObject extends EventDispatcher
     @:allow(org.si.sound)
     private function _updateVolume() : Void
     {
-        if (_parent != null)             _volumes[0] = _parent._volumes[0] * _thisVolume * _faderVolume
-        else _volumes[0] = _thisVolume * _faderVolume * 128;
+        if (_parent != null) _volumes[0] = Math.floor(_parent._volumes[0] * _thisVolume * _faderVolume)
+        else _volumes[0] = Math.floor(_thisVolume * _faderVolume * 128);
     }
     
     
@@ -750,8 +743,8 @@ class SoundObject extends EventDispatcher
     @:allow(org.si.sound)
     private function _limitVolume() : Void
     {
-        if (_volumes[0] < 0)             _volumes[0] = 0
-        else if (_volumes[0] > 128)             _volumes[0] = 128;
+        if (_volumes[0] < 0) _volumes[0] = 0
+        else if (_volumes[0] > 128) _volumes[0] = 128;
     }
     
     
@@ -759,7 +752,7 @@ class SoundObject extends EventDispatcher
     @:allow(org.si.sound)
     private function _updatePan() : Void
     {
-        if (_parent != null)             _pan = (_parent._pan + _thisPan) * 0.5
+        if (_parent != null) _pan = (_parent._pan + _thisPan) * 0.5
         else _pan = _thisPan;
     }
     
@@ -778,7 +771,7 @@ class SoundObject extends EventDispatcher
     {
         if (_fader.execute()) {
             driver.removeEventListener(SiONEvent.STREAM, _onStream);
-            driverforceDispatchStreamEvent(false);
+            driver.forceDispatchStreamEvent(false);
         }
     }
     

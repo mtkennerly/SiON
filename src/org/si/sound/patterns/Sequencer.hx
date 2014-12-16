@@ -7,19 +7,10 @@
 
 package org.si.sound.patterns;
 
-import org.si.sound.patterns.MMLEvent;
-import org.si.sound.patterns.MMLSequence;
-import org.si.sound.patterns.SiMMLTrack;
-import org.si.sound.patterns.SiONData;
-import org.si.sound.patterns.SoundObject;
-
 import org.si.sion.*;
 import org.si.sion.sequencer.base.*;
 import org.si.sion.sequencer.SiMMLTrack;
 import org.si.sound.SoundObject;
-
-
-
 
 /** The Sequencer class provides simple one track pattern player. */
 class Sequencer
@@ -58,17 +49,17 @@ class Sequencer
     
     
     /** @private [internal use] callback on every notes. function(Sequencer) : void */
-    private var onEnterFrame : Function = null;
+    public var onEnterFrame : Sequencer->Void = null;
     /** @private [internal use] callback after every notes. function(Sequencer) : void */
-    private var onExitFrame : Function = null;
+    public var onExitFrame : Sequencer->Void = null;
     /** @private [internal use] callback on first beat of every segments. function(Sequencer) : void */
-    private var onEnterSegment : Function = null;
+    public var onEnterSegment : Sequencer->Void = null;
     /** @private [internal use] Frame count in one segment */
-    private var segmentFrameCount : Int;
+    public var segmentFrameCount : Int;
     /** @private [internal use] Grid step in ticks */
-    private var gridStep : Int;
+    public var gridStep : Int;
     /** @private [internal use] portament */
-    private var portament : Int;
+    public var portament : Int;
     
     /** @private owner of this pattern sequencer */
     private var _owner : SoundObject;
@@ -93,7 +84,7 @@ class Sequencer
     /** @private Default length */
     private var _defaultLength : Int;
     /** @private Default gate time */
-    private var _defaultGateTime : Int;
+    private var _defaultGateTime : Float;
     /** @private Current note */
     private var _currentNote : Note;
     /** @private Grid shift vectors */
@@ -206,17 +197,21 @@ class Sequencer
     
     
     /** default length, this value is refered when the Note's length property is Number.NaN. */
-    private function get_defaultLength() : Float{return _defaultLength;
+    private function get_defaultLength() : Float {
+        return _defaultLength;
     }
-    private function set_defaultLength(l : Float) : Float{_defaultLength = ((l < 0)) ? 0 : l;
+    private function set_defaultLength(l : Float) : Float {
+        _defaultLength = (l < 0) ? 0 : Std.int(l);
         return l;
     }
     
     
     /** default gate time, this value is refered when the Note's gate time property is Number.NaN. */
-    private function get_defaultGateTime() : Float{return _defaultGateTime;
+    private function get_defaultGateTime() : Float {
+        return _defaultGateTime;
     }
-    private function set_defaultGateTime(g : Float) : Float{_defaultGateTime = ((g < 0)) ? 0 : ((g > 1)) ? 1 : g;
+    private function set_defaultGateTime(g : Float) : Float {
+        _defaultGateTime = (g < 0) ? 0 : (g > 1) ? 1 : Std.int(g);
         return g;
     }
     
@@ -228,7 +223,7 @@ class Sequencer
     }
     private function set_division(d : Int) : Int{
         segmentFrameCount = d;
-        gridStep = 1920 / d;
+        gridStep = Math.floor(1920 / d);
         return d;
     }
     
@@ -238,7 +233,7 @@ class Sequencer
     // constructor
     //----------------------------------------
     /** @private constructor. you should not create new PatternSequencer in your own codes. */
-    public function new(owner : SoundObject, data : SiONData, defaultNote : Int = 60, defaultVelocity : Int = 128, defaultLength : Float = 0, defaultGateTime : Float = 0.75, gridShiftPattern : Array<Int> = null)
+    public function new(owner : SoundObject, data : SiONData, defaultNote : Int = 60, defaultVelocity : Int = 128, defaultLength : Int = 0, defaultGateTime : Float = 0.75, gridShiftPattern : Array<Int> = null)
     {
         _owner = owner;
         pattern = null;
@@ -278,9 +273,9 @@ class Sequencer
     // operations
     //----------------------------------------
     /** @private [internal use] */
-    private function play(track : SiMMLTrack) : SiMMLTrack
+    public function play(track : SiMMLTrack) : SiMMLTrack
     {
-        _synthesizer_updateNumber = _owner_voiceUpdateNumber;
+        _synthesizer_updateNumber = _owner.synthesizer._voiceUpdateNumber;
         _track = track;
         _track.setPortament(portament);
         _track.setEventTrigger(_eventTriggerID, _noteTriggerFlags & 3, _noteTriggerFlags >> 2);
@@ -293,14 +288,14 @@ class Sequencer
     
     
     /** @private [internal use] */
-    private function stop() : Void
+    public function stop() : Void
     {
         
     }
     
     
     /** @private [internal use] set portament */
-    private function setPortament(p : Int) : Int
+    public function setPortament(p : Int) : Int
     {
         portament = p;
         if (portament < 0)             portament = 0;
@@ -320,52 +315,47 @@ class Sequencer
         var patternLength : Int;
         
         // increment frame counter
-        if (++_frameCounter == segmentFrameCount)             _frameCounter = 0  // segment oprations  ;
-        
-        
-        
-        if (_frameCounter == 0)             _onEnterSegment()  // pattern sequencer  ;
-        
-        
-        
+        if (++_frameCounter == segmentFrameCount) _frameCounter = 0;
+
+        // segment operations
+        if (_frameCounter == 0) _onEnterSegment();
+
+        // pattern sequencer
         patternLength = ((pattern != null)) ? pattern.length : 0;
         
         if (patternLength > 0) {
             // increment pointer
-            if (++_sequencePointer >= patternLength)                 _sequencePointer %= patternLength  // get current Note from pattern  ;
-            
-            
-            
+            if (++_sequencePointer >= patternLength) _sequencePointer %= patternLength;
+
+            // get current Note from pattern
             _currentNote = pattern[_sequencePointer];
             
             // callback on enter frame
-            if (onEnterFrame != null)                 onEnterFrame(this)  // get current velocity, note on when velocity > 0  ;
-            
-            
-            
+            if (onEnterFrame != null) onEnterFrame(this);
+
+              // get current velocity, note on when velocity > 0
             vel = velocity;
             if (vel > 0) {
                 // change voice
                 if (voiceList != null && _currentNote != null && _currentNote.voiceIndex >= 0) {
                     _owner.voice = voiceList[_currentNote.voiceIndex];
-                }  // update owners track voice when synthesizer is updated  
-                
-                if (_synthesizer_updateNumber != _owner_voiceUpdateNumber) {
-                    _owner_voice.updateTrackVoice(_track);
-                    _synthesizer_updateNumber = _owner_voiceUpdateNumber;
-                }  // change track velocity & gate time  
-                
-                
-                
+                }
+
+                // update owners track voice when synthesizer is updated
+                if (_synthesizer_updateNumber != _owner.synthesizer._voiceUpdateNumber) {
+                    _owner.synthesizer._voice.updateTrackVoice(_track);
+                    _synthesizer_updateNumber = _owner.synthesizer._voiceUpdateNumber;
+                }
+
+                // change track velocity & gate time
                 _track.velocity = vel;
                 _track.quantRatio = gateTime;
                 
                 // note on
                 _track.setNote(note, SiONDriver.mutex.sequencer.calcSampleLength(length), (portament > 0));
-            }  // set length of rest event  
-            
-            
-            
+            }
+
+            // set length of rest event
             if (_gridShiftPattern != null) {
                 var diff : Int = _gridShiftPattern[_frameCounter] - _currentGridShift;
                 _waitEvent.length = gridStep + diff;
@@ -373,11 +363,10 @@ class Sequencer
             }
             else {
                 _waitEvent.length = gridStep;
-            }  // callback on exit frame  
-            
-            
-            
-            if (onExitFrame != null)                 onExitFrame(this);
+            }
+
+            // callback on exit frame
+            if (onExitFrame != null)  onExitFrame(this);
         }
         
         return null;
@@ -388,8 +377,9 @@ class Sequencer
     private function _onEnterSegment() : Void
     {
         // callback on enter segment
-        if (onEnterSegment != null)             onEnterSegment(this)  // replace pattern  ;
-        
+        if (onEnterSegment != null) onEnterSegment(this);
+
+        // replace pattern
         if (nextPattern != null) {
             pattern = nextPattern;
             nextPattern = null;

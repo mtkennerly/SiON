@@ -7,8 +7,7 @@
 
 package org.si.sound;
 
-import org.si.sound.SiONVoice;
-
+import openfl.errors.Error;
 import org.si.sion.*;
 import org.si.sound.synthesizers.*;
 import org.si.sound.core.EffectChain;
@@ -21,13 +20,6 @@ class SoundObjectContainer extends SoundObject
 {
     public var numChildren(get, never) : Int;
 
-    // namespace
-    //----------------------------------------
-    
-    
-    
-    
-    
     // variables
     //----------------------------------------
     /** @private [protected] the list of child sound objects. */
@@ -42,7 +34,8 @@ class SoundObjectContainer extends SoundObject
     // properties
     //----------------------------------------
     /** Returns the number of children of this object. */
-    private function get_numChildren() : Int{return _soundList.length;
+    private function get_numChildren() : Int {
+        return _soundList.length;
     }
     
     
@@ -132,25 +125,25 @@ class SoundObjectContainer extends SoundObject
     
     /** @private */
     override private function set_effectSend1(v : Float) : Float{
-        _volumes[1] = ((v < 0)) ? 0 : ((v > 1)) ? 1 : (v * 128);
+        _volumes[1] = ((v < 0)) ? 0 : ((v > 1)) ? 1 : Math.floor(v * 128);
         for (sound in _soundList)sound.effectSend1 = v;
         return v;
     }
     /** @private */
     override private function set_effectSend2(v : Float) : Float{
-        _volumes[2] = ((v < 0)) ? 0 : ((v > 1)) ? 1 : (v * 128);
+        _volumes[2] = ((v < 0)) ? 0 : ((v > 1)) ? 1 : Math.floor(v * 128);
         for (sound in _soundList)sound.effectSend2 = v;
         return v;
     }
     /** @private */
     override private function set_effectSend3(v : Float) : Float{
-        _volumes[3] = ((v < 0)) ? 0 : ((v > 1)) ? 1 : (v * 128);
+        _volumes[3] = ((v < 0)) ? 0 : ((v > 1)) ? 1 : Math.floor(v * 128);
         for (sound in _soundList)sound.effectSend3 = v;
         return v;
     }
     /** @private */
     override private function set_effectSend4(v : Float) : Float{
-        _volumes[4] = ((v < 0)) ? 0 : ((v > 1)) ? 1 : (v * 128);
+        _volumes[4] = ((v < 0)) ? 0 : ((v > 1)) ? 1 : Math.floor(v * 128);
         for (sound in _soundList)sound.effectSend4 = v;
         return v;
     }
@@ -195,7 +188,7 @@ class SoundObjectContainer extends SoundObject
      */
     override public function setVolume(slot : Int, volume : Float) : Void
     {
-        _volumes[slot] = ((volume < 0)) ? 0 : ((volume > 1)) ? 128 : (volume * 128);
+        _volumes[slot] = ((volume < 0)) ? 0 : ((volume > 1)) ? 128 : Math.floor(volume * 128);
         for (sound in _soundList)sound.setVolume(slot, _volumes[slot]);
     }
     
@@ -216,7 +209,7 @@ class SoundObjectContainer extends SoundObject
     override public function stop() : Void
     {
         _isPlaying = false;
-        for (sound in _soundList)sound.stop();
+        for (sound in _soundList) sound.stop();
         if (_effectChain != null) {
             _effectChain._inactivateLocalEffect();
             if (_effectChain.effectList.length == 0) {
@@ -257,9 +250,9 @@ class SoundObjectContainer extends SoundObject
     {
         sound.stop();
         sound._setParent(this);
-        if (index < _soundList.length)             _soundList.splice(index, 0, sound)
+        if (index < _soundList.length) _soundList.insert(index, sound)
         else _soundList.push(sound);
-        if (_isPlaying)             sound.play();
+        if (_isPlaying) sound.play();
         return sound;
     }
     
@@ -273,7 +266,7 @@ class SoundObjectContainer extends SoundObject
     public function removeChild(sound : SoundObject) : SoundObject
     {
         var index : Int = Lambda.indexOf(_soundList, sound);
-        if (index == -1)             throw cast(("SoundObjectContainer Error; Specifyed children is not in the children list."), Error);
+        if (index == -1) throw cast(("SoundObjectContainer Error; Specifyed children is not in the children list."), Error);
         _soundList.splice(index, 1);
         sound.stop();
         sound._setParent(null);
@@ -348,8 +341,7 @@ class SoundObjectContainer extends SoundObject
     // oprate ancestor
     //----------------------------------------
     /** @private [internal use] */
-    override @:allow(org.si.sound)
-    private function _updateChildDepth() : Void
+    public override function _updateChildDepth() : Void
     {
         _childDepth = ((parent != null)) ? (parent._childDepth + 1) : 0;
         for (sound in _soundList)sound._updateChildDepth();
@@ -357,8 +349,7 @@ class SoundObjectContainer extends SoundObject
     
     
     /** @private [internal use] */
-    override @:allow(org.si.sound)
-    private function _updateMute() : Void
+    public override function _updateMute() : Void
     {
         super._updateMute();
         for (sound in _soundList)sound._updateMute();
@@ -366,8 +357,7 @@ class SoundObjectContainer extends SoundObject
     
     
     /** @private [internal use] */
-    override @:allow(org.si.sound)
-    private function _updateVolume() : Void
+    public override function _updateVolume() : Void
     {
         super._updateVolume();
         for (sound in _soundList)sound._updateVolume();
@@ -375,8 +365,7 @@ class SoundObjectContainer extends SoundObject
     
     
     /** @private [internal use] */
-    override @:allow(org.si.sound)
-    private function _limitVolume() : Void
+    public override function _limitVolume() : Void
     {
         super._limitVolume();
         for (sound in _soundList)sound._limitVolume();
@@ -384,8 +373,7 @@ class SoundObjectContainer extends SoundObject
     
     
     /** @private [internal use] */
-    override @:allow(org.si.sound)
-    private function _updatePan() : Void
+    public override function _updatePan() : Void
     {
         super._updatePan();
         for (sound in _soundList)sound._updatePan();
@@ -393,11 +381,10 @@ class SoundObjectContainer extends SoundObject
     
     
     /** @private [internal use] */
-    override @:allow(org.si.sound)
-    private function _limitPan() : Void
+    public override function _limitPan() : Void
     {
         super._limitPan();
-        for (sound in _soundList)sound._limitPan();
+        for (sound in _soundList) sound._limitPan();
     }
 }
 

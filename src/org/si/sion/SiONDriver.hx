@@ -1098,7 +1098,7 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
     /** Force dispatch stream event. The SiONEvent.STREAM is dispatched only when the event listener is set BEFORE calling play(). You can let SiONDriver to dispatch SiONEvent.STREAM event by this function. 
      *  @param dispatch Set true to force dispatching. Or set false to not dispatching if there are no listeners.
      */
-    private function forceDispatchStreamEvent(dispatch : Bool = true) : Void
+    public function forceDispatchStreamEvent(dispatch : Bool = true) : Void
     {
         _dispatchStreamEvent = dispatch || (hasEventListener(SiONEvent.STREAM));
     }

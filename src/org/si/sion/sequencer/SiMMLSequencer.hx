@@ -566,8 +566,8 @@ class SiMMLSequencer extends MMLSequencer
     /** calculate length (in sample count).
      *  @param beat16 The beat number in 16th calculating from.
      */
-    public function calcSampleLength(beat16 : Float) : Float{
-        return beat16 * _bpm.samplePerBeat16;
+    public function calcSampleLength(beat16 : Float) : Int {
+        return Math.floor(beat16 * _bpm.samplePerBeat16);
     }
     
     

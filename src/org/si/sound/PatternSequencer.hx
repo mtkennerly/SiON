@@ -7,9 +7,6 @@
 
 package org.si.sound;
 
-import org.si.sound.SoundObject;
-import org.si.sound.VoiceReference;
-
 import org.si.sion.*;
 import org.si.sion.sequencer.base.*;
 import org.si.sion.sequencer.SiMMLTrack;
@@ -45,17 +42,10 @@ class PatternSequencer extends SoundObject
 {
     public var sequencer(get, never) : Sequencer;
     public var portament(get, set) : Int;
-    public var onEnterFrame(get, set) : Function;
-    public var onEnterSegment(get, set) : Function;
-    public var onExitFrame(get, set) : Function;
+    public var onEnterFrame(get, set) : Sequencer->Void;
+    public var onEnterSegment(get, set) : Sequencer->Void;
+    public var onExitFrame(get, set) : Sequencer->Void;
 
-    // namespace
-    //----------------------------------------
-    
-    
-    
-    
-    
     // variables
     //----------------------------------------
     /** @private [protected] Sequencer instance */
@@ -64,9 +54,9 @@ class PatternSequencer extends SoundObject
     private var _data : SiONData;
     
     /** @private [protected] */
-    private var _callbackEnterFrame : Function = null;
+    private var _callbackEnterFrame : Sequencer->Void = null;
     /** @private [protected] */
-    private var _callbackEnterSegment : Function = null;
+    private var _callbackEnterSegment : Sequencer->Void = null;
     
     
     
@@ -79,9 +69,11 @@ class PatternSequencer extends SoundObject
     
     
     /** portament */
-    private function get_portament() : Int{return _sequencer.portament;
+    private function get_portament() : Int {
+        return _sequencer.portament;
     }
-    private function set_portament(p : Int) : Int{_sequencer.setPortament(p);
+    private function set_portament(p : Int) : Int {
+        _sequencer.setPortament(p);
         return p;
     }
     
@@ -107,25 +99,28 @@ class PatternSequencer extends SoundObject
     
     
     /** callback on enter frame */
-    private function get_onEnterFrame() : Function{return _callbackEnterFrame;
+    private function get_onEnterFrame() : Sequencer->Void {
+        return _callbackEnterFrame;
     }
-    private function set_onEnterFrame(f : Function) : Function{
+    private function set_onEnterFrame(f : Sequencer->Void) : Sequencer->Void {
         _callbackEnterFrame = f;
         return f;
     }
     
     /** callback on enter segment */
-    private function get_onEnterSegment() : Function{return _callbackEnterSegment;
+    private function get_onEnterSegment() : Sequencer->Void {
+        return _callbackEnterSegment;
     }
-    private function set_onEnterSegment(f : Function) : Function{
+    private function set_onEnterSegment(f : Sequencer->Void) : Sequencer->Void {
         _callbackEnterSegment = f;
         return f;
     }
     
     /** callback on exit frame */
-    private function get_onExitFrame() : Function{return _sequencer.onExitFrame;
+    private function get_onExitFrame() : Sequencer->Void {
+        return _sequencer.onExitFrame;
     }
-    private function set_onExitFrame(f : Function) : Function{
+    private function set_onExitFrame(f : Sequencer->Void) : Sequencer->Void {
         _sequencer.onExitFrame = f;
         return f;
     }
@@ -170,7 +165,7 @@ class PatternSequencer extends SoundObject
     /** stop sequence */
     override public function stop() : Void
     {
-        if (_track) {
+        if (_track != null) {
             _sequencer.stop();
             _synthesizer._unregisterTracks(_track);
             _track.setDisposable();
@@ -188,7 +183,7 @@ class PatternSequencer extends SoundObject
     /** @private [protected] handler on enter segment */
     override private function _onEnterFrame(seq : Sequencer) : Void
     {
-        if (_callbackEnterFrame != null)             _callbackEnterFrame(seq);
+        if (_callbackEnterFrame != null) _callbackEnterFrame(seq);
         super._onEnterFrame(seq);
     }
     
@@ -196,7 +191,7 @@ class PatternSequencer extends SoundObject
     /** @private [protected] handler on enter segment */
     override private function _onEnterSegment(seq : Sequencer) : Void
     {
-        if (_callbackEnterSegment != null)             _callbackEnterSegment(seq);
+        if (_callbackEnterSegment != null) _callbackEnterSegment(seq);
         super._onEnterSegment(seq);
     }
 }

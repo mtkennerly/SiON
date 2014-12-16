@@ -121,6 +121,7 @@ class SiMMLData extends MMLData
      */
     public function setVoice(index : Int, voice : SiMMLVoice) : Void
     {
+        trace('Setting voice $index to $voice');
         if (index >= 0 && index < SiMMLTable.VOICE_MAX) {
             if (!voice._isSuitableForFMVoice) throw errorNotGoodFMVoice();
             fmVoices[index] = voice;

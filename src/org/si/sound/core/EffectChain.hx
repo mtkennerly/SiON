@@ -7,11 +7,6 @@
 
 package org.si.sound.core;
 
-import org.si.sound.core.SiEffectBase;
-import org.si.sound.core.SiEffectStream;
-import org.si.sound.core.SiONDriver;
-import org.si.sound.core.SiOPMStream;
-
 import org.si.sion.*;
 import org.si.sion.effector.*;
 import org.si.sion.module.SiOPMStream;
@@ -22,7 +17,7 @@ import org.si.sion.module.SiOPMStream;
 class EffectChain
 {
     public var isActive(get, never) : Bool;
-    public var effectList(get, set) : Array<Dynamic>;
+    public var effectList(get, set) : Array<SiEffectBase>;
     public var streamingBuffer(get, never) : SiOPMStream;
 
     // variables
@@ -30,21 +25,23 @@ class EffectChain
     /** Stream buffer of local effect */
     private var _effectStream : SiEffectStream;
     /** Effect list */
-    private var _effectList : Array<Dynamic>;
+    private var _effectList : Array<SiEffectBase>;
     
     
     
     // properties
     //--------------------------------------------------
     /** Is processing effect ? */
-    private function get_isActive() : Bool{return (_effectStream != null);
+    private function get_isActive() : Bool {
+        return (_effectStream != null);
     }
     
     
     /** effector list */
-    private function get_effectList() : Array<Dynamic>{return _effectList;
+    private function get_effectList() : Array<SiEffectBase> {
+        return _effectList;
     }
-    private function set_effectList(list : Array<Dynamic>) : Array<Dynamic>{
+    private function set_effectList(list : Array<SiEffectBase>) : Array<SiEffectBase> {
         _effectList = list;
         if (_effectStream != null) {
             _effectStream.chain = _effectList;
@@ -64,10 +61,11 @@ class EffectChain
     // constructor
     //--------------------------------------------------
     /** @private constructor, you should not create new EffectChain instance. */
-    public function new()
+    public function new(args:Array<SiEffectBase> = null)
     {
         _effectStream = null;
-        _effectList = list || [];
+        _effectList = args;
+        if (_effectList == null) _effectList = new Array<SiEffectBase>();
     }
     
     
@@ -76,7 +74,7 @@ class EffectChain
     // operations
     //--------------------------------------------------
     /** @private [internal] activate local effect. deeper effectors executes first. */
-    private function _activateLocalEffect(depth : Int) : Void
+    public function _activateLocalEffect(depth : Int) : Void
     {
         if (_effectStream != null)             return;
         var driver : SiONDriver = SiONDriver.mutex;
@@ -87,7 +85,7 @@ class EffectChain
     
     
     /** @private [internal] inactivate local effect */
-    private function _inactivateLocalEffect() : Void
+    public function _inactivateLocalEffect() : Void
     {
         if (_effectStream == null)             return;
         var driver : SiONDriver = SiONDriver.mutex;
@@ -128,10 +126,11 @@ class EffectChain
     private static var _freeList : Array<EffectChain> = new Array<EffectChain>();
     
     /** allocate new EffectChain */
-    public static function alloc(effectList : Array<Dynamic>) : EffectChain
+    public static function alloc(effectList : Array<SiEffectBase>) : EffectChain
     {
         if (effectList == null || effectList.length == 0)             return null;
-        var ec : EffectChain = _freeList.pop() || new EffectChain();
+        var ec : EffectChain = _freeList.pop();
+        if (ec == null) ec = new EffectChain();
         ec.effectList = effectList;
         return ec;
     }

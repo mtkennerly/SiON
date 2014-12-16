@@ -983,15 +983,10 @@ class SiOPMOperator
     // Internal update total level
     private function _updateTotalLevel() : Void
     {
-        trace('SiOPMO._updateTotalLevel');
         _eg_total_level = ((_tl + (_kc >> _eg_key_scale_level_rshift)) << SiOPMTable.ENV_LSHIFT) + _eg_tl_offset + _mute;
-        trace('SiOPMO: 1');
         if (_eg_total_level > SiOPMTable.ENV_BOTTOM) _eg_total_level = SiOPMTable.ENV_BOTTOM;
-        trace('SiOPMO: 2');
         _eg_total_level -= SiOPMTable.ENV_TOP;  // table index +192.
-        trace('SiOPMO: 3');
         _eg_out = (_eg_levelTable[_eg_level] + _eg_total_level) << 3;
-        trace('SiOPMO: 4');
     }
 }
 

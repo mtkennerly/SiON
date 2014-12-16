@@ -27,10 +27,10 @@ class VoiceReference
     // variables
     //----------------------------------------
     /** @private [synthesizer internal] Instance of voice setting */
-    private var _voice : SiONVoice = null;
+    public var _voice : SiONVoice = null;
     
     /** @private [synthesizer internal] require voice update number */
-    private var _voiceUpdateNumber : Int;
+    public var _voiceUpdateNumber : Int;
     
     
     
@@ -38,9 +38,10 @@ class VoiceReference
     // properties
     //----------------------------------------
     /** voice setting */
-    private function get_voice() : SiONVoice{return _voice;
+    private function get_voice() : SiONVoice {
+        return _voice;
     }
-    private function set_voice(v : SiONVoice) : SiONVoice{
+    private function set_voice(v : SiONVoice) : SiONVoice {
         if (_voice != v)             _voiceUpdateNumber++;
         _voice = v;
         return v;
