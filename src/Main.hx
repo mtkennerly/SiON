@@ -1,239 +1,215 @@
-// Sample for synchronized play (with preset voice).
+package;
 
-package ;
+import openfl.ui.Keyboard;
+import openfl.Lib;
+import siONTenorion.Tenorion;
+import flash.display.DisplayObject;
+import tutorials.TheABCSong;
+import siONKaosillator.Kaosillator;
 
-import openfl._v2.display.BlendMode;
-import openfl._v2.text.TextField;
-import org.si.sion.sequencer.SiMMLTrack;
-import org.si.sion.events.SiONEvent;
-import org.si.sion.events.SiONTrackEvent;
-import org.si.sound.Arpeggiator;
-import org.si.sion.utils.Scale;
-import openfl._v2.display.Stage;
-import openfl._v2.filters.BlurFilter;
-import openfl._v2.display.Shape;
-import openfl._v2.display.BitmapData;
-import openfl._v2.display.Bitmap;
-
-#if flash
-import flash.display.Sprite;
-#else
-import openfl._v2.display.Sprite;
-#end
-
-import org.si.sion.SiONData;
-import org.si.sion.SiONDriver;
-import flash.Lib;
-
-import openfl._v2.events.*;
-import org.si.sion.*;
-import org.si.sion.utils.SiONPresetVoice;
-
+import openfl.events.Event;
+import openfl.events.KeyboardEvent;
+import openfl.events.MouseEvent;
+import openfl.events.TouchEvent;
+import openfl.events.JoystickEvent;
+import openfl.display.Sprite;
+import openfl.text.TextField;
 
 class Main extends Sprite
 {
-	// driver
-	public var driver : SiONDriver = new SiONDriver();
-
-	// preset voice
-	public var presetVoice : SiONPresetVoice = new SiONPresetVoice();
-
-	// MML data
-	public var rhythmLoop : SiONData;
-
-	// control pad
-	public var controlPad : ControlPad;
-
-	// text
-	public var startPortamentHere : TextField = new TextField();
-
-	// arpeggiator
-	public var arpeggiator : Arpeggiator;
+	var mMenu : Menu;
+	var mCurrentDemo : Sprite = null;
 
 	// constructor
-	public function new()
+	public function new() {
+		super();
+		stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+		mMenu = new Menu(this);
+		addChild(mMenu);
+	}
+
+	public function runSelection(classType : Class<Dynamic>) {
+		removeChild(mMenu);
+		mCurrentDemo = Type.createInstance( classType, [] );
+		addChild(mCurrentDemo);
+	}
+
+	private function onKeyUp(event:KeyboardEvent) {
+		if (event.keyCode == Keyboard.ESCAPE) { // BACK on Android
+			event.stopImmediatePropagation ();
+			if (mCurrentDemo == null) {
+				// End the program
+				Lib.exit ();
+			}
+			else {
+				// End the current demo, return to the main menu
+				removeChild(mCurrentDemo);
+				mCurrentDemo = null;
+				addChild(mMenu);
+			}
+		}
+	}
+}
+
+class Menu extends Sprite
+{
+	private var mMain : Main = null;
+
+	private static inline var menuTop : Int = 40;
+	private static inline var menuLeft : Int = 50;
+	private static inline var menuSpacing : Int = 70;
+	private static inline var fontSize : Int = 48;
+
+	private var menuItems = [
+		{ name: "ABC Song", type: TheABCSong},
+		{ name: "Kaosillator", type: Kaosillator},
+		//{ name: "KaosPad", type: TheABCSong},
+		//{ name: "Keyboard", type: TheABCSong},
+		{ name: "Tenorion", type: Tenorion}
+	];
+
+	private var mSelector : TextField;
+
+	private var mSelectedItem : Int = 0;
+
+	// constructor
+	public function new(main : Main)
 	{
 		super();
-		Lib.current.addChild(driver);
-
-		// compile
-		//mainMelody = driver.compile("t132; %6@0o3l8$c2cc.c.; %6@1o3$rcrc; %6@2v8l16$[crccrrcc]; %6@3v8o3$[rc8r8];");
-		// select voice from preset
-		//voiceClick = Reflect.field(presetVoice, "valsound.piano8");
-		//voiceKeyOn = Reflect.field(presetVoice, "valsound.wind1");
-
-		// listen click
-		//stage.addEventListener("click", _onClick);
-		//stage.addEventListener("keyDown", _onKeyOn);
-
-		// play main melody
-		//driver.play(mainMelody);
-
-		rhythmLoop = driver.compile("t132;%6@0o3l8$c2cc.c.; %6@1o3$rcrc; %6@2v8l16$[crccrrcc]; %6@3v8o3$[rc8r8];%6@4v8l16o3$aa<a8>a<ga>ararara<e8>;");
-
-		// set voices of "%6@0-4" from preset
-		var percusVoices : Array<SiONVoice> = presetVoice.categories.get("valsound.percus");
-		rhythmLoop.setVoice(0, percusVoices[0]);  // bass drum
-		rhythmLoop.setVoice(1, percusVoices[27]);  // snare drum
-		rhythmLoop.setVoice(2, percusVoices[16]);  // close hihat
-		rhythmLoop.setVoice(3, percusVoices[21]);  // open hihat
-		rhythmLoop.setVoice(4, presetVoice.voices.get("valsound.bass3"));  // bass
-
-		// listen click
-		driver.addEventListener(SiONEvent.STREAM, _onStream);
-		driver.addEventListener(SiONTrackEvent.BEAT, _onBeat);
-		stage.addEventListener("mouseDown", _onMouseDown);
-		stage.addEventListener("mouseUp", _onMouseUp);
-
-		// arpeggiator setting
-		arpeggiator = new Arpeggiator(new Scale("o1Ajap"), 1, [0, 1, 2, 5, 4, 3]);
-		arpeggiator.voice = presetVoice.voices.get("valsound.lead32");
-		arpeggiator.quantize = 4;
-		arpeggiator.volume = 0.3;
-		arpeggiator.noteQuantize = 8;
-
-		// control pad
-		controlPad = new ControlPad(stage, 320, 320, 0.5, 0.5, 0x101030);
-		addChild(controlPad);
-
-		startPortamentHere.htmlText = "<font color='#808080'>Start Portament Here</font>";
-		startPortamentHere.selectable = false;
-		startPortamentHere.x = 24;
-		startPortamentHere.y = 24;
-		startPortamentHere.width = 320;
-		addChild(startPortamentHere);
-
-		// play with an argument of resetEffector = false.
-		driver.play(rhythmLoop, false);
+		mMain = main;
+		addEventListener (Event.ADDED_TO_STAGE, onAddedToStage);
 	}
 
-	private function _onMouseDown(e : MouseEvent) : Void
-	{
-		// set portament if mouseY < 40
-		if (mouseY < 40)             arpeggiator.portament = 4
-		else arpeggiator.portament = 0;
+	private var mAdded : Bool = false;
 
-		// set pitch
-		arpeggiator.scaleIndex = Math.floor(controlPad.controlX * 32);
+	private function onAddedToStage (event:Event):Void {
+		if (mAdded) return; // TODO: Figure out why this is needed.
 
-		// start arpeggio
-		arpeggiator.play();
+		mAdded = true;
 
-		// update setup
-		//arpeggiator.track.channel.setFilterResonance(3);
-		//arpeggiator.track.channel.activateFilter(true);
-	}
-
-
-	private function _onMouseUp(e : MouseEvent) : Void
-	{
-		// stop arpeggio
-		arpeggiator.stop();
-	}
-
-	private function _onStream(e : SiONEvent) : Void
-	{
-#if false
-		// update arpeggiators track parameters
-		var track : SiMMLTrack = arpeggiator.track;
-		if (track != null) {
-			// update arpeggiator pitch
-			arpeggiator.scaleIndex = Math.floor(controlPad.controlX * 32);
-			// update filter
-			var cutoff : Int = Math.floor((controlPad.controlY - 0.1) * 192);
-			if (cutoff > 128)                 cutoff = 128
-			else if (cutoff < 16)                 cutoff = 16;
-			track.channel.setFilterOffset(cutoff);
-		}
+		stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		stage.addEventListener(TouchEvent.TOUCH_TAP, onTouchTap);
+		stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+#if (!flash)
+		stage.addEventListener(JoystickEvent.AXIS_MOVE, onJoyAxisMove);
+		stage.addEventListener(JoystickEvent.BUTTON_DOWN, onJoyButtonDown);
+		stage.addEventListener(JoystickEvent.BUTTON_UP, onJoyButtonUp);
+		stage.addEventListener(JoystickEvent.HAT_MOVE, onJoyHatMove);
 #end
+
+		var ts = new openfl.text.TextFormat();
+		ts.font = "Arial";  // set the font
+		ts.size = fontSize; // set the font size
+		ts.color=0x000000;  // set the color
+
+		var menuY = menuTop;
+
+		for (item in menuItems) {
+			var text = new TextField();
+			text.x = menuLeft;
+			text.y = menuY;
+			text.width = 600;
+			text.height = menuSpacing;
+			text.text = item.name;
+			text.setTextFormat(ts);
+			addChild(text);
+
+			menuY += menuSpacing;
+		}
+
+		mSelector = new TextField();
+		mSelector.x = menuLeft - 30;
+		mSelector.y = menuTop;
+		mSelector.width = 32;
+		mSelector.height = menuSpacing;
+		mSelector.text = ">";
+		mSelector.setTextFormat(ts);
+		addChild(mSelector);
 	}
 
-
-	private function _onBeat(e : SiONTrackEvent) : Void
-	{
-		controlPad.beat(32);
-	}
-}
-
-
-class ControlPad extends openfl._v2.display.Bitmap
-{
-	public var controlX : Float;
-	public var controlY : Float;
-	public var isDragging : Bool;
-	public var color : Int;
-
-	private var buffer : BitmapData;
-	private var ratX : Float;private var ratY : Float;
-	private var prevX : Float;private var prevY : Float;
-	private var clsDrawer : Shape = new Shape();
-	private var canvas : Shape = new Shape();
-	private var blur : BlurFilter = new BlurFilter(5, 5);
-	private var pointerSize : Float = 8;
-
-
-	public function new(stage : Stage, width : Int, height : Int, initialX : Float = 0, initialY : Float = 0, color : Int = 0x101030)
-	{
-		super(new BitmapData(width + 32, height + 32, false, 0));
-		buffer = new BitmapData(width + 32, height + 32, false, 0);
-
-		clsDrawer.graphics.clear();
-		clsDrawer.graphics.lineStyle(1, 0xffffff);
-		clsDrawer.graphics.drawRect(16, 16, width, height);
-
-		bitmapData.draw(clsDrawer);
-		buffer.fillRect(buffer.rect, 0);
-
-		this.color = color;
-		controlX = initialX;
-		controlY = initialY;
-		ratX = 1 / width;
-		ratY = 1 / height;
-		prevX = buffer.width * controlX;
-		prevY = buffer.height * controlY;
-		addEventListener("enterFrame", _onEnterFrame);
-		stage.addEventListener("mouseMove", _onMouseMove);
-		stage.addEventListener("mouseDown", function(e : Event) : Void{isDragging = true;
-		});
-		stage.addEventListener("mouseUp", function(e : Event) : Void{isDragging = false;
-		});
+	private function onTouchTap(event:TouchEvent) {
+		trace('********** TouchTap: $event');
+		trace('Local: ${event.localX}, ${event.localY}');
+		trace('Stage: ${event.stageX}, ${event.stageY}');
+		trace('Delta: ${event.delta}');
+		trace('Location of stage: ${stage.x}, ${stage.y}');
+		runAt(Math.round(event.localX), Math.round(event.localY));
 	}
 
-
-	private function _onEnterFrame(e : Event) : Void{
-		var x : Float = (buffer.width - 32) * controlX + 16;
-		var y : Float = (buffer.height - 32) * (1 - controlY) + 16;
-		canvas.graphics.clear();
-		canvas.graphics.lineStyle(pointerSize, color);
-		canvas.graphics.moveTo(prevX, prevY);
-		canvas.graphics.lineTo(x, y);
-		buffer.applyFilter(buffer, buffer.rect, buffer.rect.topLeft, blur);
-		buffer.draw(canvas, null, null, BlendMode.ADD);
-		bitmapData.copyPixels(buffer, buffer.rect, buffer.rect.topLeft);
-		bitmapData.draw(clsDrawer);
-		prevX = x + Math.random();
-		prevY = y;
-		pointerSize *= 0.96;
+	private function onMouseDown(event:MouseEvent) {
+		runAt(Math.round(mouseX), Math.round(mouseY));
 	}
 
+	private function updateSelector() {
+		mSelector.y = menuTop + mSelectedItem * menuSpacing;
+	}
 
-	private function _onMouseMove(e : MouseEvent) : Void{
-		if (isDragging) {
-			controlX = (mouseX - 16) * ratX;
-			controlY = 1 - (mouseY - 16) * ratY;
-			if (controlX < 0)                 controlX = 0
-			else if (controlX > 1)                 controlX = 1;
-			if (controlY < 0)                 controlY = 0
-			else if (controlY > 1)                 controlY = 1;
+	private function runAt(x : Int, y : Int) {
+		var selection = Std.int((y - menuTop) / menuSpacing);
+		if (selection < 0 || selection > menuItems.length - 1) return;
+
+		mSelectedItem = selection;
+		runSelection();
+	}
+
+	private function menuUp() {
+		if (mSelectedItem > 0) {
+			mSelectedItem--;
+		}
+		updateSelector();
+	}
+
+	private function menuDown() {
+		if (mSelectedItem < menuItems.length - 1) {
+			mSelectedItem++;
+		}
+		updateSelector();
+	}
+
+	private function runSelection() {
+		trace('Running ${menuItems[mSelectedItem].name}');
+
+		stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		stage.removeEventListener(TouchEvent.TOUCH_TAP, onTouchTap);
+		stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+#if (!flash)
+		stage.removeEventListener(JoystickEvent.AXIS_MOVE, onJoyAxisMove);
+		stage.removeEventListener(JoystickEvent.BUTTON_DOWN, onJoyButtonDown);
+		stage.removeEventListener(JoystickEvent.BUTTON_UP, onJoyButtonUp);
+		stage.removeEventListener(JoystickEvent.HAT_MOVE, onJoyHatMove);
+#end
+
+		mMain.runSelection( menuItems[mSelectedItem].type );
+	}
+
+	private function onKeyDown(event:KeyboardEvent) {
+		switch (event.keyCode) {
+		case 40: // arrow down
+			menuDown();
+
+		case 38: // arrow up
+			menuUp();
+
+		case 13: // return
+			runSelection();
 		}
 	}
 
-
-	public function beat(size : Int) : Void{
-		pointerSize = size;
+#if (!flash)
+	private function onJoyAxisMove (event:JoystickEvent):Void {
+		trace('Joy axis move $event');
 	}
+
+	private function onJoyButtonDown (event:JoystickEvent):Void {
+		trace('Joy button down $event');
+	}
+
+	private function onJoyButtonUp (event:JoystickEvent):Void {
+		trace('Joy button up');
+	}
+
+	private function onJoyHatMove (event:JoystickEvent):Void {
+		trace('Joy hat move $event');
+	}
+#end
 }
-
-
-
-

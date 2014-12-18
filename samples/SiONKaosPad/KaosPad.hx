@@ -1,18 +1,6 @@
 // SiON KAOS PAD
-import Bitmap;
-import BitmapData;
-import BlurFilter;
-import Event;
-import MouseEvent;
-import Shape;
-import SiCtrlFilterLowPass;
-import SiONData;
-import SiONDriver;
-import SiONEvent;
-import SiONPresetVoice;
-import SiONTrackEvent;
-import Sprite;
-import Stage;
+
+package siONKaosPad;
 
 import openfl.display.Sprite;
 import openfl.events.*;
@@ -20,11 +8,7 @@ import org.si.sion.*;
 import org.si.sion.events.*;
 import org.si.sion.effector.*;
 import org.si.sion.utils.SiONPresetVoice;
-
-
-
 import openfl.display.*;
-
 import openfl.filters.BlurFilter;
 
 class KaosPad extends Sprite
@@ -49,11 +33,15 @@ class KaosPad extends Sprite
     public function new()
     {
         super();
+        driver.addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+        addChild(driver);
+    }
+
+    private function onAddedToStage (event:Event):Void {
         // compile mml.
         drumLoop =driver.compile("t132; %6@0o3l8$c2cc.c.; %6@1o3$rcrc; %6@2v8l16$[crccrrcc]; %6@3v8o3$[rc8r8];")  // set voices of "%6@0-3" from preset  ;
-        
-        
-        
+
+        rhythmLoop.setVoice(0, presetVoice.voices.get("valsound.percus1"));  // bass drum
         var percusVoices : Array<Dynamic> = Reflect.field(presetVoice, "valsound.percus");
         drumLoop.setVoice(0, percusVoices[0]);  // bass drum  
         drumLoop.setVoice(1, percusVoices[27]);  // snare drum  

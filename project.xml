@@ -4,7 +4,10 @@
 	<meta title="SiON" package="com.sample.project" version="1.0.0" company="Company Name" />
 	<app main="Main" path="Export" file="SiON" />
 
+	<window width="768" height="768" background="0xBBBBBB" fps="60" />
+
 	<source path="src" />
+	<source path="samples" />
 
 	<haxelib name="openfl" />
 

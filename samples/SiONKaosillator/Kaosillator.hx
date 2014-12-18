@@ -1,178 +1,185 @@
-// SiON KAOSCILLATOR
-import Arpeggiator;
-import Bitmap;
-import BitmapData;
-import BlurFilter;
-import Event;
-import MouseEvent;
-import Scale;
-import Shape;
-import SiMMLTrack;
-import SiONData;
-import SiONDriver;
-import SiONEvent;
-import SiONPresetVoice;
-import SiONTrackEvent;
-import Sprite;
-import Stage;
-import TextField;
+// SiON Kaoscillator for ver0.58
+package siONKaosillator;
 
-import openfl.display.Sprite;
-import openfl.events.*;
-import openfl.text.TextField;
+import openfl.text.TextFormat;
+import flash.display.*;
+import flash.events.*;
+import flash.ui.Keyboard;
+import flash.text.TextField;
 import org.si.sion.*;
 import org.si.sion.events.*;
 import org.si.sion.sequencer.SiMMLTrack;
 import org.si.sion.utils.SiONPresetVoice;
 import org.si.sion.utils.Scale;
-
 import org.si.sound.Arpeggiator;
+import com.bit101.components.*;
+import flash.display.*;
+import flash.events.*;
+import flash.filters.BlurFilter;
+import flash.geom.*;
 
 
 
-import openfl.display.*;
-
-import openfl.filters.BlurFilter;
-
-class Kaosillator extends Sprite
-{
+class Kaosillator extends Sprite {
     // driver
-    public var driver : SiONDriver = new SiONDriver();
-    
+    public var driver:SiONDriver = new SiONDriver();
+
     // preset voice
-    public var presetVoice : SiONPresetVoice = new SiONPresetVoice();
-    
+    public var presetVoice:SiONPresetVoice = new SiONPresetVoice();
+
     // MML data
-    public var rythmLoop : SiONData;
-    
+    public var rhythmLoop:SiONData;
+
     // control pad
-    public var controlPad : ControlPad;
-    
-    // text
-    public var startPortamentHere : TextField = new TextField();
-    
+    public var controlPad:ControlPad;
+
     // arpeggiator
-    public var arpeggiator : Arpeggiator;
-    
-    
+    public var arpeggiator:Arpeggiator;
+
+
     // constructor
-    public function new()
-    {
+    public function new() {
         super();
+        driver.addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+        addChild(driver);
+    }
+
+    private function onAddedToStage (event:Event):Void {
         // compile mml.
-        var mml : String = "t132;";
+        var mml:String = "t132;";
         mml += "%6@0o3l8$c2cc.c.; %6@1o3$rcrc; %6@2v8l16$[crccrrcc]; %6@3v8o3$[rc8r8];";
         mml += "%6@4v8l16o3$aa<a8>a<ga>ararara<e8>;";
-        rythmLoop = driver.compile(mml);
-        
+        rhythmLoop = driver.compile(mml);
+
         // set voices of "%6@0-4" from preset
-        var percusVoices : Array<Dynamic> = Reflect.field(presetVoice, "valsound.percus");
-        rythmLoop.setVoice(0, percusVoices[0]);  // bass drum  
-        rythmLoop.setVoice(1, percusVoices[27]);  // snare drum  
-        rythmLoop.setVoice(2, percusVoices[16]);  // close hihat  
-        rythmLoop.setVoice(3, percusVoices[21]);  // open hihat  
-        rythmLoop.setVoice(4, Reflect.field(presetVoice, "valsound.bass3"));  // bass  
-        
+        rhythmLoop.setVoice(0, presetVoice.voices.get("valsound.percus1"));  // bass drum
+        rhythmLoop.setVoice(1, presetVoice.voices.get("valsound.percus28"));  // snare drum
+        rhythmLoop.setVoice(2, presetVoice.voices.get("valsound.percus17"));  // close hihat
+        rhythmLoop.setVoice(3, presetVoice.voices.get("valsound.percus23"));  // open hihat
+        rhythmLoop.setVoice(4, presetVoice.voices.get("valsound.bass3"));  // bass
+
         // listen click
-        driver.addEventListener(SiONEvent.STREAM, _onStream);
+        driver.addEventListener(SiONEvent.STREAM,    _onStream);
         driver.addEventListener(SiONTrackEvent.BEAT, _onBeat);
         stage.addEventListener("mouseDown", _onMouseDown);
-        stage.addEventListener("mouseUp", _onMouseUp);
-        
+        stage.addEventListener("mouseUp",   _onMouseUp);
+        stage.addEventListener("keyDown",   _onKeyDown);
+        stage.addEventListener("keyUp",     _onKeyUp);
+
         // arpeggiator setting
-        arpeggiator = new Arpeggiator(new Scale("o1Ajap"), 1, [0, 1, 2, 5, 4, 3]);
-        arpeggiator.voice = Reflect.field(presetVoice, "valsound.lead32");
+        arpeggiator = new Arpeggiator(new Scale("o1Ajap"), 1, [0,1,2,5,4,3]);
+        arpeggiator.voice = presetVoice.voices.get("valsound.lead32");
         arpeggiator.quantize = 4;
         arpeggiator.volume = 0.3;
         arpeggiator.noteQuantize = 8;
-        
+
+        // background
+        var back:Shape = new Shape();
+        back.graphics.beginFill(0);
+        back.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
+        back.graphics.endFill();
+        addChild(back);
+
         // control pad
-        controlPad = new ControlPad(stage, 320, 320, 0.5, 0.5, 0x101030);
+        controlPad = new ControlPad(stage, stage.stageWidth - 32, stage.stageHeight - 32, 0.5, 0.5, 0x4040B0); //0x101030);
         addChild(controlPad);
-        
-        startPortamentHere.htmlText = "<font color='#808080'>Start Portament Here</font>";
-        startPortamentHere.selectable = false;
-        startPortamentHere.x = 24;
-        startPortamentHere.y = 24;
-        startPortamentHere.width = 320;
-        addChild(startPortamentHere);
-        
-        // play with an argument of resetEffector = false.
-        driver.play(rythmLoop, false);
+
+        // labels
+        var ts = new TextFormat();
+        ts.font = "Arial";  // set the font
+        ts.size = 24; // set the font size
+        ts.color=0xFFFFFF;  // set the color
+
+        var label = new TextField();
+        label.text = "[Ctrl]:  Staccato  /  [Shift]: Portament";
+        label.setTextFormat(ts);
+        label.x = Std.int((stage.stageWidth - label.textWidth) / 2);
+        label.y = 20;
+        label.width = label.textWidth + 10;
+        label.height = label.textHeight + 10;
+        addChild(label);
+
+        // play rhythmLoop
+        driver.play(rhythmLoop);
     }
-    
-    
-    private function _onMouseDown(e : MouseEvent) : Void
+
+
+    private function _onMouseDown(e:MouseEvent) : Void
     {
-        // set portament if mouseY < 40
-        if (mouseY < 40)             arpeggiator.portament = 4
-        else arpeggiator.portament = 0;
-        
-        // set pitch
-        arpeggiator.scaleIndex = controlPad.controlX * 32;
-        
+        // set pitch and length
+        arpeggiator.scaleIndex = Std.int(controlPad.controlX * 32);
+        arpeggiator.noteLength = [0.5,1,1,2,4][Std.int(controlPad.controlY * 4 + 0.99)];
+        trace('arp scale: ${arpeggiator.scaleIndex} note: ${arpeggiator.noteLength}');
         // start arpeggio
         arpeggiator.play();
-        
-        // update setup
-        arpeggiator.track.channel.setFilterResonance(3);
-        arpeggiator.track.channel.activateFilter(true);
     }
-    
-    
-    private function _onMouseUp(e : MouseEvent) : Void
+
+
+    private function _onMouseUp(e:MouseEvent) : Void
     {
         // stop arpeggio
         arpeggiator.stop();
     }
-    
-    
-    private function _onStream(e : SiONEvent) : Void
+
+
+    private function _onKeyDown(e:KeyboardEvent) : Void
     {
-        // update arpeggiators track parameters
-        var track : SiMMLTrack = arpeggiator.track;
-        if (track != null) {
-            // update arpeggiator pitch
-            arpeggiator.scaleIndex = controlPad.controlX * 32;
-            // update filter
-            var cutoff : Int = (controlPad.controlY - 0.1) * 192;
-            if (cutoff > 128)                 cutoff = 128
-            else if (cutoff < 16)                 cutoff = 16;
-            track.channel.setFilterOffset(cutoff);
+        switch (e.keyCode) {
+            case Keyboard.SHIFT:
+                arpeggiator.portament = 4;  // set portament
+            case Keyboard.CONTROL:
+                arpeggiator.gateTime = 0.25;  // set staccart
         }
     }
-    
-    
-    private function _onBeat(e : SiONTrackEvent) : Void
+
+
+    private function _onKeyUp(e:KeyboardEvent) : Void
     {
-        controlPad.beat(32);
+        switch (e.keyCode) {
+            case Keyboard.SHIFT:
+                arpeggiator.portament = 0; // reset portament
+            case Keyboard.CONTROL:
+                arpeggiator.gateTime = 1;  // reset staccart
+        }
+    }
+
+    private function _onStream(e:SiONEvent) : Void
+    {
+        // update arpeggiator pitch and length
+        arpeggiator.scaleIndex = Std.int(controlPad.controlX * 24 + 4);
+        arpeggiator.noteLength = [0.5,1,1,2,4][Std.int(controlPad.controlY * 4 + 0.99)];
+    }
+
+
+    private function _onBeat(e:SiONTrackEvent) : Void
+    {
+        controlPad.beat(6);
     }
 }
 
 
 
+class ControlPad extends Bitmap {
+    public var controlX:Float;
+    public var controlY:Float;
+    public var isDragging:Bool;
+    public var color:Int;
+    
+    private var buffer:BitmapData;
+    private var ratX:Float;
+    private var ratY:Float;
+    private var prevX:Float;
+    private var prevY:Float;
+    private var blurX:Int;
+    private var clsDrawer:Shape = new Shape();
+    private var canvas:Shape = new Shape();
+    private var blur:BlurFilter = new BlurFilter(2, 2);
+    private var pointerSize:Float = 2;
 
 
-class ControlPad extends Bitmap
-{
-    public var controlX : Float;
-    public var controlY : Float;
-    public var isDragging : Bool;
-    public var color : Int;
-    
-    private var buffer : BitmapData;
-    private var ratX : Float;private var ratY : Float;
-    private var prevX : Float;private var prevY : Float;
-    private var clsDrawer : Shape = new Shape();
-    private var canvas : Shape = new Shape();
-    private var blur : BlurFilter = new BlurFilter(5, 5);
-    private var pointerSize : Float = 8;
-    
-    
-    public function new(stage : Stage, width : Int, height : Int, initialX : Float = 0, initialY : Float = 0, color : Int = 0x101030)
-    {
-        super(new BitmapData(width + 32, height + 32, false, 0));
-        buffer = new BitmapData(width + 32, height + 32, false, 0);
+    public function new(stage:Stage, width:Int, height:Int, initialX:Float=0, initialY:Float=0, color:Int=0x303090) {
+        super(new BitmapData(width+32, height+32, false, 0));
+        buffer = new BitmapData(Std.int(width*0.125+4), Std.int(height*0.125+4), false, 0);
         
         clsDrawer.graphics.clear();
         clsDrawer.graphics.lineStyle(1, 0xffffff);
@@ -180,7 +187,7 @@ class ControlPad extends Bitmap
         
         bitmapData.draw(clsDrawer);
         buffer.fillRect(buffer.rect, 0);
-        
+
         this.color = color;
         controlX = initialX;
         controlY = initialY;
@@ -188,47 +195,46 @@ class ControlPad extends Bitmap
         ratY = 1 / height;
         prevX = buffer.width * controlX;
         prevY = buffer.height * controlY;
+        blurX = 0;
         addEventListener("enterFrame", _onEnterFrame);
-        stage.addEventListener("mouseMove", _onMouseMove);
-        stage.addEventListener("mouseDown", function(e : Event) : Void{isDragging = true;
-                });
-        stage.addEventListener("mouseUp", function(e : Event) : Void{isDragging = false;
-                });
+        stage.addEventListener("mouseMove",  _onMouseMove);
+        stage.addEventListener("mouseDown",  function(e:Event):Void { isDragging = true; } );
+        stage.addEventListener("mouseUp",    function(e:Event):Void { isDragging = false; });
     }
-    
-    
-    private function _onEnterFrame(e : Event) : Void{
-        var x : Float = (buffer.width - 32) * controlX + 16;
-        var y : Float = (buffer.height - 32) * (1 - controlY) + 16;
+
+
+    private var matrix:Matrix = new Matrix(8, 0, 0, 8, 0, 0);
+    private function _onEnterFrame(e:Event) : Void {
+        var x:Float = (buffer.width  - 4) * controlX + 2;
+        var y:Float = (buffer.height - 4) * (1-controlY) + 2;
         canvas.graphics.clear();
         canvas.graphics.lineStyle(pointerSize, color);
         canvas.graphics.moveTo(prevX, prevY);
         canvas.graphics.lineTo(x, y);
         buffer.applyFilter(buffer, buffer.rect, buffer.rect.topLeft, blur);
-        buffer.draw(canvas, null, null, "add");
-        bitmapData.copyPixels(buffer, buffer.rect, buffer.rect.topLeft);
+        buffer.draw(canvas, null, null, BlendMode.ADD);
+        bitmapData.draw(buffer, matrix);
         bitmapData.draw(clsDrawer);
-        prevX = x + Math.random();
+        prevX = x + blurX;
         prevY = y;
-        pointerSize *= 0.96;
+        blurX = 1 - blurX;
+        pointerSize *= 0.75;
     }
-    
-    
-    private function _onMouseMove(e : MouseEvent) : Void{
+
+
+    private function _onMouseMove(e:MouseEvent) : Void {
         if (isDragging) {
             controlX = (mouseX - 16) * ratX;
             controlY = 1 - (mouseY - 16) * ratY;
-            if (controlX < 0)                 controlX = 0
-            else if (controlX > 1)                 controlX = 1;
-            if (controlY < 0)                 controlY = 0
-            else if (controlY > 1)                 controlY = 1;
+            if (controlX < 0) controlX = 0;
+            else if (controlX > 1) controlX = 1;
+            if (controlY < 0) controlY = 0;
+            else if (controlY > 1) controlY = 1;
         }
     }
-    
-    
-    public function beat(size : Int) : Void{
+
+
+    public function beat(size:Int) : Void {
         pointerSize = size;
     }
 }
-
-

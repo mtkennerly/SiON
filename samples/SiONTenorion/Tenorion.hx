@@ -1,16 +1,6 @@
 // SiON TENORION
-import Bitmap;
-import BitmapData;
-import ColorTransform;
-import Event;
-import Point;
-import Shape;
-import SiONDriver;
-import SiONPresetVoice;
-import SiONTrackEvent;
-import SiONVoice;
-import Sprite;
-import Stage;
+
+package siONTenorion;
 
 import openfl.display.Sprite;
 import openfl.events.*;
@@ -18,11 +8,7 @@ import openfl.text.TextField;
 import org.si.sion.*;
 import org.si.sion.events.*;
 import org.si.sion.utils.SiONPresetVoice;
-
-
-
 import openfl.display.*;
-
 import openfl.geom.*;
 
 class Tenorion extends Sprite
@@ -48,17 +34,21 @@ class Tenorion extends Sprite
     public function new()
     {
         super();
+        driver.addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+        driver.addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
+        addChild(driver);
+    }
+
+    private function onAddedToStage (event:Event):Void {
         var i : Int;
         
         // set voices from preset
-        var percusVoices : Array<Dynamic> = Reflect.field(presetVoice, "valsound.percus");
-        voices[0] = percusVoices[0];  // bass drum  
-        voices[1] = percusVoices[27];  // snare drum  
-        voices[2] = percusVoices[16];  // close hihat  
-        voices[3] = percusVoices[22];  // open hihat  
-        for (8){voices[i] = Reflect.field(presetVoice, "valsound.bass18");
-        }  // others  
-        
+        voices[0] = presetVoice.voices.get("valsound.percus1");  // bass drum
+        voices[1] = presetVoice.voices.get("valsound.percus28");  // snare drum
+        voices[2] = presetVoice.voices.get("valsound.percus17");  // close hihat
+        voices[3] = presetVoice.voices.get("valsound.percus23");  // open hihat
+        for (i in 4...8 ) voices[i] = presetVoice.voices.get("valsound.bass18"); // others
+
         // listen
         driver.setBeatCallbackInterval(1);
         driver.addEventListener(SiONTrackEvent.BEAT, _onBeat);
@@ -72,8 +62,11 @@ class Tenorion extends Sprite
         beatCounter = 0;
         driver.play();
     }
-    
-    
+
+    private function onRemovedFromStage (event:Event):Void {
+        driver.stop();
+    }
+
     // _onBeat (SiONTrackEvent.BEAT) is called back in each beat at the sound timing.
     private function _onBeat(e : SiONTrackEvent) : Void
     {
@@ -85,51 +78,63 @@ class Tenorion extends Sprite
     private function _onTimerInterruption() : Void
     {
         var beatIndex : Int = beatCounter & 15;
-        for (i in 0...16){
-            if (matrixPad.sequences[i] & (1 << beatIndex) != 0)                 driver.noteOn(notes[i], voices[i], length[i]);
+        for (i in 0...16) {
+            //trace('Turning on ${matrixPad.sequences[i]}');
+            if (matrixPad.sequences[i] & (1 << beatIndex) != 0) {
+                driver.noteOn(notes[i], voices[i], length[i]);
+            }
         }
         beatCounter++;
     }
 }
 
 
-
-
-
 class MatrixPad extends Bitmap
 {
     public var sequences : Array<Int> = new Array<Int>();
     private var canvas : Shape = new Shape();
-    private var buffer : BitmapData = new BitmapData(320, 320, true, 0);
-    private var padOn : BitmapData = _pad(0x303050, 0x6060a0);
-    private var padOff : BitmapData = _pad(0x303050, 0x202040);
+    private var buffer : BitmapData;
+    private var padOn : BitmapData;
+    private var padOff : BitmapData;
     private var pt : Point = new Point();
     private var colt : ColorTransform = new ColorTransform(1, 1, 1, 0.1);
-    
-    
+    private var padWidth : Int;
+    private var padHeight : Int;
+
     public function new(stage : Stage)
     {
-        super(new BitmapData(320, 320, false, 0));
+        super(new BitmapData(stage.stageWidth, stage.stageHeight, false, 0));
+        buffer = new BitmapData(stage.stageWidth, stage.stageHeight, true, 0);
+        padWidth = Std.int(stage.stageWidth / 16);
+        padHeight = Std.int(stage.stageHeight / 16);
+        padOn = _pad(0x303050, 0x6060a0);
+        padOff = _pad(0x303050, 0x202040);
         var i : Int;
-        for (256){
-            pt.x = (i & 15) * 20;
-            pt.y = (i & 240) * 1.25;
+        for (i in 0...256) {
+            pt.x = Std.int((i & 0x0F) * padWidth);
+            pt.y = Std.int((i & 0xF0) * padHeight / 16);
             buffer.copyPixels(padOff, padOff.rect, pt);
             bitmapData.copyPixels(padOff, padOff.rect, pt);
         }
-        for (16){sequences[i] = 0;
+        for (i in 0...16) {
+            sequences[i] = 0;
         }
+        stage.addEventListener(Event.REMOVED_FROM_STAGE, _onRemoved);
         addEventListener("enterFrame", _onEnterFrame);
         stage.addEventListener("click", _onClick);
     }
     
-    
-    private function _pad(border : Int, face : Int) : BitmapData{
-        var pix : BitmapData = new BitmapData(20, 20, false, 0);
+    private function _onRemoved(e: Event) {
+        removeEventListener("enterFrame", _onEnterFrame);
+        stage.removeEventListener("click", _onClick);
+    }
+
+    private function _pad(border : Int, face : Int) : BitmapData {
+        var pix : BitmapData = new BitmapData(padWidth, padHeight, false, 0);
         canvas.graphics.clear();
         canvas.graphics.lineStyle(1, border);
         canvas.graphics.beginFill(face);
-        canvas.graphics.drawRect(1, 1, 17, 17);
+        canvas.graphics.drawRect(1, 1, padWidth - 3, padHeight - 3);
         canvas.graphics.endFill();
         pix.draw(canvas);
         return pix;
@@ -142,25 +147,24 @@ class MatrixPad extends Bitmap
     
     
     private function _onClick(e : Event) : Void{
-        if (mouseX >= 0 && mouseX < 320 && mouseY >= 0 && mouseY < 320) {
-            var track : Int = 15 - Math.round(mouseY * 0.05);
-            var beat : Int = Math.round(mouseX * 0.05);
+        if (mouseX >= 0 && mouseX < stage.stageWidth && mouseY >= 0 && mouseY < stage.stageHeight) {
+            var track : Int = 15 - Math.floor(mouseY / padHeight);
+            var beat : Int = Math.floor(mouseX / padWidth);
             sequences[track] ^= 1 << beat;
-            pt.x = beat * 20;
-            pt.y = (15 - track) * 20;
-            if (sequences[track] & (1 << beat) != 0)                 buffer.copyPixels(padOn, padOn.rect, pt)
+            pt.x = Std.int(beat * padWidth);
+            pt.y = Std.int((15 - track) * padHeight);
+            if (sequences[track] & (1 << beat) != 0) buffer.copyPixels(padOn, padOn.rect, pt)
             else buffer.copyPixels(padOff, padOff.rect, pt);
         }
     }
     
     
     public function beat(beat16th : Int) : Void{
-        pt.x = beat16th * 20;
-pt.y = 0;
-        while (pt.y < 320){bitmapData.copyPixels(padOn, padOn.rect, pt);
-            pt.y += 20;
+        pt.x = beat16th * padWidth;
+        pt.y = 0;
+        while (pt.y < 16 * padHeight) {
+            bitmapData.copyPixels(padOn, padOn.rect, pt);
+            pt.y += padHeight;
         }
     }
 }
-
-

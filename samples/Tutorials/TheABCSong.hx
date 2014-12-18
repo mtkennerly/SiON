@@ -1,8 +1,10 @@
 // the simplest example
-import SiONDriver;
 
+package tutorials;
+
+import openfl.events.Event;
+import org.si.sion.SiONDriver;
 import openfl.display.Sprite;
-import org.si.sion.*;
 
 class TheABCSong extends Sprite
 {
@@ -11,6 +13,11 @@ class TheABCSong extends Sprite
     public function new()
     {
         super();
+        driver.addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+        addChild(driver);
+    }
+
+    private function onAddedToStage (event:Event):Void {
         driver.play("t100 l8 [ccggaag4 ffeeddc4 | [ggffeed4]2 ]2");
     }
 }
