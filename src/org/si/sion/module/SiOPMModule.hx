@@ -82,6 +82,7 @@ class SiOPMModule
      */
     public function new()
     {
+        trace('     ---------- SiOPMModule constructor ----------');
         // initial values
         initOperatorParam = new SiOPMOperatorParam();
         
@@ -113,13 +114,14 @@ class SiOPMModule
      */
     public function initialize(channelCount : Int, bitRate : Int, bufferLength : Int) : Void
     {
+        trace('     ---------- SiOPMModule ----------');
         _bitRate = bitRate;
         
         var i : Int;
         var stream : SiOPMStream;
         
         // reset stream slot
-        for (i in 0...STREAM_SEND_SIZE){
+        for (i in 0...STREAM_SEND_SIZE) {
             streamSlot[i] = null;
         }
         streamSlot[0] = outputStream;
@@ -129,7 +131,7 @@ class SiOPMModule
             _bufferLength = bufferLength;
             // AS3 original: outputStream.buffer.length = bufferLength << 1;
             outputStream.buffer = new Array<Float>();
-            for (i in 0...PIPE_SIZE){
+            for (i in 0...PIPE_SIZE) {
                 SLLint.freeRing(_pipeBuffer[i]);
                 _pipeBuffer[i] = SLLint.allocRing(bufferLength);
                 _pipeBufferPager[i] = SLLint.createRingPager(_pipeBuffer[i], true);
@@ -163,7 +165,7 @@ class SiOPMModule
     public function _endProcess() : Void
     {
         outputStream.limit();
-        if (_bitRate != 0)             outputStream.quantize(_bitRate);
+        if (_bitRate != 0) outputStream.quantize(_bitRate);
     }
     
     

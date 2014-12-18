@@ -18,13 +18,6 @@ class MMLSequence
     public var mmlLength(get, never) : Int;
     public var hasRepeatAll(get, never) : Bool;
 
-    // namespace
-    //--------------------------------------------------
-    
-    
-    
-    
-    
     // variables
     //--------------------------------------------------
     /** First MMLEvent. The ID is always MMLEvent.SEQUENCE_HEAD. */
@@ -64,17 +57,18 @@ class MMLSequence
     }
     
     /** MML String, if its cached when its compiling. */
-    private function get_mmlString() : String{return _mmlString;
+    private function get_mmlString() : String {
+        return _mmlString;
     }
     
     /** MML length, in resolution unit (1920 = whole-tone in default). */
-    private function get_mmlLength() : Int{
+    private function get_mmlLength() : Int {
         if (_mmlLength == -1)             _updateMMLLength();
         return _mmlLength;
     }
     
     /** flag for apearance of repeat all command (segno) */
-    private function get_hasRepeatAll() : Bool{
+    private function get_hasRepeatAll() : Bool {
         if (_mmlLength == -1)             _updateMMLLength();
         return _hasRepeatAll;
     }
@@ -92,8 +86,8 @@ class MMLSequence
         _mmlString = "";
         _mmlLength = -1;
         _hasRepeatAll = false;
-        _prevSequence = ((term)) ? this : null;
-        _nextSequence = ((term)) ? this : null;
+        _prevSequence = (term) ? this : null;
+        _nextSequence = (term) ? this : null;
         _isTerminal = term;
         _callbackInternalCall = [];
     }

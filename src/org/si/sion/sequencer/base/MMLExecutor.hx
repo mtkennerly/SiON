@@ -147,7 +147,7 @@ class MMLExecutor
     public function stop() : Void
     {
         if (pointer != null) {
-            if (pointer == _processEvent)                 _processEvent.jump = MMLEvent.nopEvent
+            if (pointer == _processEvent) _processEvent.jump = MMLEvent.nopEvent
             else pointer = null;
         }
     }
@@ -209,10 +209,7 @@ class MMLExecutor
         return e.next;
     }
     
-    
-    
-    
-    
+
     // callback
     //--------------------------------------------------
     /** @private [sion sequencer internal] callback onTempoChanged. */

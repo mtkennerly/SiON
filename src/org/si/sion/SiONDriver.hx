@@ -574,45 +574,31 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
 
         // check mutex
         if (_mutex != null && !_allowPluralDrivers) throw errorPluralDrivers();
-        trace('In SiONDriver constructor!!');
 
         // check parameters
         if (bufferLength != 2048 && bufferLength != 4096 && bufferLength != 8192) throw errorParamNotAvailable("stream buffer", bufferLength);
         if (channelCount != 1 && channelCount != 2) throw errorParamNotAvailable("channel count", channelCount);
         if (sampleRate != 44100) throw errorParamNotAvailable("sampling rate", sampleRate);
 
-        trace('SDC: 1');
-
         // initialize tables
         var dummy : Dynamic;
         dummy = SiOPMTable.instance;  //initialize(3580000, 1789772.5, 44100) sampleRate;  
         dummy = SiMMLTable.instance;  //initialize();  
 
-        trace('SDC: 2');
-
         // allocation
         _jobQueue = new Array<SiONDriverJob>();
-        trace('SDC: 2a');
         module = new SiOPMModule();
-        trace('SDC: 2b');
         effector = new SiEffectModule(module);
-        trace('SDC: 2c');
         sequencer = new SiMMLSequencer(module, _callbackEventTriggerOn, _callbackEventTriggerOff, _callbackTempoChanged);
-        trace('SDC: 2d');
         _sound = new Sound();
-        trace('SDC: 2e');
         _soundTransform = new SoundTransform();
-        trace('SDC: 2f');
         _fader = new Fader();
-        trace('SDC: 2g');
         _timerSequence = new MMLSequence();
-        trace('SDC: 2h');
         _loadingSoundList = [];
 #if MIDI_ENABLED
         _midiModule = new MIDIModule();
         _midiConverter = new SiONDataConverterSMF(null, _midiModule);
 #end
-        trace('SDC: 3');
 
         // initialize
         _tempData = null;
@@ -637,8 +623,6 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
         _timerSequence.appendNewEvent(MMLEvent.REPEAT_ALL, 0);
         _timerSequence.appendNewEvent(MMLEvent.TIMER, 0);
         _timerIntervalEvent = _timerSequence.appendNewEvent(MMLEvent.GLOBAL_WAIT, 0, 0);
-
-        trace('SDC: 4');
 
         _backgroundSound = null;
         _backgroundLoopPoint = -1;
@@ -679,14 +663,11 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
         _data = null;
         _soundChannel = null;
 
-        trace('SDC: 5');
-
         // register sound streaming function
         _sound.addEventListener("sampleData", _streaming);
         
         // set mutex
         _mutex = this;
-        trace('SDC: Exiting');
     }
     
     
@@ -706,16 +687,11 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
             // stop sound
             stop();
 
-            trace('compile: 1');
             // compile immediately
             var t : Int = Math.round(haxe.Timer.stamp() * 1000);
-            trace('compile: prepareCompile($mml, $data');
             _prepareCompile(mml, data);
-            trace('compile: 3');
             _jobProgress = sequencer.compile(0);
-            trace('compile: 4');
             _timeCompile = Math.round(haxe.Timer.stamp() * 1000) - t;
-            trace('compile: 5');
             _mmlString = null;
         }
         catch (e : Error){
@@ -922,15 +898,12 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
                 _isPaused = false;
             }
             else {
-                trace('SDR.play(): stop');
                 // stop sound
                 stop();
 
-                trace('SDR.play(): prep("$data", $resetEffector)');
                 // preparation
                 _prepareProcess(data, resetEffector);
 
-                trace('SDR.play(): init');
                 // initialize
                 _timeProcessTotal = 0;
                 for (i in 0...TIME_AVARAGING_COUNT){
@@ -942,18 +915,9 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
                 
                 // start streaming
                 _suspendStreaming = true;
-                trace('SDR.play(): playing!! sound is $_sound');
-                trace('    bytesLoaded: ${_sound.bytesLoaded}');
-                trace('     bytesTotal: ${_sound.bytesTotal}');
-                trace('            id3: ${_sound.bytesTotal}');
-                trace('    isBuffering: ${_sound.isBuffering}');
-                trace('         length: ${_sound.length}');
-                trace('            url: ${_sound.url}');
                 _soundChannel = _sound.play();
-                trace('SDR.play(): Sound playing in progress');
                 _soundChannel.soundTransform = _soundTransform;
                 _process_addAllEventListners();
-                trace('SDR.play(): done');
             }
         }
         catch (e : Error) {
@@ -1077,7 +1041,8 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
     public function setTimerInterruption(length16th : Float = 1, callback : Void->Void = null) : Void
     {
         _timerIntervalEvent.length = Math.floor(length16th * sequencer.setting.resolution * 0.0625);
-        _timerCallback = ((length16th > 0)) ? callback : null;
+        trace('***** setTimerInterruption: $length16th length: ${_timerIntervalEvent.length}');
+        _timerCallback = (length16th > 0) ? callback : null;
     }
     
     
@@ -1087,10 +1052,11 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
     public function setBeatCallbackInterval(length16th : Float = 1) : Void
     {
         var filter : Int = 1;
-        while (length16th > 1.5){
+        while (length16th > 1.5) {
             filter <<= 1;
             length16th *= 0.5;
         }
+        trace('Setting beat callback filter to ${filter-1}');
         sequencer._setBeatCallbackFilter(filter - 1);
     }
     
@@ -1411,17 +1377,24 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
         var seq : MMLSequence = data.sequenceGroup.headSequence;
         var delaySamples : Int = Math.floor(sequencer.calcSampleDelay(0, delay, quant));
         var lengthSamples : Int = Math.floor(sequencer.calcSampleLength(length));
-        
+
+        trace('sequenceOn, seq is $seq delay $delaySamples length $lengthSamples');
         // create new sequence tracks
         while (seq != null){
+            trace('We have a sequence.');
             if (seq.isActive) {
+                trace('Sequence is active');
                 mmlTrack = sequencer._newControlableTrack(internalTrackID, isDisposable);
                 mmlTrack.sequenceOn(seq, lengthSamples, delaySamples);
-                if (voice != null)                     voice.updateTrackVoice(mmlTrack);
+                if (voice != null) {
+                    trace('And we have a voice!');
+                    voice.updateTrackVoice(mmlTrack);
+                }
                 tracks.push(mmlTrack);
             }
             seq = seq.nextSequence;
         }
+        trace('Returning $tracks');
         return tracks;
     }
     
@@ -1817,20 +1790,24 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
                 trace('_data is $_data');
             }
             else if (Std.is(data, SiONData)) {
+                trace('Type of data is SiONData.');
                 // type check and play
                 _data = data;
             }
             else if (Std.is(data, Sound)) {
+                trace('Type of data is Sound.');
                 // play data as background sound
                 setBackgroundSound(data);
             }
             else if (Std.is(data, URLRequest)) {
+                trace('Type of data is URLRequest.');
                 // load sound from url
                 var sound : Sound = new Sound(data);
                 setBackgroundSound(sound);
             }
 #if MIDI_ENABLED
             else if (Std.is(data, SMFData)) {
+                trace('Type of data is MIDI SMFData.');
                 // MIDI file
                 _midiConverter.smfData = data;
                 _midiConverter.useMIDIModuleEffector = resetEffector;
@@ -1841,52 +1818,42 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
 #if !MIDI_ENABLED
             trace("***** MIDI is currently unsupported");
 #end
+                trace('Type of data is unknown.');
                 // not good data type
                 throw errorDataIncorrect();
             }
+        } else {
+            trace('No data to play');
         }
 
         // THESE FUNCTIONS ORDER IS VERY IMPORTANT !!
-        trace('PPC: 1');
         module.initialize(_channelCount, _bitRate, _bufferLength);  // initialize DSP
-        trace('PPC: 2');
         module.reset();  // reset all channels
-        trace('PPC: 3');
         if (resetEffector) effector.initialize()
         // initialize (or reset) effectors
         else effector._reset();
-        trace('PPC: 4');
         sequencer._prepareProcess(_data, Std.int(_sampleRate), _bufferLength);  // set sequencer tracks (should be called after module.reset())
-        trace('PPC: 5');
         if (_data != null) _parseSystemCommand(_data.systemCommands);
         // parse #EFFECT command (should be called after effector._reset())
-        trace('PPC: 6');
         effector._prepareProcess();  // set effector connections
-        trace('PPC: 7');
         _trackEventQueue.splice(0, _trackEventQueue.length);  // clear event queue
-        trace('PPC: 8');
 
         // set position
         if (_data != null && _position > 0) {
-            trace('PPC: 9');
             sequencer.dummyProcess(Math.round(_position * _sampleRate * 0.001));
         }
-        trace('PPC: 10');
 
         // start background sound
         if (_backgroundSound != null) {
-            trace('PPC: 11');
             _startBackgroundSound();
         }
 
-        trace('PPC: 12');
+        trace('Timer callback is $_timerCallback');
         // set timer interruption
         if (_timerCallback != null) {
-            trace('PPC: 13');
             sequencer.setGlobalSequence(_timerSequence);  // set timer interruption
             sequencer._setTimerCallback(_timerCallback);
         }
-        trace('PPC: 14');
     }
     
     
@@ -1991,11 +1958,19 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
                 
                 // write samples
                 imax = output.length;
-                //trace('  Writing $imax samples');
+                var lastData : Float = 0.0;
+                if (imax > 0 && imax < 4096) trace('  Writing $imax samples');
                 for (i in 0...imax) {
                     buffer.writeFloat(output[i]);
+                    lastData = output[i];
                 }
-                
+                // Test to fill in the buffer
+                if (imax == 0) {
+                    for (i in imax...4096) {
+                        buffer.writeFloat(lastData);
+                    }
+                }
+
                 // dispatch streaming event
                 if (_dispatchStreamEvent) {
                     event = new SiONEvent(SiONEvent.STREAM, this, buffer, true);
@@ -2025,6 +2000,7 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
             _inStreaming = false;
         }
         catch (e : Error) {
+            trace('Error streaming data: $e');
             // error
             _removeAllEventListners();
             if (_debugMode) throw e

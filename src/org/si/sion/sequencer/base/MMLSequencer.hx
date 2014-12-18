@@ -345,7 +345,7 @@ class MMLSequencer
             onBeat(0, 0);
         }
         else {
-            while (floorPrevBeat < floorCurrBeat){
+            while (floorPrevBeat < floorCurrBeat) {
                 floorPrevBeat++;
                 if ((floorPrevBeat & _onBeatCallbackFilter) == 0) {
                     onBeat(Math.floor((floorPrevBeat - prevBeat) * _bpm.samplePerBeat16), floorPrevBeat);

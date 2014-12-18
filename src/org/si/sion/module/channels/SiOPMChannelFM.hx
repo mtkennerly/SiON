@@ -116,17 +116,12 @@ class SiOPMChannelFM extends SiOPMChannelBase
     /** constructor */
     public function new(chip : SiOPMModule)
     {
-        trace('SiOPMFM($chip)');
         super(chip);
 
-        trace('SiOPMFM: 1');
         _funcProcessList = [[_proc1op_loff, _proc2op, _proc3op, _proc4op, _proc2ana, _procring, _procsync, _proc2op, _procpcm_loff],
                 [_proc1op_lon, _proc2op, _proc3op, _proc4op, _proc2ana, _procring, _procsync, _proc2op, _procpcm_lon]];
-        trace('SiOPMFM: 2');
         operator = new Array<SiOPMOperator>();
-        trace('SiOPMFM: 3');
         operator[0] = _allocFMOperator();
-        trace('SiOPMFM: 4');
         operator[1] = null;
         operator[2] = null;
         operator[3] = null;
@@ -136,14 +131,10 @@ class SiOPMChannelFM extends SiOPMChannelBase
         _funcProcessType = PROC_OP1;
         _funcProcess = _proc1op_loff;
 
-        trace('SiOPMFM: 5');
         _pipe0 = SLLint.allocRing(1);
-        trace('SiOPMFM: 6');
         _pipe1 = SLLint.allocRing(1);
-        trace('SiOPMFM: 7');
 
         initialize(null, 0);
-        trace('SiOPMFM: 8');
     }
     
 
@@ -668,20 +659,15 @@ class SiOPMChannelFM extends SiOPMChannelBase
     /** Initialize. */
     override public function initialize(prev : SiOPMChannelBase, bufferIndex : Int) : Void
     {
-        trace('SiOPMFM.initialize($prev, $bufferIndex)');
         // initialize operators
         _updateOperatorCount(1);
-        trace('SiOPMFM: 1 operator is "$operator"');
         operator[0].initialize();
-        trace('SiOPMFM: 2');
         _isNoteOn = false;
         registerMapType = 0;
         registerMapChannel = 0;
 
-        trace('SiOPMFM: 3');
         // initialize sound channel
         super.initialize(prev, bufferIndex);
-        trace('SiOPMFM: 4');
     }
     
     

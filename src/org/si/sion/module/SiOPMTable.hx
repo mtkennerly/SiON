@@ -339,8 +339,6 @@ class SiOPMTable
         var imax2 : Int;
         var table : Array<Dynamic>;
 
-        trace('********** SiOPMTable._createEGTables()');
-
         // 128 = 64rates + 32ks-rates + 32dummies for dr,sr=0
         eg_timerSteps = new Array<Int>();
         eg_tableSelector = new Array<Int>();
@@ -378,7 +376,6 @@ class SiOPMTable
         eg_levelTables = new Array<Array<Int>>();
         for (i in 0...7) {
             eg_levelTables[i] = new Array<Int>();
-            trace('----- level table $i craeted.');
         }
         for (i in 0...imax2) {
             eg_levelTables[0][i] = i;  // normal table  

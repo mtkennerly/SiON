@@ -304,8 +304,8 @@ class Scale
     public function check(note : Int) : Bool
     {
         note -= _scaleNotes[0];
-        if (note < 0)             note = (note + 144) % 12
-        else if (note > 24)             note = ((note - 12) % 12) + 12;
+        if (note < 0) note = (note + 144) % 12
+        else if (note > 24) note = ((note - 12) % 12) + 12;
         return ((_scaleTable & (1 << note)) != 0);
     }
     
@@ -317,9 +317,9 @@ class Scale
     public function shift(note : Int) : Int
     {
         var n : Int = note - _scaleNotes[0];
-        if (n < 0)             n = (n + 144) % 12
-        else if (n > 23)             n = ((n - 12) % 12) + 12;
-        if ((_scaleTable & (1 << n)) != 0)             return note;
+        if (n < 0) n = (n + 144) % 12
+        else if (n > 23) n = ((n - 12) % 12) + 12;
+        if ((_scaleTable & (1 << n)) != 0) return note;
         var up : Int;
         var dw : Int;
         up = n + 1;
@@ -402,6 +402,4 @@ class Scale
         return new Error("Scale; Invalid scale name. '" + name + "'");
     }
 }
-
-
 

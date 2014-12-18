@@ -145,7 +145,7 @@ class SiMMLSequencer extends MMLSequencer
     }
     
     /** SiONTrackEvent.BEAT is called if (beatCount16th &amp; onBeatCallbackFilter) == 0. */
-    public function _setBeatCallbackFilter(filter : Int) : Void{
+    public function _setBeatCallbackFilter(filter : Int) : Void {
         _onBeatCallbackFilter = filter;
     }
     
@@ -315,21 +315,15 @@ class SiMMLSequencer extends MMLSequencer
     /** @private [sion internal] Reset all tracks. */
     public function _resetAllTracks() : Void
     {
-        trace('SiMMLS._resetAllTracks()');
         for (trk in tracks){
-            trace('Reset track "$trk"');
             trk._reset(0);
-            trace('SiMMLS: 1');
             trk.velocity = setting.defaultVolume;
             trk.quantRatio = setting.defaultQuantRatio / setting.maxQuantRatio;
-            trace('SiMMLS: 2');
             trk.quantCount = calcSampleCount(setting.defaultQuantCount);
             trk.channel.masterVolume = setting.defaultFineVolume;
-            trace('SiMMLS: 3');
         }
         _processedSampleCount = 0;
         _isSequenceFinished = (tracks.length == 0);
-        trace('SiMMLS: 4');
     }
     
     
@@ -508,7 +502,7 @@ class SiMMLSequencer extends MMLSequencer
         var finished : Bool;
         
         // prepare buffering
-        for (trk in tracks)trk.channel.resetChannelBufferStatus();
+        for (trk in tracks) trk.channel.resetChannelBufferStatus();
         
         // buffering
         finished = true;
@@ -524,17 +518,17 @@ class SiMMLSequencer extends MMLSequencer
                 finished = processMMLExecutor(trk.executor, len) && finished;
             }
             _enableChangeBPM = true;
-        }        while ((!isEndGlobalSequence()));
-        
+        } while ((!isEndGlobalSequence()));
+
         _bpm = _changableBPM;
         _currentTrack = null;
         _processedSampleCount += _module.bufferLength;
-        
+
         _isSequenceFinished = finished;
     }
     
     
-    /** Dummy process. This funciton must be called after prepareProcess().
+    /** Dummy process. This function must be called after prepareProcess().
      *  @param length dumming sample count. [NOTICE] This value is rounded by a buffer length. Not an exact value.
      */
     public function dummyProcess(sampleCount : Int) : Void
@@ -548,7 +542,6 @@ class SiMMLSequencer extends MMLSequencer
         _registerDummyProcessEvent();
         
         // pseudo processing
-        // haxe conversion: Is this right??
         for (count in 0...bufCount) {
             _process();
         }
@@ -763,7 +756,7 @@ class SiMMLSequencer extends MMLSequencer
     /** @private [protected] Callback on every 16th beats. */
     override private function onBeat(delaySamples : Int, beatCounter : Int) : Void
     {
-        if (!_dummyProcess && _callbackBeat != null)             _callbackBeat(delaySamples, beatCounter);
+        if (!_dummyProcess && _callbackBeat != null) _callbackBeat(delaySamples, beatCounter);
     }
     
     

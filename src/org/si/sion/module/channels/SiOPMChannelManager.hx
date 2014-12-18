@@ -89,30 +89,21 @@ class SiOPMChannelManager
     // get new channel. returns null when the channel count is overflow.
     private function _newChannel(prev : SiOPMChannelBase, bufferIndex : Int) : SiOPMChannelBase
     {
-        trace('SiOPMCM._newChannel($prev, $bufferIndex');
-
         var newChannel : SiOPMChannelBase;
-        trace('newChannel: 1');
         if (_term._next._isFree) {
-            trace('newChannel: 2');
             // The head channel is free -> The head will be a new channel.
             newChannel = _term._next;
             newChannel._prev._next = newChannel._next;
             newChannel._next._prev = newChannel._prev;
         }
         else {
-            trace('newChannel: 3');
             // The head channel is active -> channel overflow.
             // create new channel.
-            trace('Creating channel of class $_channelClass, chip $_chip');
             newChannel = Type.createInstance(_channelClass, [_chip]);
-            trace('newChannel: 3b');
             newChannel._channelType = _channelType;
-            trace('newChannel: 3c');
             _length++;
         }
 
-        trace('newChannel: 4');
         // set newChannel to tail and activate.
         newChannel._isFree = false;
         newChannel._prev = _term._prev;
@@ -120,11 +111,9 @@ class SiOPMChannelManager
         newChannel._prev._next = newChannel;
         newChannel._next._prev = newChannel;
 
-        trace('newChannel: 5');
         // initialize
         newChannel.initialize(prev, bufferIndex);
 
-        trace('newChannel: 6');
         return newChannel;
     }
     
@@ -212,11 +201,8 @@ class SiOPMChannelManager
     /** New channel with initializing. */
     public static function newChannel(type : Int, prev : SiOPMChannelBase, bufferIndex : Int) : SiOPMChannelBase
     {
-        trace('SiOPMCM.newChannel($type, $prev, $bufferIndex)');
         var channelManager = _channelManagers[type];
-        trace('SiOPMCM: 1');
         var returnValue = channelManager._newChannel(prev, bufferIndex);
-        trace('Returning $returnValue');
         return returnValue;
     }
     
