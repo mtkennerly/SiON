@@ -15,8 +15,24 @@ import openfl.events.JoystickEvent;
 import openfl.display.Sprite;
 import openfl.text.TextField;
 
+#if ouya
+import openfl.utils.JNI;
+import tv.ouya.console.api.OuyaController;
+#end
+
 class Main extends Sprite
 {
+	#if ouya
+	public static inline var DEAD_ZONE : Float = OuyaController.STICK_DEADZONE;
+	static inline public var BUTTON_SELECT:Int = OuyaController.BUTTON_O;
+	static inline public var BUTTON_BACK : Int = OuyaController.BUTTON_A;
+	#else
+	public static inline var DEAD_ZONE : Float = 0.4;
+	static inline public var BUTTON_SELECT : Int = 0;
+	static inline public var BUTTON_BACK : Int = 9;
+	#end
+
+
 	var mMenu : Menu;
 	var mCurrentDemo : Sprite = null;
 
@@ -24,6 +40,7 @@ class Main extends Sprite
 	public function new() {
 		super();
 		stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+		stage.addEventListener(JoystickEvent.BUTTON_DOWN, onJoyButtonDown);
 		mMenu = new Menu(this);
 		addChild(mMenu);
 	}
@@ -49,6 +66,23 @@ class Main extends Sprite
 			}
 		}
 	}
+
+	private function onJoyButtonDown (event:JoystickEvent):Void {
+		if (event.id == Main.BUTTON_BACK) {
+			trace('Button BACK hit');
+			if (mCurrentDemo == null) {
+				// End the program
+				Lib.exit ();
+			}
+			else {
+				// End the current demo, return to the main menu
+				removeChild(mCurrentDemo);
+				mCurrentDemo = null;
+				addChild(mMenu);
+			}
+		}
+	}
+
 }
 
 class Menu extends Sprite
@@ -93,7 +127,6 @@ class Menu extends Sprite
 #if (!flash)
 		stage.addEventListener(JoystickEvent.AXIS_MOVE, onJoyAxisMove);
 		stage.addEventListener(JoystickEvent.BUTTON_DOWN, onJoyButtonDown);
-		stage.addEventListener(JoystickEvent.BUTTON_UP, onJoyButtonUp);
 		stage.addEventListener(JoystickEvent.HAT_MOVE, onJoyHatMove);
 #end
 
@@ -175,7 +208,6 @@ class Menu extends Sprite
 #if (!flash)
 		stage.removeEventListener(JoystickEvent.AXIS_MOVE, onJoyAxisMove);
 		stage.removeEventListener(JoystickEvent.BUTTON_DOWN, onJoyButtonDown);
-		stage.removeEventListener(JoystickEvent.BUTTON_UP, onJoyButtonUp);
 		stage.removeEventListener(JoystickEvent.HAT_MOVE, onJoyHatMove);
 #end
 
@@ -183,6 +215,7 @@ class Menu extends Sprite
 	}
 
 	private function onKeyDown(event:KeyboardEvent) {
+		trace('KeyDown: $event');
 		switch (event.keyCode) {
 		case 40: // arrow down
 			menuDown();
@@ -196,16 +229,31 @@ class Menu extends Sprite
 	}
 
 #if (!flash)
+	private var bJustMoved = false;
 	private function onJoyAxisMove (event:JoystickEvent):Void {
-		trace('Joy axis move $event');
+		trace('JoyAxisMove: $event');
+		if (Math.abs(event.y) < Main.DEAD_ZONE) {
+			bJustMoved = false;
+			return;
+		}
+
+		if (bJustMoved) return;
+
+		if (event.y < -Main.DEAD_ZONE) {
+			bJustMoved = true;
+			menuUp();
+		}
+		else if (event.y > Main.DEAD_ZONE) {
+			bJustMoved = true;
+			menuDown();
+		}
 	}
 
 	private function onJoyButtonDown (event:JoystickEvent):Void {
-		trace('Joy button down $event');
-	}
-
-	private function onJoyButtonUp (event:JoystickEvent):Void {
-		trace('Joy button up');
+		trace('Joy button down ${event.id}');
+		if (event.id == Main.BUTTON_SELECT) {
+			runSelection();
+		}
 	}
 
 	private function onJoyHatMove (event:JoystickEvent):Void {

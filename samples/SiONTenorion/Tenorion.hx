@@ -100,6 +100,8 @@ class MatrixPad extends Bitmap
     private var colt : ColorTransform = new ColorTransform(1, 1, 1, 0.1);
     private var padWidth : Int;
     private var padHeight : Int;
+    private var joyBeat : Int = -1;
+    private var joyTrack : Int = -1;
 
     public function new(stage : Stage)
     {
@@ -122,8 +124,96 @@ class MatrixPad extends Bitmap
         stage.addEventListener(Event.REMOVED_FROM_STAGE, _onRemoved);
         addEventListener("enterFrame", _onEnterFrame);
         stage.addEventListener("click", _onClick);
+#if (!flash)
+        stage.addEventListener(JoystickEvent.AXIS_MOVE, onJoyAxisMove);
+        stage.addEventListener(JoystickEvent.BUTTON_DOWN, onJoyButtonDown);
+#end
     }
-    
+
+    private var bJustMoved : Bool = false;
+
+    private function beatRight() {
+        if (joyBeat == -1 || joyTrack == -1) {
+            joyBeat = 0;
+            joyTrack = 0;
+            return;
+        }
+
+        if (joyBeat < 15) {
+            joyBeat++;
+        }
+    }
+
+    private function beatLeft() {
+        if (joyBeat == -1 || joyTrack == -1) {
+            joyBeat = 0;
+            joyTrack = 0;
+            return;
+        }
+
+        joyBeat--;
+    }
+
+    private function trackDown() {
+        if (joyBeat == -1 || joyTrack == -1) {
+            joyBeat = 0;
+            joyTrack = 0;
+            return;
+        }
+
+        if (joyTrack < 15) {
+            joyTrack++;
+        }
+    }
+
+    private function trackUp() {
+        if (joyBeat == -1 || joyTrack == -1) {
+            joyBeat = 0;
+            joyTrack = 0;
+            return;
+        }
+
+        joyTrack--;
+    }
+
+    private function onJoyAxisMove (event:JoystickEvent):Void {
+        if (Math.abs(event.x) < Main.DEAD_ZONE && Math.abs(event.y) < Main.DEAD_ZONE) {
+            bJustMoved = false;
+            return;
+        }
+
+        if (bJustMoved) return;
+
+        if (event.x < -Main.DEAD_ZONE) {
+            bJustMoved = true;
+            beatLeft();
+        }
+        else if (event.x > Main.DEAD_ZONE) {
+            bJustMoved = true;
+            beatRight();
+        }
+
+        if (event.y < -Main.DEAD_ZONE) {
+            bJustMoved = true;
+            trackUp();
+        }
+        else if (event.y > Main.DEAD_ZONE) {
+            bJustMoved = true;
+            trackDown();
+        }
+    }
+
+    private function onJoyButtonDown (event:JoystickEvent):Void {
+        trace('Joy button down ${event.id}');
+        if (event.id == Main.BUTTON_SELECT) {
+            sequences[15-joyTrack] ^= 1 << joyBeat;
+            pt.x = Std.int(joyBeat * padWidth);
+            pt.y = Std.int(joyTrack * padHeight);
+            if (sequences[15-joyTrack] & (1 << joyBeat) != 0) buffer.copyPixels(padOn, padOn.rect, pt)
+            else buffer.copyPixels(padOff, padOff.rect, pt);
+        }
+    }
+
     private function _onRemoved(e: Event) {
         removeEventListener("enterFrame", _onEnterFrame);
         stage.removeEventListener("click", _onClick);
@@ -143,6 +233,17 @@ class MatrixPad extends Bitmap
     
     private function _onEnterFrame(e : Event) : Void{
         bitmapData.draw(buffer, null, colt);
+        var bitmapSelection : BitmapData = new BitmapData(padWidth, padHeight, true, 0);
+        var selection : Shape = new Shape();
+        selection.graphics.clear();
+        selection.graphics.lineStyle(1, 0xFF0000);
+        selection.graphics.beginFill(0xFF0000, 0.0);
+        selection.graphics.drawRect(1, 1, padWidth - 3, padHeight - 3);
+        selection.graphics.endFill();
+        bitmapSelection.draw(selection);
+        pt.x = joyBeat * padWidth;
+        pt.y = joyTrack * padHeight;
+        bitmapData.copyPixels(bitmapSelection, bitmapSelection.rect, pt, null, null, true);
     }
     
     
