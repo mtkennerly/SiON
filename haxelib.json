@@ -1,0 +1,13 @@
+{     
+  "name": "sion",
+  "url" : "https://github.com/gunnbr/SiON",
+  "license": "BSD",  
+  "tags": ["sion", "audio", "synthesizer"],
+  "description": "Software synthesizer library to dynamically create music and sound effects, allowing your final binary to be small.",
+  "version": "0.0.1-alpha",
+  "releasenote": "First release. Trivial examples work. Android doesn't work well enough to use.",
+  "contributors": ["gunnbr"],    
+  "dependencies": {
+    "openfl": ""
+  }
+}
