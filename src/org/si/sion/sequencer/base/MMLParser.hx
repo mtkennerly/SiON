@@ -229,6 +229,7 @@ class MMLParser
     /* Add new event. */
     public static function addMMLEvent(id : Int, data : Int = 0, length : Int = 0, noteOption : Bool = false) : MMLEvent
     {
+        trace('addMMLEvent($id, $data, $length, $noteOption)');
         if (!noteOption) {
             // Make channel data chain
             if (id == MMLEvent.SEQUENCE_HEAD) {
@@ -383,11 +384,11 @@ class MMLParser
     private static function createRegExp(reset : Bool) : EReg
     {
         // user defined event letters
-        var ude : Array<Dynamic> = [];
-        for (letter in _userDefinedEventID) {
+        var ude : Array<String> = [];
+        for (letter in _userDefinedEventID.keys()) {
             ude.push(letter);
         }
-        var uderex : String = ((ude.length > 0)) ? (ude.join("|")) : "a";  // ('A`) I know its an ad-hok solution...
+        var uderex : String = (ude.length > 0) ? (ude.join("|")) : "a";  // ('A`) I know its an ad-hok solution...
 
         var rex : String;
         rex = "(\\s+)";                                            // whitespace (res[1])
@@ -587,25 +588,20 @@ class MMLParser
     // initialize before parse
     private static function _initialize() : Void
     {
-        trace('MMLParser._iitialize()');
+        trace('MMLParser._initialize()');
         // free all remains
         var e : MMLEvent = _terminator.next;
         while (e != null) {
             e = _freeEvent(e);
         }
 
-        trace('MMLP: 1');
         // initialize tempraries
         _systemEventIndex = 0;  // system event index
         _sequenceMMLIndex = 0;  // sequence mml index  
         _lastEvent = _terminator;  // clear event chain  
-        trace('MMLP: 2');
         _lastSequenceHead = _pushMMLEvent(MMLEvent.SEQUENCE_HEAD, 0, 0);  // add first event (SEQUENCE_HEAD).
-        trace('MMLP: 3');
         if (_cacheMMLString)  addMMLEvent(MMLEvent.DEBUG_INFO, -1);
-        trace('MMLP: 4');
         _initialize_track();
-        trace('MMLP: 5');
     }
     
     
