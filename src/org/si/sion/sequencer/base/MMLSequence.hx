@@ -7,6 +7,8 @@
 package org.si.sion.sequencer.base;
 
 
+import openfl.utils.ByteArray;
+
 /** Sequence of 1 sound channel. MMLData > MMLSequenceGroup > MMLSequence > MMLEvent (">" meanse "has a"). */
 class MMLSequence
 {
