@@ -3,8 +3,8 @@ package;
 import openfl.ui.Keyboard;
 import openfl.Lib;
 import siONTenorion.Tenorion;
-import flash.display.DisplayObject;
 import tutorials.TheABCSong;
+import tutorials.EventTrigger;
 import siONKaosillator.Kaosillator;
 
 import openfl.events.Event;
@@ -41,6 +41,7 @@ class Main extends Sprite
 		super();
 		stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
 		stage.addEventListener(JoystickEvent.BUTTON_DOWN, onJoyButtonDown);
+
 		mMenu = new Menu(this);
 		addChild(mMenu);
 	}
@@ -95,11 +96,12 @@ class Menu extends Sprite
 	private static inline var fontSize : Int = 48;
 
 	private var menuItems = [
-		{ name: "ABC Song", type: TheABCSong},
-		{ name: "Kaosillator", type: Kaosillator},
-		//{ name: "KaosPad", type: TheABCSong},
-		//{ name: "Keyboard", type: TheABCSong},
-		{ name: "Tenorion", type: Tenorion}
+        { name: "ABC Song", type: TheABCSong},
+        { name: "Event Trigger Test", type: EventTrigger},
+        { name: "Kaosillator", type: Kaosillator},
+        //{ name: "KaosPad", type: KaosPad},
+        //{ name: "Keyboard", type: Keyboard},
+        { name: "Tenorion", type: Tenorion}
 	];
 
 	private var mSelector : TextField;
@@ -114,12 +116,11 @@ class Menu extends Sprite
 		addEventListener (Event.ADDED_TO_STAGE, onAddedToStage);
 	}
 
-	private var mAdded : Bool = false;
+	private var mInitialized : Bool = false;
 
 	private function onAddedToStage (event:Event):Void {
-		if (mAdded) return; // TODO: Figure out why this is needed.
-
-		mAdded = true;
+		removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+		addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
 
 		stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		stage.addEventListener(TouchEvent.TOUCH_TAP, onTouchTap);
@@ -130,34 +131,45 @@ class Menu extends Sprite
 		stage.addEventListener(JoystickEvent.HAT_MOVE, onJoyHatMove);
 #end
 
-		var ts = new openfl.text.TextFormat();
-		ts.font = "Arial";  // set the font
-		ts.size = fontSize; // set the font size
-		ts.color=0x000000;  // set the color
-
-		var menuY = menuTop;
-
-		for (item in menuItems) {
-			var text = new TextField();
-			text.x = menuLeft;
-			text.y = menuY;
-			text.width = 600;
-			text.height = menuSpacing;
-			text.text = item.name;
-			text.setTextFormat(ts);
-			addChild(text);
-
-			menuY += menuSpacing;
+		if (mInitialized) {
+			mSelector.y = menuTop;
 		}
+		else {
+			var ts = new openfl.text.TextFormat();
+			ts.font = "Arial";  // set the font
+			ts.size = fontSize; // set the font size
+			ts.color=0x000000;  // set the color
 
-		mSelector = new TextField();
-		mSelector.x = menuLeft - 30;
-		mSelector.y = menuTop;
-		mSelector.width = 32;
-		mSelector.height = menuSpacing;
-		mSelector.text = ">";
-		mSelector.setTextFormat(ts);
-		addChild(mSelector);
+			var menuY = menuTop;
+
+			for (item in menuItems) {
+				var text = new TextField();
+				text.x = menuLeft;
+				text.y = menuY;
+				text.width = 600;
+				text.height = menuSpacing;
+				text.text = item.name;
+				text.setTextFormat(ts);
+				addChild(text);
+
+				menuY += menuSpacing;
+			}
+
+			mSelector = new TextField();
+			mSelector.x = menuLeft - 30;
+			mSelector.y = menuTop;
+			mSelector.width = 32;
+			mSelector.height = menuSpacing;
+			mSelector.text = ">";
+			mSelector.setTextFormat(ts);
+			addChild(mSelector);
+
+			mInitialized = true;
+		}
+	}
+
+	private function onRemovedFromStage (event:Event):Void {
+		addEventListener (Event.ADDED_TO_STAGE, onAddedToStage);
 	}
 
 	private function onTouchTap(event:TouchEvent) {
@@ -215,7 +227,6 @@ class Menu extends Sprite
 	}
 
 	private function onKeyDown(event:KeyboardEvent) {
-		trace('KeyDown: $event');
 		switch (event.keyCode) {
 		case 40: // arrow down
 			menuDown();

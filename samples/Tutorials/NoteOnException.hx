@@ -22,23 +22,19 @@ class NoteOnException extends Sprite
     // note on exception mode
     public var exceptionMode : Array<Dynamic> = [{
             name : "ignore",
-            mode : SiONDriver.NEM_IGNORE,
-
+            mode : SiONDriver.NEM_IGNORE
         }, 
         {
             name : "reject",
-            mode : SiONDriver.NEM_REJECT,
-
+            mode : SiONDriver.NEM_REJECT
         }, 
         {
             name : "overwrite",
-            mode : SiONDriver.NEM_OVERWRITE,
-
+            mode : SiONDriver.NEM_OVERWRITE
         }, 
         {
             name : "shift",
-            mode : SiONDriver.NEM_SHIFT,
-
+            mode : SiONDriver.NEM_SHIFT
         }];
     
     // index
@@ -46,12 +42,12 @@ class NoteOnException extends Sprite
     
     // text field
     public var tf : TextField = new TextField();
-    
-    
+
     // constructor
     public function new()
     {
         super();
+
         // display text
         addChild(tf);
         
