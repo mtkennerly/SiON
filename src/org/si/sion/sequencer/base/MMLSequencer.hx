@@ -113,7 +113,8 @@ class MMLSequencer
     {
         this.setting = new MMLParserSetting();
         
-        for (i in 0...MMLEvent.COMMAND_MAX){_eventHandlers[i] = _nop;
+        for (i in 0...MMLEvent.COMMAND_MAX) {
+            _eventHandlers[i] = _nop;
         }
         setMMLEventListener(MMLEvent.NOP, _default_onNoOperation, false);
         setMMLEventListener(MMLEvent.PROCESS, _default_onProcess, false);
@@ -271,7 +272,9 @@ class MMLSequencer
      */
     public function _prepareProcess(data : MMLData, sampleRate : Int, bufferLength : Int) : Void
     {
-        if (sampleRate != 22050 && sampleRate != 44100)             throw new Error("MMLSequencer error: Only 22050 or 44100 sampling rate is available.");
+        if (sampleRate != 22050 && sampleRate != 44100) {
+            throw new Error("MMLSequencer error: Only 22050 or 44100 sampling rate is available.");
+        }
         mmlData = data;
         this.sampleRate = sampleRate;
         _bufferLength = bufferLength;
@@ -313,6 +316,7 @@ class MMLSequencer
         _globalExecuteSampleCount = 0;
         _globalBufferIndex = 0;
     }
+
     /** execute global sequence. returns executing sample length. */
     private function executeGlobalSequence() : Int
     {
@@ -330,9 +334,10 @@ class MMLSequencer
                 event = _eventHandlers[event.id](event);
                 currentExecutor.pointer = event;
             }
-        }        while ((_globalExecuteSampleCount == 0));
+        } while (_globalExecuteSampleCount == 0);
         return _globalExecuteSampleCount;
     }
+
     /** check global sequences pointer acheives to the end. */
     private function isEndGlobalSequence() : Bool
     {
@@ -368,7 +373,7 @@ class MMLSequencer
     private function processMMLExecutor(exe : MMLExecutor, bufferSampleCount : Int) : Bool
     {
         currentExecutor = exe;
-        
+
         // buffering
         var event : MMLEvent = currentExecutor.pointer;
         _processSampleCount = bufferSampleCount;
@@ -508,18 +513,18 @@ class MMLSequencer
         while (seq != null) {
             count = seq.headEvent.data;
             if (count == 0) {
-                seq = seq.nextSequence;continue;
+                seq = seq.nextSequence;
+                continue;
             }
 
-            // initialize  ;
+            // initialize
             _tempExecutor.initialize(seq);
             prev = seq.headEvent;
             e = prev.next;
             pos = 0;
             hasNoEvent = true;
-            
             // calculate position and pickup global events
-            while (e != null && (count > 0 || hasNoEvent)){
+            while (e != null && (count > 0 || hasNoEvent)) {
                 if (_eventGlobalFlags[e.id]) {
                     if (e.id == MMLEvent.TABLE_EVENT) {
                         // table event
@@ -527,7 +532,8 @@ class MMLSequencer
                     }
                     else {
                         // global event
-                        if (seq.headEvent.jump == e)                             seq.headEvent.jump = prev;
+                        if (seq.headEvent.jump == e)
+                            seq.headEvent.jump = prev;
                         prev.next = e.next;
                         e.next = null;
                         e.length = pos;
@@ -536,11 +542,11 @@ class MMLSequencer
                     e = prev.next;
                     count--;
                 }
-                else 
-                if (e.length != 0) {
+                else if (e.length != 0) {
                     // note or rest
                     pos += e.length;
-                    if (e.id != MMLEvent.REST)                         hasNoEvent = false;
+                    if (e.id != MMLEvent.REST)
+                        hasNoEvent = false;
                     prev = e;
                     e = e.next;
                 }
@@ -551,19 +557,23 @@ class MMLSequencer
 
                     switch (_sw1_)
                     {
-                        case MMLEvent.REPEAT_BEGIN:e = _tempExecutor._onRepeatBegin(e);
+                        case MMLEvent.REPEAT_BEGIN:
+                            e = _tempExecutor._onRepeatBegin(e);
                         case MMLEvent.REPEAT_BREAK:
                             e = _tempExecutor._onRepeatBreak(e);
-                            if (prev.next != e)                                 prev = prev.jump.jump;
+                            if (prev.next != e)
+                                prev = prev.jump.jump;
                         case MMLEvent.REPEAT_END:
                             e = _tempExecutor._onRepeatEnd(e);
-                            if (prev.next != e)                                 prev = prev.jump;
-                        case MMLEvent.REPEAT_ALL:e = _tempExecutor._onRepeatAll(e);
-                        case MMLEvent.SEQUENCE_TAIL:e = null;
+                            if (prev.next != e)
+                                prev = prev.jump;
+                        case MMLEvent.REPEAT_ALL:
+                            e = _tempExecutor._onRepeatAll(e);
+                        case MMLEvent.SEQUENCE_TAIL:
+                            e = null;
                         default:
                             e = e.next;
                             hasNoEvent = true;
-                            break;
                     }
                 }
             }
@@ -664,10 +674,9 @@ class MMLSequencer
             var sampleCountFixed : Int = Math.floor(e.length * _bpm._samplePerTick + exec._decimalFractionSampleCount);
             exec._residueSampleCount = sampleCountFixed >> FIXED_BITS;
             exec._decimalFractionSampleCount = sampleCountFixed & FIXED_FILTER;
-        }  // processing  
-        
-        
-        
+        }
+
+        // processing
         if (exec._residueSampleCount <= _processSampleCount) {
             onProcess(exec._residueSampleCount, e.jump);
             _processSampleCount -= exec._residueSampleCount;
