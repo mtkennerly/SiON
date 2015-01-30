@@ -138,7 +138,7 @@ class SiMMLTrack
     @:allow(org.si.sion.sequencer)
     private var _callbackUpdateRegister : Int->Int->Void = null;
     
-    // event trriger
+    // event trigger
     private var _eventTriggerOn : SiMMLTrack->Bool = null;
     private var _eventTriggerOff : SiMMLTrack->Bool = null;
     private var _eventTriggerID : Int;
@@ -718,7 +718,7 @@ class SiMMLTrack
     }
     
     
-    /** set envelop step (&#64;fps) 
+    /** set envelop step (&#64;fps)
      *  @param fps Frame par second
      */
     public function setEnvelopFPS(fps : Int) : Void

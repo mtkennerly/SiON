@@ -84,15 +84,15 @@ class MMLSequenceGroup
      */
     public function alloc(headEvent : MMLEvent) : Void
     {
-        // divied into sequences
+        // divided into sequences
         var seq : MMLSequence;
-        while (headEvent != null && headEvent.jump != null){
+        while (headEvent != null && headEvent.jump != null) {
             if (headEvent.id != MMLEvent.SEQUENCE_HEAD) {
                 throw new Error("MMLSequence: Unknown error on dividing sequences. " + headEvent);
             }
-            seq = appendNewSequence();  // push new sequence  
-            headEvent = seq._cutout(headEvent);  // cutout sequence  
-            seq._updateMMLString();  // update mml string  
+            seq = appendNewSequence();  // push new sequence
+            headEvent = seq._cutout(headEvent);  // cutout sequence
+            seq._updateMMLString();  // update mml string
             seq.isActive = true;
         }
     }
@@ -127,7 +127,7 @@ class MMLSequenceGroup
     // allocated sequences
     private var _sequences : Array<MMLSequence>;
     // free list
-    private static var _freeList : Array<Dynamic> = [];
+    private static var _freeList : Array<MMLSequence> = [];
     
     
     /** append new sequence */
@@ -135,7 +135,7 @@ class MMLSequenceGroup
     {
         var seq : MMLSequence = _newSequence();
         seq._insertBefore(_term);
-        seq.isActive = false;  // inactivate  
+        seq.isActive = false;  // inactivate
         return seq;
     }
     
@@ -145,7 +145,9 @@ class MMLSequenceGroup
     private function _newSequence() : MMLSequence
     {
         var seq : MMLSequence = _freeList.pop();
-        if (seq == null) seq = new MMLSequence();
+        if (seq == null) {
+            seq = new MMLSequence();
+        }
         seq._owner = _owner;
         _sequences.push(seq);
         return seq;

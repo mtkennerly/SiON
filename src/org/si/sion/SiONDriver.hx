@@ -7,7 +7,8 @@
 
 package org.si.sion;
 
-import openfl._v2.utils.Timer;
+import openfl.utils.Endian;
+import openfl.utils.Timer;
 import openfl.errors.*;
 import openfl.events.*;
 import openfl.media.*;
@@ -16,7 +17,6 @@ import openfl.display.Sprite;
 
 import openfl.utils.ByteArray;
 import org.si.utils.SLLint;
-import org.si.utils.SLLNumber;
 import org.si.sion.events.*;
 import org.si.sion.sequencer.base.MMLSequence;
 import org.si.sion.sequencer.base.MMLEvent;
@@ -35,7 +35,6 @@ import org.si.sion.module.SiOPMWavePCMData;
 import org.si.sion.module.SiOPMWaveSamplerTable;
 import org.si.sion.module.SiOPMWaveSamplerData;
 import org.si.sion.effector.SiEffectModule;
-import org.si.sion.effector.SiEffectBase;
 import org.si.sion.utils.soundloader.SoundLoader;
 import org.si.sion.utils.SiONUtil;
 import org.si.sion.utils.Fader;
@@ -212,7 +211,7 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
     private var _fader : Fader;  // sound fader  
     //----- SiOPM DSP module related
     private var _channelCount : Int;  // module output channels (1 or 2)  
-    private var _sampleRate : Float;  // module output frequency ratio (44100 or 22050)  
+    private var _sampleRate : Int;  // module output frequency ratio (44100 or 22050)
     private var _bitRate : Int;  // module output bitrate  
     private var _bufferLength : Int;  // module and streaming buffer size (8192, 4096 or 2048)  
     private var _debugMode : Bool;  // true; throw Error, false; throw ErrorEvent  
@@ -730,20 +729,23 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
      */
     public function render(data : Dynamic, renderBuffer : Array<Float> = null, renderBufferChannelCount : Int = 2, resetEffector : Bool = true) : Array<Float>
     {
-        try{
+        try {
             // stop sound
             stop();
             
             // rendering immediately
             var t : Int = Math.round(haxe.Timer.stamp() * 1000);
             _prepareRender(data, renderBuffer, renderBufferChannelCount, resetEffector);
-            while (true){if (_rendering())                     break;
+            while (true) {
+                if (_rendering()) break;
             }
             _timeRender = Math.round(haxe.Timer.stamp() * 1000) - t;
-        }        catch (e : Error){
+        }
+        catch (e : Error) {
+            trace('Error while rendering: $e');
             // error
             _removeAllEventListners();
-            if (_debugMode)                 throw e
+            if (_debugMode) throw e
             else dispatchEvent(new ErrorEvent(ErrorEvent.ERROR, false, false, e.message));
         }
         
@@ -817,7 +819,9 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
                 _executeNextJob();
                 _queue_addAllEventListners();
             }
-        }        catch (e : Error){
+        }
+        catch (e : Error) {
+            trace('Error in startQueue: $e');
             // error
             _removeAllEventListners();
             _cancelAllJobs();
@@ -1660,7 +1664,8 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
             // canceled
             if (event.isDefaultPrevented())  _cancelAllJobs();
         }
-        catch (e : Error){
+        catch (e : Error) {
+            trace('error in queue enter frame: $e');
             // error
             _removeAllEventListners();
             _cancelAllJobs();
@@ -1826,17 +1831,28 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
             trace('No data to play');
         }
 
-        // THESE FUNCTIONS ORDER IS VERY IMPORTANT !!
-        module.initialize(_channelCount, _bitRate, _bufferLength);  // initialize DSP
-        module.reset();  // reset all channels
-        if (resetEffector) effector.initialize()
+        // THE ORDER OF THESE FUNCTIONS IS VERY IMPORTANT !!
+        // initialize DSP
+        module.initialize(_channelCount, _bitRate, _bufferLength);
+        // reset all channels
+        module.reset();
         // initialize (or reset) effectors
-        else effector._reset();
-        sequencer._prepareProcess(_data, Std.int(_sampleRate), _bufferLength);  // set sequencer tracks (should be called after module.reset())
-        if (_data != null) _parseSystemCommand(_data.systemCommands);
+        if (resetEffector) {
+            effector.initialize();
+        }
+        else {
+            effector._reset();
+        }
+        // set sequencer tracks (should be called after module.reset())
+        sequencer._prepareProcess(_data, _sampleRate, _bufferLength);
         // parse #EFFECT command (should be called after effector._reset())
-        effector._prepareProcess();  // set effector connections
-        _trackEventQueue.splice(0, _trackEventQueue.length);  // clear event queue
+        if (_data != null) {
+            _parseSystemCommand(_data.systemCommands);
+        }
+        // set effector connections
+        effector._prepareProcess();
+        // clear event queue
+        _trackEventQueue.splice(0, _trackEventQueue.length);
 
         // set position
         if (_data != null && _position > 0) {
@@ -1871,7 +1887,10 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
         }
         else {
             // preserve stop
-            if (_preserveStop) stop();
+            if (_preserveStop) {
+                trace('preserveStop is set');
+                stop();
+            }
 
 
             // frame trigger
@@ -1906,14 +1925,20 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
             if (event.isDefaultPrevented()) stop();    // canceled
         }
     }
-    
-    
+
+
+    private var time : Float = haxe.Timer.stamp();
+
     // on sampleData
     private function _streaming(e : SampleDataEvent) : Void
     {
+        var now = haxe.Timer.stamp();
+        //trace('Time since last: ${(now - time) * 1000} ms');
+        time = now;
+
         if (e.data == null) {
             e.data = new ByteArray();
-			e.data.endian = flash.utils.Endian.LITTLE_ENDIAN;
+			e.data.endian = Endian.LITTLE_ENDIAN;
         }
         var buffer : ByteArray = e.data;
         var extracted : Int;
@@ -1938,6 +1963,7 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
             }
             else {
                 //trace('Streaming audio data...');
+
                 // process starting time
                 var t : Int = Math.round(haxe.Timer.stamp() * 1000);
                 
@@ -1959,7 +1985,8 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
                 // write samples
                 imax = output.length;
                 var lastData : Float = 0.0;
-                if (imax > 0 && imax < 4096) trace('  Writing $imax samples');
+                //if (imax > 0 && imax < 4096)
+                //    trace('***** Writing $imax samples');
                 for (i in 0...imax) {
                     buffer.writeFloat(output[i]);
                     lastData = output[i];
@@ -1975,7 +2002,10 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
                 if (_dispatchStreamEvent) {
                     event = new SiONEvent(SiONEvent.STREAM, this, buffer, true);
                     dispatchEvent(event);
-                    if (event.isDefaultPrevented()) stop();  // canceled
+                    if (event.isDefaultPrevented()) {
+                        trace('is default prevented');
+                        stop();  // canceled
+                    }
                 }
 
                 // dispatch finishSequence event
@@ -1988,11 +2018,17 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
                 if (_fader.execute()) {
                     var eventType : String = ((_fader.isIncrement)) ? SiONEvent.FADE_IN_COMPLETE : SiONEvent.FADE_OUT_COMPLETE;
                     dispatchEvent(new SiONEvent(eventType, this, buffer));
-                    if (_autoStop && !_fader.isIncrement) stop();
+                    if (_autoStop && !_fader.isIncrement) {
+                        trace('fader says stop');
+                        stop();
+                    }
                 }
                 else {
                     // auto stop
-                    if (_autoStop && sequencer.isFinished) stop();
+                    if (_autoStop && sequencer.isFinished) {
+                        trace('we are done and auto stopping');
+                        stop();
+                    }
                 }
             }
 
@@ -2006,6 +2042,9 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
             if (_debugMode) throw e
             else dispatchEvent(new ErrorEvent(ErrorEvent.ERROR, false, false, e.message));
         }
+
+        //var end = haxe.Timer.stamp();
+        //trace('Time to write samples: ${(end - now) * 1000} ms');
     }
     
     
@@ -2200,7 +2239,7 @@ class SiONDriver extends Sprite implements ISiOPMWaveInterface
     // errors
     //----------------------------------------
     private function errorPluralDrivers() : Error{
-        return new Error("SiONDriver error; Cannot create pulral SiONDrivers.");
+        return new Error("SiONDriver error; Cannot create plural SiONDrivers.");
     }
     
     

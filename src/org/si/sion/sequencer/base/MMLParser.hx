@@ -6,8 +6,7 @@
 
 package org.si.sion.sequencer.base;
 
-//import openfl.utils.EReg;
-import openfl._v2.utils.Timer;
+import openfl.utils.Timer;
 import openfl.errors.Error;
 
 /** MML parser class. */
@@ -506,7 +505,10 @@ class MMLParser
                 else 
                 if (res[REX_USER_EVENT] != null) {
                     // user defined events.
-                    if (!_userDefinedEventID.exists(res[REX_USER_EVENT])) throw errorUnknown("REX_USER_EVENT");
+                    if (!_userDefinedEventID.exists(res[REX_USER_EVENT])) {
+                        throw errorUnknown("REX_USER_EVENT");
+                    }
+
                     addMMLEvent(_userDefinedEventID[res[REX_USER_EVENT]], __param());
                 }
                 else 
@@ -564,7 +566,7 @@ class MMLParser
 
             var position = rex.matchedPos();
             if (position == null) throw "EReg matchedPos error";
-            trace('LastMatchedPos: ${position.len} bytes at ${position.pos}');
+            //trace('LastMatchedPos: ${position.len} bytes at ${position.pos}');
             _lastMatchedPos = position.pos + position.len;
         }
 

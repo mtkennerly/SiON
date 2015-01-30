@@ -7,9 +7,6 @@
 package org.si.sion.sequencer.base;
 
 
-import openfl.utils.ByteArray;
-
-
 /** Sequence of 1 sound channel. MMLData > MMLSequenceGroup > MMLSequence > MMLEvent (">" meanse "has a"). */
 class MMLSequence
 {
@@ -63,13 +60,15 @@ class MMLSequence
     
     /** MML length, in resolution unit (1920 = whole-tone in default). */
     private function get_mmlLength() : Int {
-        if (_mmlLength == -1)             _updateMMLLength();
+        if (_mmlLength == -1)
+            _updateMMLLength();
         return _mmlLength;
     }
     
     /** flag for apearance of repeat all command (segno) */
     private function get_hasRepeatAll() : Bool {
-        if (_mmlLength == -1)             _updateMMLLength();
+        if (_mmlLength == -1)
+            _updateMMLLength();
         return _hasRepeatAll;
     }
     
@@ -96,13 +95,22 @@ class MMLSequence
     /** toString returns the event ids. */
     public function toString() : String
     {
-        if (_isTerminal)             return "terminator";
-        var e : MMLEvent = headEvent.next;
+        if (_isTerminal)
+            return "terminator";
+
         var str : String = "";
-        for (i in 0...32){
+        if (headEvent == null) {
+            return str;
+        }
+        var e : MMLEvent = headEvent.next;
+        if (e == null) {
+            return str;
+        }
+        for (i in 0...32) {
             str += Std.string(e.id) + " ";
             e = e.next;
-            if (e == null)                 break;
+            if (e == null)
+                break;
         }
         return str;
     }
@@ -115,15 +123,18 @@ class MMLSequence
      */
     public function toVector(lengthLimit : Int = 0, offset : Int = 0, eventID : Int = -1) : Array<MMLEvent>
     {
-        if (headEvent == null)             return null;
+        if (headEvent == null)
+            return null;
         var e : MMLEvent;
         var i : Int = 0;
         var result : Array<MMLEvent> = new Array<MMLEvent>();
         e = headEvent.next;
         while (e != null && e.id != MMLEvent.SEQUENCE_TAIL){
             if (eventID == -1 || eventID == e.id) {
-                if (i >= offset)                     result.push(e);
-                if (lengthLimit > 0 && i >= lengthLimit)                     break;
+                if (i >= offset)
+                    result.push(e);
+                if (lengthLimit > 0 && i >= lengthLimit)
+                    break;
                 i++;
             }
             e = e.next;
@@ -142,10 +153,7 @@ class MMLSequence
         return this;
     }
     
-    
-    
-    
-    
+
     // operations
     //--------------------------------------------------
     /** initialize. */
@@ -175,8 +183,7 @@ class MMLSequence
             _prevSequence = null;
             _nextSequence = null;
         }
-        else 
-        if (_isTerminal) {
+        else if (_isTerminal) {
             _prevSequence = this;
             _nextSequence = this;
         }
@@ -286,7 +293,8 @@ class MMLSequence
         // connect event at head
         e.next = headEvent.next;
         headEvent.next = e;
-        if (headEvent.jump == headEvent)             headEvent.jump = e;
+        if (headEvent.jump == headEvent)
+            headEvent.jump = e;
         return e;
     }
     
@@ -296,7 +304,8 @@ class MMLSequence
      */
     public function shift() : MMLEvent
     {
-        if (headEvent.jump == headEvent)             return null;
+        if (headEvent.jump == headEvent)
+            return null;
         var ret : MMLEvent = headEvent.next;
         headEvent.next = ret.next;
         ret.next = null;
@@ -312,7 +321,8 @@ class MMLSequence
     {
         // simply connect first tail to second head.
         headEvent.jump.next = secondHead;
-        if (headEvent.jump.next == null) headEvent.jump.next = tailEvent;
+        if (headEvent.jump.next == null)
+            headEvent.jump.next = tailEvent;
         return this;
     }
     
@@ -387,7 +397,7 @@ class MMLSequence
         _nextSequence._prevSequence = _prevSequence;
         _prevSequence = null;
         _nextSequence = null;
-        return ((ret == this)) ? null : ret;
+        return (ret == this) ? null : ret;
     }
     
     
@@ -425,6 +435,3 @@ class MMLSequence
         _mmlLength = length;
     }
 }
-
-
-

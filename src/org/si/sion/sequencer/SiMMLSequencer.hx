@@ -369,7 +369,9 @@ class SiMMLSequencer extends MMLSequencer
         i = tracks.length - 1;
         while (i >= 0){
             trk = tracks[i];
-            if (!trk.isActive)                 return _initializeTrack(trk, internalTrackID, isDisposable);
+            if (!trk.isActive) {
+                return _initializeTrack(trk, internalTrackID, isDisposable);
+            }
             i--;
         }
         
@@ -396,8 +398,7 @@ class SiMMLSequencer extends MMLSequencer
         track.channel.masterVolume = setting.defaultFineVolume;
         return track;
     }
-    
-    
+
     // find lowest priority track
     private function _findLowestPriorityTrack() : SiMMLTrack
     {
@@ -406,7 +407,7 @@ class SiMMLSequencer extends MMLSequencer
         var index : Int = 0;
         var maxPriority : Int = 0;
         i = tracks.length - 1;
-        while (i >= 0){
+        while (i >= 0) {
             p = tracks[i].priority;
             if (p >= maxPriority) {
                 index = i;
@@ -414,12 +415,10 @@ class SiMMLSequencer extends MMLSequencer
             }
             i--;
         }
+
         return ((maxPriority == 0)) ? null : tracks[index];
     }
-    
-    
-    
-    
+
     // compile
     //--------------------------------------------------
     /** Prepare to compile mml string. Calls onBeforeCompile() inside.
@@ -448,18 +447,14 @@ class SiMMLSequencer extends MMLSequencer
      */
     override public function _prepareProcess(data : MMLData, sampleRate : Int, bufferLength : Int) : Void
     {
-        trace('SiMMLSequencer($data, $sampleRate, $bufferLength)');
+        trace('SiMMLSequencer._prepareProcess($data, $sampleRate, $bufferLength)');
         // initialize all channels
         _freeAllTracks();
         _processedSampleCount = 0;
         _enableChangeBPM = true;
 
-        trace('SiMMLS: 1');
-
-        // call super function (set mmlData/grobalSequence/defaultBPM inside)
+        // call super function (set mmlData/globalSequence/defaultBPM inside)
         super._prepareProcess(data, sampleRate, bufferLength);
-
-        trace('SiMMLS: 2');
 
         if (mmlData != null) {
             // initialize all sequence tracks
@@ -468,12 +463,8 @@ class SiMMLSequencer extends MMLSequencer
             var idx : Int = 0;
             var internalTrackID : Int;
 
-            trace('SiMMLS: 3');
-
-            while (seq != null){
-                trace('SiMMLS: 4');
+            while (seq != null) {
                 if (seq.isActive) {
-                    trace('SiMMLS: 5');
                     trk = _freeTracks.pop();
                     if (trk == null) trk = new SiMMLTrack();
                     internalTrackID = idx | SiMMLTrack.MML_TRACK;
@@ -485,10 +476,8 @@ class SiMMLSequencer extends MMLSequencer
             }
         }
 
-        trace('SiMMLS: 6');
         // reset
         _resetAllTracks();
-        trace('SiMMLS: 7');
     }
     
     
@@ -500,17 +489,19 @@ class SiMMLSequencer extends MMLSequencer
         var trk : SiMMLTrack;
         var data : SiMMLData;
         var finished : Bool;
-        
+
         // prepare buffering
-        for (trk in tracks) trk.channel.resetChannelBufferStatus();
-        
+        for (trk in tracks) {
+            trk.channel.resetChannelBufferStatus();
+        }
+
         // buffering
         finished = true;
         startGlobalSequence();
         do{
             bufferingLength = executeGlobalSequence();
             _enableChangeBPM = false;
-            for (trk in tracks){
+            for (trk in tracks) {
                 _currentTrack = trk;
                 len = trk._prepareBuffer(bufferingLength);
                 _bpm = trk._bpmSetting;

@@ -70,7 +70,7 @@ class MMLEvent
     public var id : Int = 0;
     /** Event data. */
     public var data : Int = 0;
-    /** Prcessing length. */
+    /** Processing length. */
     public var length : Int = 0;
     /** Next event pointer in an event chain. */
     public var next : MMLEvent;
@@ -137,7 +137,9 @@ class MMLEvent
     /** free this event to reuse. */
     public function free() : Void
     {
-        if (next == null)             MMLParser._freeEvent(this);
+        if (next == null) {
+            MMLParser._freeEvent(this);
+        }
     }
     
     
