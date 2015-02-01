@@ -11,5 +11,6 @@ Some APIs have changed from the AS3 version. Get the haxe examples from https://
 * Playing music works. 
 * Setting voices to the internal synthesizer instruments works.
 * Synchronizing to display objects works.
-* Android support does *not* work. (Not usably anyway.)
+* Fade in/out with the low pass filter works
+* Android support does *not* work. (Seems better with a change that went into openfl on Jan. 26, 2015.)
 * iOS support is untested.

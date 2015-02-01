@@ -1,0 +1,15 @@
+0.0.2-alpha Feb. 1, 2015
+------------------------
+Fixed parsing of user commands, including 30 or so internal commands implemented as user commands.
+Fixed parsing of sequences that don't start with a note.
+Tested fader and low pass filter.
+Fixed lots of places where as3hx left "break" statements in a default case, causing the outside loop to exit.
+
+0.0.1-alpha Jan. 5, 2015
+------------------------
+First public release
+Trivial examples work
+Setting voices to the internal synthesizer instruments works.
+Android support does *not* work well, I think due to audio driver issues in lime.
+iOS support is untested.
+
