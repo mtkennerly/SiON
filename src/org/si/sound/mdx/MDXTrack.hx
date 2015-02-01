@@ -106,45 +106,42 @@ class MDXTrack
             else {
                 switch (code)
                 {
+                    //----- 2 operands
                     case MDXEvent.REGISTER, MDXEvent.FADEOUT:
                         newEvent(code, bytes.readUnsignedByte(), bytes.readUnsignedByte());
+                    //----- 1 operand
                     case MDXEvent.VOICE, MDXEvent.PAN, MDXEvent.VOLUME, MDXEvent.GATE, MDXEvent.KEY_ON_DELAY, MDXEvent.FREQUENCY, MDXEvent.LFO_DELAY, MDXEvent.SYNC_SEND:
                         newEvent(code, bytes.readUnsignedByte());
+                    //----- 0 operands
                     case MDXEvent.VOLUME_DEC, MDXEvent.VOLUME_INC, MDXEvent.SLUR, MDXEvent.SET_PCM8, MDXEvent.SYNC_WAIT:
                         newEvent(code);
+                    //----- 1 WORD
+                    case MDXEvent.DETUNE, MDXEvent.PORTAMENT:
+                        newEvent(code, bytes.readShort());  //...short?
                     //----- REPEAT
-                    case MDXEvent.DETUNE, MDXEvent.PORTAMENT, MDXEvent.REPEAT_BEGIN:
-
-                        switch (code)
-                        {case MDXEvent.PORTAMENT:
-                                newEvent(code, bytes.readShort());  //...short?  
-                                break;
-                        }
+                    case MDXEvent.REPEAT_BEGIN:
                         newEvent(code, bytes.readUnsignedByte(), bytes.readUnsignedByte());
+                    case MDXEvent.REPEAT_END:
+                        newEvent(code, pos + bytes.readShort());  // position of REPEAT_BEGIN
+                    case MDXEvent.REPEAT_BREAK:
+                        newEvent(code, pos + bytes.readShort() + 2);  // position of REPEAT_END
+
                     //----- others
-                    case MDXEvent.REPEAT_END, MDXEvent.REPEAT_BREAK, MDXEvent.TIMERB:
-
-                        switch (code)
-                        {case MDXEvent.REPEAT_END:
-                                newEvent(code, pos + bytes.readShort());  // position of REPEAT_BEGIN  
-                                break;
-                        }
-
-                        switch (code)
-                        {case MDXEvent.REPEAT_BREAK:
-                                newEvent(code, pos + bytes.readShort() + 2);  // position of REPEAT_END  
-                                break;
-                        }
+                    case MDXEvent.TIMERB:
                         v = bytes.readUnsignedByte();
-                        if (clock == 0)                             timerB = v;
+                        if (clock == 0)
+                            timerB = v;
                         newEvent(code, v);
                     case MDXEvent.PITCH_LFO, MDXEvent.VOLUME_LFO:
                         v = bytes.readUnsignedByte();
-                        if (v == 0x80 || v == 0x81)                             newEvent(code, v)
-                        else newEvent(code, v | (bytes.readUnsignedShort() << 8), bytes.readShort());
+                        if (v == 0x80 || v == 0x81)
+                            newEvent(code, v)
+                        else
+                            newEvent(code, v | (bytes.readUnsignedShort() << 8), bytes.readShort());
                     case MDXEvent.OPM_LFO:
                         v = bytes.readUnsignedByte();
-                        if (v == 0x80 || v == 0x81)                             newEvent(code, v << 16)
+                        if (v == 0x80 || v == 0x81)
+                            newEvent(code, v << 16)
                         else {
                             v = (v << 16) | (bytes.readUnsignedByte() << 8) | bytes.readUnsignedByte();
                             newEvent(code, v, bytes.readShort());
@@ -152,13 +149,14 @@ class MDXTrack
                     case MDXEvent.DATA_END:  // ...?  
                         v = bytes.readShort();
                         newEvent(code, v);
-                        if (v > 0 && pos - v + 3 >= 0)                             segnoPointer = mem[pos - v + 3]
-                        else if (v < 0 && pos + v + 3 >= 0)                             segnoPointer = mem[pos + v + 3];
+                        if (v > 0 && pos - v + 3 >= 0)
+                            segnoPointer = mem[pos - v + 3]
+                        else if (v < 0 && pos + v + 3 >= 0)
+                            segnoPointer = mem[pos + v + 3];
                         exitLoop = true;
                     default:
                         newEvent(MDXEvent.DATA_END);
                         exitLoop = true;
-                        break;
                 }
             }
         }
@@ -169,12 +167,10 @@ class MDXTrack
             sequence.push(inst);
             mem[pos] = inst;
             return inst;
-        }  //trace(String(this));    //trace("------------------- ch", channelNumber, "-------------------");  ;
-        
-        
-        
-        
-        
+        }
+
+        //trace(String(this));
+        // trace("------------------- ch", channelNumber, "-------------------");
         return this;
     }
 }

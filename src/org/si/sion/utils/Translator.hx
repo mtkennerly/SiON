@@ -1801,7 +1801,6 @@ class Translator
                             }
                             --j;
                         }
-                        break;
                 }
             }
             else {

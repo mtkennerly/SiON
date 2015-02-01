@@ -142,7 +142,8 @@ class MDXExecutor
     @:allow(org.si.sound.mdx)
     private function exec(totalClock : Int, bpm : Float) : Int
     {
-        if (mmlseq == null)             return Int.MAX_VALUE;
+        if (mmlseq == null)
+            return Int.MAX_VALUE;
         
         var e : MDXEvent = null;
         var me : MMLEvent;
@@ -151,23 +152,31 @@ class MDXExecutor
         
         while (clock <= totalClock && pointer < pointerMax && !waitSync){
             e = mdxtrack.sequence[pointer];
-            if (mdxtrack.segnoPointer == e)                 mmlseq.appendNewEvent(MMLEvent.REPEAT_ALL, 0);
+            if (mdxtrack.segnoPointer == e)
+                mmlseq.appendNewEvent(MMLEvent.REPEAT_ALL, 0);
             
             if (e.type < 0x80) {
                 lastNoteMML = null;
-                if (lastRestMML != null)                     lastRestMML.length += e.deltaClock * 10
-                else lastRestMML = mmlseq.appendNewEvent(MMLEvent.REST, 0, e.deltaClock * 10);
+                if (lastRestMML != null)
+                    lastRestMML.length += e.deltaClock * 10
+                else
+                    lastRestMML = mmlseq.appendNewEvent(MMLEvent.REST, 0, e.deltaClock * 10);
             }
             else if (e.type < 0xe0) {
                 lastRestMML = null;
-                if (mdxtrack.channelNumber < 8 && anFreq == -1) {  // FM  
-                    if (lastNoteMML != null && lastNoteMML.data == e.data + 15)                         lastNoteMML.length = e.deltaClock * 10
-                    else mmlseq.appendNewEvent(MMLEvent.NOTE, e.data + 15, e.deltaClock * 10);
+                if (mdxtrack.channelNumber < 8 && anFreq == -1) {
+                    // FM
+                    if (lastNoteMML != null && lastNoteMML.data == e.data + 15)
+                        lastNoteMML.length = e.deltaClock * 10
+                    else
+                        mmlseq.appendNewEvent(MMLEvent.NOTE, e.data + 15, e.deltaClock * 10);
                 }
-                else if (mdxtrack.channelNumber == 7) {  // FM/Noise  
+                else if (mdxtrack.channelNumber == 7) {
+                    // FM/Noise
                     mmlseq.appendNewEvent(MMLEvent.NOTE, anFreq, e.deltaClock * 10);
                 }
-                else {  // ADPCM  
+                else {
+                    // ADPCM
                     if (adpcmID != e.data) {
                         adpcmID = e.data;
                         mmlseq.appendNewEvent(MMLEvent.MOD_PARAM, adpcmID);
@@ -183,19 +192,21 @@ class MDXExecutor
                 switch (_sw0_)
                 {
                     case MDXEvent.PORTAMENT:  // ...?  
-                        if (mdxtrack.sequence[pointer + 1].type == MDXEvent.SLUR)                             pointer++;
-                        if (mdxtrack.sequence[pointer + 1].type != MDXEvent.NOTE)                             break;
-                        v = e.data;
-                        pointer++;
-                        e = mdxtrack.sequence[pointer];
-                        mmlseq.appendNewEvent(MMLEvent.NOTE, e.data + 15, 0);
-                        mmlseq.appendNewEvent(MMLEvent.PITCHBEND, 0, e.deltaClock * 10);
-                        lastNoteMML = mmlseq.appendNewEvent(MMLEvent.NOTE, e.data + 15 + (v * e.deltaClock + 8192) / 16384, 0);
+                        if (mdxtrack.sequence[pointer + 1].type == MDXEvent.SLUR)
+                            pointer++;
+                        if (mdxtrack.sequence[pointer + 1].type == MDXEvent.NOTE) {
+                            v = e.data;
+                            pointer++;
+                            e = mdxtrack.sequence[pointer];
+                            mmlseq.appendNewEvent(MMLEvent.NOTE, e.data + 15, 0);
+                            mmlseq.appendNewEvent(MMLEvent.PITCHBEND, 0, e.deltaClock * 10);
+                            lastNoteMML = mmlseq.appendNewEvent(MMLEvent.NOTE, e.data + 15 + (v * e.deltaClock + 8192) / 16384, 0);
+                        }
                     case MDXEvent.REGISTER:
                         mmlseq.appendNewEvent(MMLEvent.REGISTER, e.data);
                         mmlseq.appendNewEvent(MMLEvent.PARAMETER, e.data2);
-                    case MDXEvent.FADEOUT:{mmlseq.appendNewEvent(eventIDFadeOut, e.data2);
-                    }
+                    case MDXEvent.FADEOUT:
+                        mmlseq.appendNewEvent(eventIDFadeOut, e.data2);
                     case MDXEvent.VOICE:
                         if (mdxtrack.channelNumber < 8) {  // ...?  
                             voiceID = e.data;
@@ -220,11 +231,13 @@ class MDXExecutor
                         }
                         _vol();
                     case MDXEvent.VOLUME_DEC:
-                        if (--volume == 0)                             volume = 0;
+                        if (--volume == 0)
+                            volume = 0;
                         _vol();
                     case MDXEvent.VOLUME_INC:
                         l = ((fineVolumeFlag)) ? 127 : 15;
-                        if (++volume == l)                             volume = l;
+                        if (++volume == l)
+                            volume = l;
                         _vol();
                     case MDXEvent.GATE:
                         if (e.data < 9) {
@@ -237,8 +250,8 @@ class MDXExecutor
                             mmlseq.appendNewEvent(MMLEvent.QUANT_RATIO, 8);
                             mmlseq.appendNewEvent(MMLEvent.QUANT_COUNT, -gateTime);
                         }
-                    case MDXEvent.KEY_ON_DELAY:{mmlseq.appendNewEvent(MMLEvent.KEY_ON_DELAY, e.data * 10);
-                    }
+                    case MDXEvent.KEY_ON_DELAY:
+                        mmlseq.appendNewEvent(MMLEvent.KEY_ON_DELAY, e.data * 10);
                     case MDXEvent.SLUR:
                         if (mdxtrack.sequence[pointer + 1].type == MDXEvent.NOTE) {
                             pointer++;
@@ -259,23 +272,24 @@ class MDXExecutor
                         mmlseq.appendNewEvent(eventIDPShift, e.data);
                     case MDXEvent.LFO_DELAY:
                         lfoDelay = e.data * 75 / bpm;
-                        if (mp > 0)                             _mod(eventIDPMod, mp, lfows, lfofq);
-                        if (ma > 0)                             _mod(eventIDAMod, ma, lfows, lfofq);
+                        if (mp > 0)
+                            _mod(eventIDPMod, mp, lfows, lfofq);
+                        if (ma > 0)
+                            _mod(eventIDAMod, ma, lfows, lfofq);
                     case MDXEvent.PITCH_LFO:
                         if ((e.data & 0x80) != 0) {
-                            if ((e.data & 0xff) == 0x80)                                 mmlseq.appendNewEvent(eventIDPMod, 0)
-                            else _mod(eventIDPMod, mp, lfows, lfofq);
+                            if ((e.data & 0xff) == 0x80)
+                                mmlseq.appendNewEvent(eventIDPMod, 0)
+                            else
+                                _mod(eventIDPMod, mp, lfows, lfofq);
                         }
                         else {
                             l = e.data >> 8;
                             mp = ((e.data2 >> ((((e.data & 4) == 0)) ? 8 : 0)) * l) >> 1;
                             _mod(eventIDPMod, mp, e.data & 3, l * 75 / bpm * (((lfows != 0)) ? 2 : 1));
                         }
-                    case MDXEvent.VOLUME_LFO, MDXEvent.FREQUENCY:
-
-                        switch (_sw0_)
-                        {case MDXEvent.VOLUME_LFO:
-                            /* ... 
+                    case MDXEvent.VOLUME_LFO:
+                        /* ...
                             if ((e.data & 0x80) != 0) {
                             if ((e.data & 0xff) == 0x80) mmlseq.appendNewEvent(eventIDAMod, 0);
                             else _mod(eventIDAMod, ma, lfows, lfofq);
@@ -285,8 +299,7 @@ class MDXExecutor
                             _mod(eventIDAMod, ma, e.data&3, l*75/bpm * ((lfows)?2:1));
                             }
                             */
-                            break;
-                        }
+                    case MDXEvent.FREQUENCY:
                         if (mdxtrack.channelNumber == 7) {
                             if (e.data & 128) {
                                 if (noiseVoiceNumber != -1) {
@@ -304,20 +317,16 @@ class MDXExecutor
                             anFreq = e.data;
                         }
                     case MDXEvent.SYNC_WAIT:
-                    //trace("wait", clock);
-                    waitSync = true;
-                    case MDXEvent.SYNC_SEND, MDXEvent.TIMERB, MDXEvent.DATA_END, MDXEvent.SET_PCM8, MDXEvent.OPM_LFO:
-
-                        switch (_sw0_)
-                        {case MDXEvent.SET_PCM8:
-                            // do nothing
-                            break;
-                        }
+                        //trace("wait", clock);
+                        waitSync = true;
+                    case MDXEvent.SYNC_SEND:
+                        trace("send", clock);
+                    case MDXEvent.TIMERB, MDXEvent.DATA_END, MDXEvent.SET_PCM8:
+                        // do nothing
+                    case MDXEvent.OPM_LFO:
                         // not supported
-                        break;
                     default:
                         // not supported
-                        break;
                 }
             }
             
@@ -327,9 +336,11 @@ class MDXExecutor
         
         return ((pointer >= pointerMax || waitSync)) ? Int.MAX_VALUE : clock;
         
-        function _vol() : Void{
-            if (mdxtrack.channelNumber < 8)                 mmlseq.appendNewEvent(eventIDExp, ((fineVolumeFlag)) ? _tlTable[volume] : _volTable[volume])
-            else mmlseq.appendNewEvent(eventIDExp, ((fineVolumeFlag)) ? (127 - volume) : _volTable[volume]);
+        function _vol() : Void {
+            if (mdxtrack.channelNumber < 8)
+                mmlseq.appendNewEvent(eventIDExp, ((fineVolumeFlag)) ? _tlTable[volume] : _volTable[volume])
+            else
+                mmlseq.appendNewEvent(eventIDExp, ((fineVolumeFlag)) ? (127 - volume) : _volTable[volume]);
         };
         
         function _mod(eventID : Int, data : Int, ws : Int, fq : Int) : Void{

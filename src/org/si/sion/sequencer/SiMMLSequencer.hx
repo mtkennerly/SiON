@@ -1021,7 +1021,6 @@ class SiMMLSequencer extends MMLSequencer
                 default:  // mck/tss  
                     mmlData.defaultVelocityMode = SiOPMTable.VM_LINEAR;
                     mmlData.defaultExpressionMode = SiOPMTable.VM_LINEAR;
-                    break;
             }
         }
     }

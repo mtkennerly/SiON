@@ -142,7 +142,7 @@ class SiEffectDownSampler extends SiEffectBase
                     i = startIndex;
                     while (i < imax){
                         j = 0;
-l = 0;
+                        l = 0;
                         while (j < jmax){
                             l += buffer[i];
                             j++;
