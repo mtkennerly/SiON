@@ -17,7 +17,7 @@ import flash.utils.ByteArray;
 import flash.events.Event;
 import flash.display.BitmapData;
 #else
-import openfl._v2.utils.CompressionAlgorithm;
+import openfl.utils.CompressionAlgorithm;
 import openfl.net.URLLoaderDataFormat;
 import openfl.events.IOErrorEvent;
 import openfl.net.URLRequest;
@@ -53,6 +53,11 @@ class ByteArrayExt extends ByteArray
             this.writeBytes(copyFrom);
             this.endian = copyFrom.endian;
             this.position = 0;
+        }
+        else {
+            // By default, use little endian, since SWF files
+            // used by SoundFont are in little endian format
+            endian = Endian.LITTLE_ENDIAN;
         }
     }
     

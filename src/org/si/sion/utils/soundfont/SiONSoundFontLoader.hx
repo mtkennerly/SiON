@@ -94,17 +94,27 @@ class SiONSoundFontLoader extends EventDispatcher
     /** load sound font from binary 
      *  @param bytes ByteArray to load from.
      */
-    public function loadBytes(bytes : ByteArray) : Void{
+    public function loadBytes(bytes : ByteArray) : Bool {
+        var success = true;
+        trace('fontloader.loadbytes');
         _binloader = null;
         var signature : Int = bytes.readUnsignedInt();
-        if (signature == 0x0b535743) {  // swf  
+        if (signature == 0x0b535743) {  // swf
+            trace('Found a swf');
             _swfloader = new Loader();
             _addAllListeners(_swfloader.contentLoaderInfo);
             _swfloader.loadBytes(bytes);
         }
         else if (signature == 0x04034b50) {  // zip  
+            trace('Found a zip');
             _analyzeZip(bytes);
         }
+        else {
+            var hexSig=StringTools.hex(signature);
+            trace('unhandled soundfont type: $signature: 0x$hexSig');
+            success = false;
+        }
+        return success;
     }
     
     
@@ -134,30 +144,40 @@ class SiONSoundFontLoader extends EventDispatcher
     
     private function _onComplete(e : Event) : Void
     {
+        trace('SoundFontLoader.onComplete: $e');
         _removeAllListeners();
-        if (_binloader != null)             loadBytes(_binloader.data)
+        if (_binloader != null) {
+            trace('Loading bytes from binloader.data');
+            loadBytes(_binloader.data);
+        }
         else {
+            trace('binloader is null');
             _analyze();
             dispatchEvent(e.clone());
         }
     }
-    
-    
-    private function _onProgress(e : Event) : Void{dispatchEvent(e.clone());
+
+    private function _onProgress(e : Event) : Void {
+        dispatchEvent(e.clone());
     }
-    private function _onError(e : ErrorEvent) : Void{_removeAllListeners();dispatchEvent(e.clone());
+
+    private function _onError(e : ErrorEvent) : Void {
+        _removeAllListeners();dispatchEvent(e.clone());
     }
-    
-    
-    
+
     
     // internal functions
     //--------------------------------------------------
     private function _analyze() : Void
     {
+        trace('SoundFontLoader.analyze. content is ${_swfloader.content}');
         var container : SiONSoundFontContainer = try cast(_swfloader.content, SiONSoundFontContainer) catch(e:Dynamic) null;
-        if (container == null) _onError(new IOErrorEvent(IOErrorEvent.IO_ERROR, false, false, "The sound font file is not valid."));  // create new sound font instance
+        if (container == null) {
+            _onError(new IOErrorEvent(IOErrorEvent.IO_ERROR, false, false, "The sound font file is not valid."));
+            return;
+        }
 
+        // create new sound font instance
         soundFont = new SiONSoundFont(container.sounds);
         
         // parse mml
@@ -215,7 +235,7 @@ class SiONSoundFontLoader extends EventDispatcher
             soundFont.fmVoices[num] = voice;
         };
 
-        for (i in 0...imax){
+        for (i in 0...imax) {
             cmd = systemCommands[i];
             num = cmd.number;
             dat = cmd.content;
@@ -226,26 +246,34 @@ class SiONSoundFontLoader extends EventDispatcher
             switch (_sw1_)
             {
                 // tone settings
-                case "#@":{__parseToneParam(Translator.parseParam);
+                case "#@":{
+                    __parseToneParam(Translator.parseParam);
                 }
-                case "#OPM@":{__parseToneParam(Translator.parseOPMParam);
+                case "#OPM@":{
+                    __parseToneParam(Translator.parseOPMParam);
                 }
-                case "#OPN@":{__parseToneParam(Translator.parseOPNParam);
+                case "#OPN@":{
+                    __parseToneParam(Translator.parseOPNParam);
                 }
-                case "#OPL@":{__parseToneParam(Translator.parseOPLParam);
+                case "#OPL@":{
+                    __parseToneParam(Translator.parseOPLParam);
                 }
-                case "#OPX@":{__parseToneParam(Translator.parseOPXParam);
+                case "#OPX@":{
+                    __parseToneParam(Translator.parseOPXParam);
                 }
-                case "#MA@":{__parseToneParam(Translator.parseMA3Param);
+                case "#MA@":{
+                    __parseToneParam(Translator.parseMA3Param);
                 }
-                case "#AL@":{__parseToneParam(Translator.parseALParam);
+                case "#AL@":{
+                    __parseToneParam(Translator.parseALParam);
                 }
                 
                 // parser settings
                 case "#FPS":{
                     soundFont.defaultFPS = ((num > 0)) ? num : ((dat == "") ? 60 : Std.parseInt(dat));
                 }
-                case "#VMODE":{_parseVCommansSubMML(dat);
+                case "#VMODE":{
+                    _parseVCommansSubMML(dat);
                 }
                 
                 // tables
@@ -271,7 +299,8 @@ class SiONSoundFontLoader extends EventDispatcher
                     num &= (SiOPMTable.NOTE_TABLE_SIZE - 1);
                     if (soundFont.samplerTables[bank] == null) soundFont.samplerTables[bank] = new SiOPMWaveSamplerTable();
                     samplerTable = soundFont.samplerTables[bank];
-                    if (!Translator.parseSamplerWave(samplerTable, num, dat, soundFont.sounds))                         _errorParameterNotValid("#SAMPLER", Std.string(num));
+                    if (!Translator.parseSamplerWave(samplerTable, num, dat, soundFont.sounds))
+                        _errorParameterNotValid("#SAMPLER", Std.string(num));
                 }
                 case "#PCMWAVE":{
                     if (num < 0 || num > 255) throw _errorParameterNotValid("#PCMWAVE", Std.string(num));
@@ -288,7 +317,6 @@ class SiONSoundFontLoader extends EventDispatcher
                     if (!Translator.parsePCMVoice(voice, dat, pfx, soundFont.envelopes)) _errorParameterNotValid("#PCMVOICE", Std.string(num));
                 }
                 default:
-                    break;
             }
         }
     }
@@ -319,7 +347,6 @@ class SiONSoundFontLoader extends EventDispatcher
                 default:  // mck/tss  
                     soundFont.defaultVelocityMode = SiOPMTable.VM_LINEAR;
                     soundFont.defaultExpressionMode = SiOPMTable.VM_LINEAR;
-                    break;
             }
             
             dat=tcmdrex.matchedRight();

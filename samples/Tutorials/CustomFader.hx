@@ -1,13 +1,5 @@
 // Sample for custom fader.
-import Event;
-import Fader;
-import SiCtrlFilterLowPass;
-import SiONData;
-import SiONDriver;
-import SiONEvent;
-import SiONPresetVoice;
-import SiONVoice;
-import Sprite;
+package tutorials;
 
 import openfl.display.Sprite;
 import openfl.events.*;
@@ -43,16 +35,21 @@ class CustomFader extends Sprite
     public function new()
     {
         super();
+        driver.addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+
+        addChild(driver);
+    }
+
+    private function onAddedToStage (event:Event):Void {
+
         // compile mml.
-        drumLoop =driver.compile("%6@0o3l8$c2cc.c.; %6@1o3$rcrc; %6@2v8l16$[crccrrcc]; %6@3v8o3$[rc8r8]")  // set voices of "%6@0-3" from preset  ;
-        
-        
-        
-        var percusVoices : Array<Dynamic> = Reflect.field(presetVoice, "valsound.percus");
-        drumLoop.setVoice(0, percusVoices[0]);  // bass drum  
-        drumLoop.setVoice(1, percusVoices[27]);  // snare drum  
-        drumLoop.setVoice(2, percusVoices[16]);  // close hihat  
-        drumLoop.setVoice(3, percusVoices[21]);  // open hihat  
+        drumLoop = driver.compile("%6@0o3l8$c2cc.c.; %6@1o3$rcrc; %6@2v8l16$[crccrrcc]; %6@3v8o3$[rc8r8]");
+
+        // set voices of "%6@0-3" from preset
+        drumLoop.setVoice(0, presetVoice.voices.get("valsound.percus1"));  // bass drum
+        drumLoop.setVoice(1, presetVoice.voices.get("valsound.percus28"));  // snare drum
+        drumLoop.setVoice(2, presetVoice.voices.get("valsound.percus17"));  // close hihat
+        drumLoop.setVoice(3, presetVoice.voices.get("valsound.percus22"));  // open hihat
         
         // listen click
         driver.addEventListener(SiONEvent.STREAM_START, _onStreamStart);
@@ -76,7 +73,10 @@ class CustomFader extends Sprite
     {
         // start custom fade with 10[sec] if the fader is inactive.
         // The "10 * 44100 / 2048" calculates callbacking count of _onStream in 10 seconds.
-        if (!lpfFader.isActive)             lpfFader.setFade(_fadeLPF, 1, 0, 10 * 44100 / 2048);
+        if (!lpfFader.isActive) {
+            trace('Starting custom fade!');
+            lpfFader.setFade(_fadeLPF, 1, 0, Std.int(10 * 44100 / 2048));
+        }
     }
     
     
@@ -84,7 +84,7 @@ class CustomFader extends Sprite
     {
         // start custom fade with 5[sec].
         // The "5 * 44100 / 2048" calculates callbacking count of _onStream in 5 seconds.
-        lpfFader.setFade(_fadeLPF, 0, 1, 5 * 44100 / 2048);
+        lpfFader.setFade(_fadeLPF, 0, 1, Std.int(5 * 44100 / 2048));
     }
     
     
@@ -94,7 +94,11 @@ class CustomFader extends Sprite
         if (lpfFader.execute()) {
             // Fader.execute() returns true when the fading achieves to the end.
             // and stop if the fader is decrement.
-            if (!lpfFader.isIncrement)                 driver.stop();
+            if (!lpfFader.isIncrement) {
+                trace('Fading finished. Starting again.');
+                // start custom fade with 5[sec].
+                // The "5 * 44100 / 2048" calculates callbacking count of _onStream in 5 seconds.
+                lpfFader.setFade(_fadeLPF, 0, 1, Std.int(5 * 44100 / 2048));            }
         }
     }
     

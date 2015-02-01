@@ -73,36 +73,47 @@ class SoundLoaderFileData extends EventDispatcher
     private var _urlRequest : URLRequest;
     private var _type : String;
     private var _checkPolicyFile : Bool;
-    private var _bytesLoaded : Int;private var _bytesTotal : Int;
-    private var _loader : Loader;private var _sound : Sound;private var _urlLoader : URLLoader;private var _fontLoader : SiONSoundFontLoader;private var _byteArray : ByteArray;
+    private var _bytesLoaded : Int;
+    private var _bytesTotal : Int;
+    private var _loader : Loader;
+    private var _sound : Sound;
+    private var _urlLoader : URLLoader;
+    private var _fontLoader : SiONSoundFontLoader;
+    private var _byteArray : ByteArray;
     private var _soundLoader : SoundLoader;
     
-    
-    
-    
+
     // properties
     //----------------------------------------
     /** data id */
-    private function get_dataID() : String{return _dataID;
+    private function get_dataID() : String {
+        return _dataID;
     }
+
     /** loaded data */
-    private function get_data() : Dynamic{return _content;
+    private function get_data() : Dynamic {
+        return _content;
     }
+
     /** url string */
-    private function get_urlString() : String{return ((_urlRequest != null)) ? _urlRequest.url : null;
+    private function get_urlString() : String {
+        return ((_urlRequest != null)) ? _urlRequest.url : null;
     }
+
     /** data type */
-    private function get_type() : String{return _type;
+    private function get_type() : String {
+        return _type;
     }
+
     /** loaded bytes */
-    private function get_bytesLoaded() : Int{return _bytesLoaded;
+    private function get_bytesLoaded() : Int {
+        return _bytesLoaded;
     }
+
     /** total bytes */
-    private function get_bytesTotal() : Int{return _bytesTotal;
+    private function get_bytesTotal() : Int {
+        return _bytesTotal;
     }
-    
-    
-    
     
     // functions
     //----------------------------------------
@@ -110,6 +121,7 @@ class SoundLoaderFileData extends EventDispatcher
     public function new(soundLoader : SoundLoader, id : String, urlRequest : URLRequest, byteArray : ByteArray, ext : String, checkPolicyFile : Bool)
     {
         super();
+        trace('SoundLoaderFileData("$id")');
         this._dataID = id;
         this._soundLoader = soundLoader;
         this._urlRequest = urlRequest;
@@ -124,17 +136,18 @@ class SoundLoaderFileData extends EventDispatcher
         this._byteArray = byteArray;
     }
     
-    
-    
-    
+
     // private functions
     //----------------------------------------
     /** @private */
     @:allow(org.si.sion.utils.soundloader)
     private function load() : Bool
     {
+        trace('InSoundLoaderFileData.load');
         // already loaded
-        if (_content != null)             return false;
+        if (_content != null) {
+            return false;
+        }
         
         switch (_type)
         {
@@ -142,9 +155,13 @@ class SoundLoaderFileData extends EventDispatcher
                 _addAllListeners(_sound = new Sound());
                 _sound.load(_urlRequest, new SoundLoaderContext(1000, _checkPolicyFile));
             case "img", "ssfpng":
+                trace('Loading an image...');
                 _loader = new Loader();
+                trace('Created a new loader');
                 _addAllListeners(_loader.contentLoaderInfo);
+                trace('Added a listener');
                 _loader.load(_urlRequest, new LoaderContext(_checkPolicyFile));
+                trace('Called load on $_urlRequest .');
             case "txt":
                 _addAllListeners(_urlLoader = new URLLoader());
                 _urlLoader.dataFormat = URLLoaderDataFormat.TEXT;
@@ -230,6 +247,7 @@ class SoundLoaderFileData extends EventDispatcher
     
     private function _onComplete(e : Event) : Void
     {
+        trace('SoundLoaderFileData.onComplete');
         _removeAllListeners();
         _soundLoader._onProgress(this, Std.int(e.target.bytesLoaded - _bytesLoaded), Std.int(e.target.bytesTotal - _bytesTotal));
         _bytesLoaded = e.target.bytesLoaded;
@@ -267,13 +285,17 @@ class SoundLoaderFileData extends EventDispatcher
                 _soundLoader._onComplete(this);
             case "ssfpng":
                 {
+                    trace('SoundLoaderFileData.postProcess - ssfpng');
                     var bitmapSound : Bitmap;
                     try {
                         bitmapSound = cast((_loader.content), Bitmap);
+                        trace('cast bitmapsound');
                     }
                     catch (e : Dynamic) {
+                        trace('failed to cast');
                         bitmapSound = null;
                     }
+                    trace('converting bitmap to soundfont');
                     _convertBitmapDataToSoundFont(bitmapSound.bitmapData);
                 }
             case "img", "b2img":
@@ -302,24 +324,35 @@ class SoundLoaderFileData extends EventDispatcher
     
     private function _convertBitmapDataToSoundFont(bitmap : BitmapData) : Void
     {
-        var bitmap2bytes : ByteArrayExt = new ByteArrayExt();  // convert BitmapData to ByteArray  
+        var bitmap2bytes : ByteArrayExt = new ByteArrayExt();  // convert BitmapData to ByteArray
+        trace('in convert');
         _loader = null;
         _fontLoader = new SiONSoundFontLoader();  // convert ByteArray to SWF and SWF to soundList  
         _fontLoader.addEventListener(Event.COMPLETE, __convertB2SF_onComplete);
         _fontLoader.addEventListener(IOErrorEvent.IO_ERROR, __errorCallback);
-        _fontLoader.loadBytes(bitmap2bytes.fromBitmapData(bitmap));
+        trace('Calling loadbytes');
+        var dataBytes = bitmap2bytes.fromBitmapData(bitmap);
+        var success = _fontLoader.loadBytes(dataBytes);
+        if (!success)
+        {
+            _soundLoader._onError(this, "Failed to convert the data");
+        }
+        trace('loadbytes returned');
     }
     
     
     private function __convertB2SF_onComplete(e : Event) : Void
     {
+        trace('convert complete');
         _content = _fontLoader.soundFont;
+        trace('calling onComplete');
         _soundLoader._onComplete(this);
     }
     
     
     private function __errorCallback(e : ErrorEvent) : Void
     {
+        trace('failed to convert');
         _soundLoader._onError(this, Std.string(e));
     }
 }

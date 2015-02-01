@@ -37,7 +37,7 @@ import openfl.utils.ByteArray;
  */
 class SoundLoader extends EventDispatcher
 {
-    public var hash(get, never) : Dynamic;
+    public var hash(get, never) : Map<String, Dynamic>;
     public var bytesTotal(get, never) : Float;
     public var bytesLoaded(get, never) : Float;
     public var loadingFileCount(get, never) : Int;
@@ -53,7 +53,7 @@ class SoundLoader extends EventDispatcher
     /** loading url list */
     private var _preserveList : Array<SoundLoaderFileData>;
     /** total file size */
-    private var _bytesTotal : Float;
+    private var _bytesTotal : Int;
     /** loaded file size */
     private var _bytesLoaded : Int;
     /** error file count */
@@ -81,7 +81,7 @@ class SoundLoader extends EventDispatcher
     // properties
     //------------------------------------------------------------
     /** Object to access all Sound instances. */
-    private function get_hash() : Dynamic {
+    private function get_hash() : Map<String, Dynamic> {
         return _loaded;
     }
     
@@ -115,16 +115,20 @@ class SoundLoader extends EventDispatcher
     }
     
     /** true to load 'mp3' type file as 'mp3bin' @default false */
-    private function get_loadMP3FileAsBinary() : Bool{return _loadMP3FileAsBinary;
+    private function get_loadMP3FileAsBinary() : Bool {
+        return _loadMP3FileAsBinary;
     }
-    private function set_loadMP3FileAsBinary(b : Bool) : Bool{_loadMP3FileAsBinary = b;
+    private function set_loadMP3FileAsBinary(b : Bool) : Bool {
+        _loadMP3FileAsBinary = b;
         return b;
     }
     
     /** true to check ID confirictoin @default false */
-    private function get_rememberHistory() : Bool{return _rememberHistory;
+    private function get_rememberHistory() : Bool {
+        return _rememberHistory;
     }
-    private function set_rememberHistory(b : Bool) : Bool{_rememberHistory = b;
+    private function set_rememberHistory(b : Bool) : Bool {
+        _rememberHistory = b;
         return b;
     }
     
@@ -162,8 +166,8 @@ class SoundLoader extends EventDispatcher
     override public function toString() : String
     {
         var output : String = "[SoundLoader: " + loadedFileCount + " files are loaded.\n";
-        for (id in Reflect.fields(_loaded)){
-            output += "  '" + id + "' : " + Std.string(Reflect.field(_loaded, id)) + "\n";
+        for (id in _loaded.keys()){
+            output += "  '" + id + "' : " + _loaded[id] + "\n";
         }
         output += "]";
         return output;
@@ -183,23 +187,31 @@ class SoundLoader extends EventDispatcher
      */
     public function setURL(urlRequest : URLRequest, id : String = null, type : String = null, checkPolicyFile : Bool = false) : SoundLoaderFileData
     {
+        trace('SoundLoader.setURL(${urlRequest.url}, "$id")');
         var urlString : String = urlRequest.url;
         var lastDotIndex : Int = urlString.lastIndexOf(".");
         var lastSlashIndex : Int = urlString.lastIndexOf("/");
         var fileData : SoundLoaderFileData;
-        if (lastSlashIndex == -1)             lastSlashIndex = 0;
-        if (lastDotIndex < lastSlashIndex)             lastDotIndex = urlString.length;
-        if (id == null)             id = urlString.substr(lastSlashIndex);
+        if (lastSlashIndex == -1)
+            lastSlashIndex = 0;
+        if (lastDotIndex < lastSlashIndex)
+            lastDotIndex = urlString.length;
+        if (id == null)
+            id = urlString.substr(lastSlashIndex);
         if (_rememberHistory && _loadedFileData.exists(id) && _loadedFileData.get(id).urlString == urlString) {
             fileData = _loadedFileData.get(id);
         }
         else {
-            if (type == null)                 type = urlString.substr(lastDotIndex + 1);
+            if (type == null)
+                type = urlString.substr(lastDotIndex + 1);
             if (_loadImgFileAsSoundFont) {
-                if (type == "swf")                     type = "ssf"
-                else if (type == "png")                     type = "ssfpng";
+                if (type == "swf")
+                    type = "ssf"
+                else if (type == "png")
+                    type = "ssfpng";
             }
-            if (_loadMP3FileAsBinary && type == "mp3")                 type = "mp3bin";
+            if (_loadMP3FileAsBinary && type == "mp3")
+                type = "mp3bin";
             if (!(Lambda.has(SoundLoaderFileData._ext2typeTable, type))) {
                 throw new Error("unknown file type. : " + urlString);
             }
@@ -241,10 +253,18 @@ class SoundLoader extends EventDispatcher
      */
     public function loadAll() : Int
     {
+        trace('SoundLoader.loadAll()');
         var count : Int = 0;
-        for (i in 0..._preserveList.length){
-            if (_preserveList[i].load())                 count++
-            else _preserveList[i].dispatchEvent(new Event(Event.COMPLETE, false, false));
+        for (i in 0..._preserveList.length) {
+            if (_preserveList[i].load()) {
+                trace('${_preserveList[i].urlString}: load pending: NOT cheating for a test');
+                //_preserveList[i].dispatchEvent(new Event(Event.COMPLETE, false, false));
+                count++;
+            }
+            else {
+                trace('${_preserveList[i].urlString}: already have the data!');
+                _preserveList[i].dispatchEvent(new Event(Event.COMPLETE, false, false));
+            }
         }
         
         if (_loadingFileCount + count > 0) {
@@ -277,16 +297,22 @@ class SoundLoader extends EventDispatcher
     @:allow(org.si.sion.utils.soundloader)
     private function _onComplete(fileData : SoundLoaderFileData) : Void
     {
+        trace('SoundLoader.onComplete');
         if (fileData.dataID != null) {
+            trace('Completed dataID: ${fileData.dataID}');
             if (!(Lambda.has(_loaded, fileData.dataID))) {
+                trace('Loaded has this ID');
                 _loadedFileCount++;
             }
             _loadedFileData[fileData.dataID] = fileData;
             _loaded[fileData.dataID] = fileData.data;
         }
+        else {
+            trace('Completed event has no dataID.');
+        }
         fileData.dispatchEvent(new Event(Event.COMPLETE, false, false));
         if (--_loadingFileCount == 0) {
-            _bytesLoaded = Math.floor(_bytesTotal);
+            _bytesLoaded = _bytesTotal;
             dispatchEvent(new Event(Event.COMPLETE, false, false));
         }
     }
