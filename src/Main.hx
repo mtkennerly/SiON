@@ -7,6 +7,7 @@ import tutorials.TheABCSong;
 import tutorials.EventTrigger;
 import tutorials.SoundFontSample;
 import tutorials.CustomFader;
+import tutorials.NomlMusic;
 import siONKaosillator.Kaosillator;
 
 import openfl.events.Event;
@@ -98,6 +99,7 @@ class Menu extends Sprite
 	private static inline var fontSize : Int = 48;
 
 	private var menuItems = [
+        { name: "NomlMusic", type: NomlMusic},
         { name: "ABC Song", type: TheABCSong},
         { name: "Event Trigger Test", type: EventTrigger},
         { name: "Kaosillator", type: Kaosillator},

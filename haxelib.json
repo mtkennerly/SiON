@@ -4,8 +4,8 @@
   "license": "BSD",  
   "tags": ["sion", "audio", "synthesizer"],
   "description": "Software synthesizer library to dynamically create music and sound effects, allowing your final binary to be small.",
-  "version": "0.0.2-alpha",
-  "releasenote": "Fixed many bugs. Works much better now.",
+  "version": "0.0.3-alpha",
+  "releasenote": "Fixed parsing of macros so now a proper song plays!",
   "contributors": ["gunnbr"],    
   "dependencies": {
     "openfl": ""

@@ -1,3 +1,7 @@
+0.0.3-alpha Feb. 3, 2015
+------------------------
+Fixed parsing of macros so now a real song plays!!
+
 0.0.2-alpha Feb. 1, 2015
 ------------------------
 Fixed parsing of user commands, including 30 or so internal commands implemented as user commands.
