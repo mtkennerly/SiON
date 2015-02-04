@@ -582,11 +582,9 @@ class SiMMLSequencer extends MMLSequencer
         var codeH : Int = "-".charCodeAt(0);
         var comrex : EReg = new EReg("/\\*.*?\\*/|//.*?[\\r\\n]+", "gms");
         var reprex : EReg = new EReg("!\\[(\\d*)(.*?)(!\\|(.*?))?!\\](\\d*)", "gms");
-        var seqrex : EReg = new EReg("[ \\t\\r\\n]*(#([A-Z@\\-]+)(\\+=|=)?)?([^;{]*({.*?})?[^;]*);", "gms");  //}
+        var seqrex : EReg = new EReg("[ \\t\\r\\n]*(#([A-Z@\\-]+)\\s*(\\+=|=)?)?([^;{]*({.*?})?[^;]*);", "gms");  //}
         var midrex : EReg = new EReg("([A-Z])?(-([A-Z])?)?", "g");
         var expmml : String;
-        var res : Dynamic;
-        var midres : Dynamic;
         var c : Int;
         var i : Int;
         var imax : Int;
@@ -595,55 +593,54 @@ class SiMMLSequencer extends MMLSequencer
         var concat : Bool;
         var startID : Int;
         var endID : Int;
-        
+
         // reset
         _resetParserParameters();
-        
+
         // remove comments
         mml += "\n";
         mml = comrex.replace(mml, "");
-        
+
         // format last
         i = mml.length;
-        do{
-            if (i == 0)                 return null;
+        do {
+            if (i == 0)
+                return null;
             str1 = mml.charAt(--i);
-        }        while ((" \t\r\n".indexOf(str1) != -1));
+        }  while ((" \t\r\n".indexOf(str1) != -1));
+
         mml = mml.substring(0, i + 1);
-        if (str1 != ";")             mml += ";";  // expand macros
-        
-        
-        
+        if (str1 != ";")
+            mml += ";";
+
+        // expand macros
         expmml = "";
-        while (seqrex.match(mml)){
+        while (seqrex.match(mml)) {
             // normal sequence
             if (seqrex.matched(1) == null) {
                 expmml += _expandMacro(seqrex.matched(4)) + ";";
             }
-            else 
-            
-            // system command
-            if (seqrex.matched(3) == null) {
+            else if (seqrex.matched(3) == null) {
+                // system command
                 if (Std.string(seqrex.matched(2)) == "END") {
                     // #END command
                     break;
                 }
-                else 
-                // parse system command
-                if (!_parseSystemCommandBefore(Std.string(seqrex.matched(1)), seqrex.matched(4))) {
+                else if (!_parseSystemCommandBefore(Std.string(seqrex.matched(1)), seqrex.matched(4))) {
+                    // parse system command
                     // if the function returns false, parse system command after compiling mml.
                     expmml += Std.string(seqrex.matched(0));
                 }
             }
-            else 
-            
-            // macro definition
-            {
+            else {
+                // macro definition
                 str2 = seqrex.matched(2);
                 concat = (seqrex.matched(3) == "+=");
                 // parse macro IDs
-                midrex.match(str2);
-                while (midrex.matched(0) != null) {
+                while (midrex.match(str2)) {
+
+                    if ((midrex.matched(0) == null) || (midrex.matched(0).length == 0)) break;
+
                     startID = (midrex.matched(1) != null) ? (midrex.matched(1).charCodeAt(0) - codeA) : 0;
                     endID = (midrex.matched(2) != null) ? (midrex.matched(3) != null ? (midrex.matched(3).charCodeAt(0) - codeA) : MACRO_SIZE - 1) : startID;
                     for (i in  startID...(endID + 1)) {
@@ -655,7 +652,6 @@ class SiMMLSequencer extends MMLSequencer
                         }
                     }
                     str2 = midrex.matchedRight();
-                    midres = midrex.match(str2);
                 }
             }
 
@@ -679,7 +675,7 @@ class SiMMLSequencer extends MMLSequencer
                             return str1;
                         }
                         );
-        
+
         //trace(mml); trace(expmml);
         return expmml;
     }
