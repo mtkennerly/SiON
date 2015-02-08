@@ -204,7 +204,7 @@ class SiMMLTrack
     private var _set_sweep_end : Array<Int>;
     private var _env_internval : Int;
     
-    // executing envelop
+    // executing envelope
     private var _env_exp : SLLint;
     private var _env_voice : SLLint;
     private var _env_note : SLLint;
@@ -1233,14 +1233,13 @@ class SiMMLTrack
         // callback
         if (_callbackBeforeNoteOn != null) {
             if (!_callbackBeforeNoteOn(this))                 return;
-        }  // change pitch  
-        
-        
-        
+        }
+
+        // change pitch
         var oldPitch : Int = channel.pitch;
         _pitchIndex = ((_note + noteShift) << 6) + pitchShift;
         channel.pitch = _pitchIndex + _pitchBend;
-        
+
         // note on
         if (!_flagNoKeyOn) {
             // reset previous envelop
@@ -1250,14 +1249,15 @@ class SiMMLTrack
                 //_simulator.selectTone(this, _voiceIndex);
                 channel.offsetFilter(128);
             }  // previous note off  
-            
+
             if (channel.isNoteOn) {
                 // callback
                 if (_callbackBeforeNoteOff != null)                     _callbackBeforeNoteOff(this);
                 channel.noteOff();
             }  // update process  
-            
+
             _updateProcess(1);
+
             // note on
             channel.noteOn();
         }
@@ -1272,10 +1272,10 @@ class SiMMLTrack
             else {
                 _sweep_pitch = channel.pitch << FIXED_BITS;
             }  // try to set envelop off  
-            
+
             _envelopOff(1);
         }
-        
+
         _flagNoKeyOn = false;
         
         // set key on counter
@@ -1307,7 +1307,7 @@ class SiMMLTrack
     {
         // prepare next process
         _processMode = _set_processMode[keyOn];
-        
+
         if (_processMode == ENVELOP) {
             // set envelop tables
             _env_exp = _set_env_exp[keyOn];
@@ -1336,8 +1336,11 @@ class SiMMLTrack
             _sweep_pitch = channel.pitch << FIXED_BITS;
             _env_exp_offset = ((_set_exp_offset[keyOn])) ? _expression : 0;
             _env_pitch_active = _pns_or[keyOn];
+
             // activate filter
-            if (!channel.isFilterActive)                 channel.activateFilter(cast(_env_filter, Bool));
+            if (!channel.isFilterActive)
+                channel.activateFilter(_env_filter != null);
+
             // reset index
             _residue = 0;
         }
@@ -1361,7 +1364,8 @@ class SiMMLTrack
     private function _onNoteEvent(note : Int, length : Int) : Void
     {
         _keyOnLength = Math.floor(length * quantRatio) - quantCount - keyOnDelay;
-        if (_keyOnLength < 1)             _keyOnLength = 1;
+        if (_keyOnLength < 1)
+            _keyOnLength = 1;
         _mmlKeyOn(note);
     }
     

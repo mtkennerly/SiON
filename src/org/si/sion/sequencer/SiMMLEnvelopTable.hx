@@ -133,7 +133,9 @@ class SiMMLEnvelopTable
     public function parseMML(tableNumbers : String, postfix : String, maxIndex : Int = 65536) : SiMMLEnvelopTable
     {
         var res : Dynamic = Translator.parseTableNumbers(tableNumbers, postfix, maxIndex);
-        if (res.head) _initialize(res.head, res.tail);
+        if (res.head != null) {
+            _initialize(res.head, res.tail);
+        }
         return this;
     }
     
@@ -148,7 +150,8 @@ class SiMMLEnvelopTable
         head = head_;
         tail = tail_;
         // looping last data
-        if (tail.next == null)             tail.next = tail;
+        if (tail.next == null)
+            tail.next = tail;
     }
 }
 
